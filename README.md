@@ -41,16 +41,42 @@ Below is a reference bill of materials for building a basic multi-channel neural
 Prices are approximate (2026). Links are for reference only — equivalent components from any
 vendor will work.
 
-### Core: NV Diamond Magnetometer Array
+### Core: NV Diamond Magnetometer (single ODMR channel)
 
-| Component | Qty | Approx Price | Link | Notes |
+ODMR works by pumping a nitrogen-vacancy diamond with green (532 nm) light,
+sweeping a ~2.87 GHz microwave field across the NV spin resonance, and reading
+the red fluorescence dip on a photodiode. Verified, currently-purchasable parts
+(confirm price/stock at checkout — some are quote/lead-time items):
+
+| Component | Qty | Approx Price | Vendor / Link | Notes |
 |-----------|-----|-------------|------|-------|
-| NV Diamond Sensor Chip (2x2mm, 1ppm N) | 16 | $45 ea | [AliExpress: NV Diamond Chip](https://www.aliexpress.com/w/wholesale-nv-diamond-sensor.html) | Nitrogen-vacancy center, electronic grade |
-| 532nm Green Laser Diode Module (100mW) | 4 | $12 ea | [AliExpress: 532nm Laser Module](https://www.aliexpress.com/w/wholesale-532nm-laser-module-100mw.html) | Excitation source for ODMR |
-| Microwave Signal Generator (2.87 GHz) | 1 | $85 | [AliExpress: RF Signal Generator 3GHz](https://www.aliexpress.com/w/wholesale-rf-signal-generator-3ghz.html) | For NV zero-field splitting resonance |
-| SMA Coaxial Cable (50 Ohm, 30cm) | 4 | $3 ea | [AliExpress: SMA Cable 50 Ohm](https://www.aliexpress.com/w/wholesale-sma-cable-50-ohm.html) | Microwave delivery to diamond chips |
-| Photodiode Array (Si PIN, 16-ch) | 1 | $25 | [AliExpress: Photodiode Array](https://www.aliexpress.com/w/wholesale-photodiode-array-16-channel.html) | Fluorescence detection |
-| Transimpedance Amplifier Board | 1 | $18 | [AliExpress: TIA Board](https://www.aliexpress.com/w/wholesale-transimpedance-amplifier-board.html) | Converts photocurrent to voltage |
+| **NV-doped CVD diamond** (research grade) | 1 | ~$1,440 | [Element Six DNV-B1, 3.0×3.0×0.5 mm](https://e6cvd.com/us/application/all/dnv-b1-3-0mmx3-0mm-0-5mm.html) | The real sensing element: ~800 ppb engineered N, NV ensemble for magnetometry. Quote/lead-time item — **not** a $45 commodity. |
+| **NV diamond** (budget / demo grade) | 1 | ~$200–500 (quote) | [Adámas Nanotechnologies NV diamond plates](https://www.adamasnano.com/diamond-plates) | HPHT plates (100–300 ppm N) for education/R&D. Brighter but worse spin coherence (T2) → lower sensitivity. Enough to *see* an ODMR dip. |
+| **532 nm pump laser** (lab grade) | 1 | ~$1,000–2,000 | [Thorlabs 532 nm DPSS lasers](https://www.thorlabs.com/532-nm-diode-pumped-solid-state-dpss-lasers) | Real ODMR wants 50–150 mW CW. (Thorlabs' compact [CPS532](https://www.thorlabs.com/thorproduct.cfm?partnumber=CPS532) is only 4.5 mW — too weak.) |
+| **532 nm pump laser** (budget) | 1 | ~$30–80 | [Laserlands 532 nm DPSS module](https://www.laserlands.net/diode-laser-module/532nm-dpss-green-laser-module.html) | A 50–100 mW DPSS "pointer" module works for a demo; poor power stability. **Class 3B — eye hazard, wear goggles.** |
+| **2.87 GHz microwave source** | 1 | ~$20–35 | [ADF4351 PLL board, 35 MHz–4.4 GHz](https://www.amazon.com/Frequency-Synthesizer-Development-Generator-35M-4-4GHz/dp/B0BCWVHFT1) | Honest cheap real part — covers 2.87 GHz, SPI-controlled, SMA output. |
+| **RF amplifier** (usually needed) | 1 | ~$93 | [Mini-Circuits ZX60-V63+ (50 MHz–6 GHz)](https://www.minicircuits.com/WebStore/dashboard.html?model=ZX60-V63%2B) | ADF4351 outputs only ~0 to +5 dBm; a ~20 dB gain block drives the NV spins through the loop. |
+| **Microwave delivery loop** | 1 | ~$5–15 | hand-wound copper loop + [SMA pigtail (Digikey)](https://www.digikey.com) | ~1–2 mm copper loop against the diamond, fed by SMA. DIY. |
+| **Long-pass optical filter** (essential) | 1 | ~$120 | [Thorlabs FEL0600, Ø1″ 600 nm long-pass](https://www.thorlabs.com/thorproduct.cfm?partnumber=FEL0600) | Blocks the 532 nm pump, passes NV red fluorescence (637–700 nm). Without it the pump swamps the detector — no ODMR contrast. |
+| **Focusing / collection lens** | 1 | ~$30 | [Thorlabs ACL2520U aspheric, f=20 mm, NA 0.60](https://www.thorlabs.com/thorproduct.cfm?partnumber=ACL2520U) | High-NA lens to focus the pump and collect fluorescence. |
+| **Photodiode + transimpedance amp** | 1 | ~$400 | [Thorlabs PDA36A2 switchable-gain Si detector](https://www.thorlabs.com/thorproduct.cfm?partnumber=PDA36A2) | Si photodiode + built-in switchable-gain TIA in one unit. DIY op-amp TIA (OPA381/OPA657) + bare Si photodiode is the ~$20–40 budget alternative. |
+
+> **Reality check — NV-diamond magnetometry is research-grade hardware, not a
+> $45 hobby part.** The microwave source is genuinely cheap (ADF4351, ~$20–35),
+> but **the diamond and the optics dominate the cost.** A magnetometry-grade
+> CVD diamond (Element Six DNV-B1) is ~$1,440, not $45; even an education-grade
+> HPHT plate runs into the hundreds and trades away the spin coherence that
+> gives you sensitivity. Add the essential long-pass filter (~$120), a high-NA
+> lens, an amplified photodiode/TIA (~$400), and a pump laser strong enough to
+> actually excite the NVs (50–100 mW — a real lab DPSS head is ~$1–2k). Honest
+> figure: **the cheapest credible single-channel ODMR demo rig is several
+> hundred dollars at the very low end (demo diamond, pointer laser, DIY
+> electronics) and realistically ~$3,000–5,000 for a research-quality channel.**
+> A 16-channel NV array is a serious scientific instrument — multiplied
+> diamonds, lasers, optics and detection electronics, comfortably a five-figure
+> build. **If you just want to develop the software, use the EEG path below or
+> the built-in simulator** — they exercise the same pipeline without the
+> quantum-optics bench.
 
 ### Alternative: OPM (Optically Pumped Magnetometer)
 
@@ -88,7 +114,12 @@ vendor will work.
 | Breadboard + Jumper Wire Kit | 1 | $8 | [AliExpress: Breadboard Kit](https://www.aliexpress.com/w/wholesale-breadboard-jumper-wire-kit.html) | Prototyping |
 | 3D Printed Sensor Mount (STL provided) | 1 | — | Print locally | Holds diamond chips in array |
 
-**Estimated total cost:** ~$650–$900 for a 16-channel NV diamond setup, ~$500 for OPM, ~$200 for EEG.
+**Estimated total cost (honest):** a single-channel NV ODMR rig is ~$700–1,000
+(demo-grade diamond + budget laser + DIY electronics) to ~$3,000–5,000
+(research grade); a 16-channel NV array is a five-figure scientific instrument
+(see the NV reality check above). OPM is similarly lab-grade. **EEG is the
+practical path at ~$200**, and the built-in **simulator costs nothing** — both
+exercise the full pipeline.
 
 ### Assembly Instructions
 
