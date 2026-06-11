@@ -9,6 +9,58 @@
 
 ---
 
+An open-source Rust framework for watching the **architecture of thought** form
+in real time.
+
+**Not mind-reading.** rUv Neural does not touch words, memories, or private
+thoughts — and it cannot. It measures something more fundamental: **how**
+cognition organizes itself, by tracking the live *topology* of brain networks
+with graph theory and dynamic minimum-cut analysis. Think Google Maps for
+cognition — not *what* you're thinking, **how**.
+
+It detects the moments cognition is made of: when attention shifts, when
+confusion appears, when understanding emerges, when ideas connect, when
+cognitive load spikes, when someone drops into flow. Those are topology events
+in a connectivity graph — exactly what the min-cut layer surfaces.
+
+> **What it does *today*, honestly.** rUv Neural is a **framework and pipeline**
+> (sensors → DSP → connectivity graph → min-cut topology → cognitive-state
+> decode), validated on **EEG** and a **built-in deterministic simulator** — not
+> yet clinically validated on a population. The quantum-sensor front-end
+> (NV-diamond / OPM) is the **research frontier**: real magnetometry-grade
+> hardware is a five-figure instrument (see [the BOM reality check](#core-nv-diamond-magnetometer-single-odmr-channel)),
+> so EEG and the simulator are the practical paths to develop against. Every
+> capability below is what this **architecture could enable** — a direction, not
+> a delivered clinical claim.
+
+RuView showed we could read human *behavior* from invisible radio signals.
+rUv Neural asks a bigger question: what happens when we can observe the
+*architecture of cognition* as it unfolds? The future isn't reading minds — it's
+understanding the structure of thought.
+
+## Applications — what this architecture could enable
+
+> These are research and product **directions**, not validated capabilities or
+> medical claims. Clinical and neural-data uses are gated on informed consent,
+> IRB/ethics approval, and regulatory clearance (see Ethics, below).
+
+**Research & clinical (consent / IRB / regulatory-gated):**
+
+- Brain-computer interfaces that respond to *intent* rather than buttons
+- Early-warning research for Alzheimer's, dementia, and neurological decline
+- Mental-health and depression biomarker research
+- Stroke recovery and neurorehabilitation
+- Sleep-stage and dream-state analysis
+
+**Consumer & developer (lower-stakes, EEG/simulator-friendly):**
+
+- Real-time focus / cognitive-load monitoring — a Fitbit-for-your-brain
+- Human–AI collaboration systems that adapt to cognitive load
+- Next-generation gaming, VR, and immersive computing
+- Education tools that detect comprehension in real time
+
+---
+
 ## Ethics & Responsible Use
 
 > **This technology interfaces with human neural data. Use it responsibly.**
