@@ -1,6 +1,16 @@
-# rUv Neural — Brain Topology Analysis System
+# rUv Neural — Real-Time Brain Network Topology Analysis in Rust
 
-> Quantum sensor integration x RuVector graph memory x Dynamic mincut coherence detection
+> **Open-source brain-computer interface (BCI) and neural signal-processing
+> framework in Rust.** Real-time EEG / quantum-sensor (NV-diamond, OPM)
+> connectivity analysis: DSP → brain-network graph → dynamic minimum-cut
+> topology → cognitive-state decoding. Edge (ESP32) + WebAssembly + cryptographic
+> witness verification.
+
+<sub>**Keywords:** brain-computer interface · BCI · EEG signal processing ·
+neural decoding · real-time connectivity analysis · graph theory · minimum cut ·
+network topology · connectomics · NV-diamond magnetometry · optically pumped
+magnetometer (OPM) · quantum sensing · neurotechnology · neurofeedback ·
+computational neuroscience · Rust · ESP32 · WebAssembly</sub>
 
 [![crates.io](https://img.shields.io/crates/v/ruv-neural-core.svg)](https://crates.io/crates/ruv-neural-core)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)]()
