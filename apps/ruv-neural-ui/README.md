@@ -57,6 +57,15 @@ src/
 tests/         Playwright E2E (also captures README screenshots)
 ```
 
+## Security
+
+`npm audit --omit=dev` reports **0 vulnerabilities** — the shipped runtime
+dependencies (`react`, `zod`, `zustand`, `@noble/*`) are clean. The remaining
+advisories are confined to the dev-only build chain (`esbuild`/`vite`) and only
+resolve via a breaking Vite major bump, deferred to avoid churn. A content-lint
+test (`src/util/content-lint.test.ts`) fails the build if any disallowed
+medical-claim phrase appears in UI source (ADR-0014 §3, §17).
+
 ## Deployment
 
 Pushes to `main` that touch `apps/ruv-neural-ui/**` build and publish to GitHub
