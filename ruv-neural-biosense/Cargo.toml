@@ -1,0 +1,20 @@
+[package]
+name = "ruv-neural-biosense"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+description = "Physiological response sensing (HRV, respiration, motion, sleep proxy) for the rUv Neural closed-loop neuromodulation platform — the 'measure a response' stage."
+keywords = ["hrv", "respiration", "physiology", "biosignal", "neurofeedback"]
+categories = ["science", "algorithms"]
+
+[dependencies]
+ruv-neural-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+approx.workspace = true

@@ -57,8 +57,8 @@ pub fn run(
         let bundle = WitnessBundle::new(
             env!("CARGO_PKG_VERSION"),
             "0.1.0",
-            333,
-            333,
+            392,
+            392,
             0,
             caps,
         );
