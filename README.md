@@ -16,7 +16,7 @@ stimulation · HRV · computational neuroscience · Rust · ESP32 · WebAssembly
 [![crates.io](https://img.shields.io/crates/v/ruv-neural-core.svg)](https://crates.io/crates/ruv-neural-core)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)]()
 [![Rust](https://img.shields.io/badge/rust-1.75+-orange.svg)]()
-[![Tests](https://img.shields.io/badge/tests-392%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-396%20passed-brightgreen.svg)]()
 
 ---
 
@@ -167,6 +167,35 @@ Design decisions are documented as Architecture Decision Records in
 [`docs/adr/`](docs/adr/0000-template.md); the drive-to-validated iteration log is
 in [`docs/closed-loop-loop-log.md`](docs/closed-loop-loop-log.md).
 
+### Web console — rUv Neural UI
+
+A **static, local-first** web console ([`apps/ruv-neural-ui`](apps/ruv-neural-ui),
+[ADR-0014](docs/adr/0014-web-console.md)) makes Ruflo understandable in five
+minutes and **verifies the evidence entirely in your browser** — no backend, no
+accounts, no health data leaves the page. It plays back real, signed evidence
+bundles (`ruv-neural neuromod --bundle … --sign`) in **Demo** mode and verifies
+any imported bundle in **Replay** mode: schema validity, a **recomputed** hash
+chain, receipt integrity + frequency tolerance, fail-safe-stop semantics, the
+Ed25519 signature, and the acceptance result. The Rust exporter and the
+TypeScript verifier hash from the *same* fixed-precision canonical string, so the
+chain is reproduced, not trusted.
+
+| Overview — session summary + local verification | Live session — convergence |
+|---|---|
+| ![Overview](docs/images/overview.png) | ![Live session](docs/images/session.png) |
+
+| Stimulus verifier — verified 40 Hz receipts | Safety envelope — fail-safe stop |
+|---|---|
+| ![Stimulus verifier](docs/images/stimulus.png) | ![Safety envelope](docs/images/safety.png) |
+
+```bash
+cd apps/ruv-neural-ui
+npm install
+npm run test      # vitest — schema + verifier + tamper-detection (Rust↔TS hash parity)
+npm run dev       # local dev server
+npm run build     # static build → dist/ (deploys to GitHub Pages)
+```
+
 ## Hardware Parts List
 
 Below is a reference bill of materials for building a basic multi-channel neural sensing rig.
@@ -279,7 +308,7 @@ exercise the full pipeline.
 5. **Verification**
    - Generate a witness bundle: `cargo run -p ruv-neural-cli -- witness --output witness.json`
    - Verify Ed25519 signature: `cargo run -p ruv-neural-cli -- witness --verify witness.json`
-   - Expected output: `VERDICT: PASS` (50 capability attestations, 392 tests)
+   - Expected output: `VERDICT: PASS` (51 capability attestations, 396 tests)
 
 ## Architecture
 
@@ -540,7 +569,7 @@ cargo run -p ruv-neural-cli -- witness --verify witness-bundle.json
 ```
 
 The bundle contains:
-- **50 capability attestations** covering all 15 crates
+- **51 capability attestations** covering all 15 crates
 - **SHA-256 digest** of the capability matrix
 - **Ed25519 signature** (unique per generation)
 - **Public key** for independent verification

@@ -15,6 +15,7 @@
 //!                         audit (hash-chained)
 //! ```
 
+use ruv_neural_biosense::PhysioMetrics;
 use ruv_neural_stim::{StimulusGenerator, VerifiedStimulus};
 use serde::{Deserialize, Serialize};
 
@@ -85,6 +86,10 @@ impl Default for ControllerConfig {
 /// The result of one control step.
 #[derive(Debug, Clone)]
 pub struct StepResult {
+    /// Monotonic step index (matches the audit event index).
+    pub index: u64,
+    /// Session-relative timestamp of the observation (s).
+    pub timestamp_s: f64,
     /// Phase after this step.
     pub phase: ControllerPhase,
     /// Audit event recorded for this step.
@@ -99,6 +104,8 @@ pub struct StepResult {
     pub plan: StimulusPlan,
     /// The personal state embedding (ruVector) for this step.
     pub embedding: PersonalStateEmbedding,
+    /// The fused physiological metrics observed this step.
+    pub physio: PhysioMetrics,
     /// Human-readable message.
     pub message: String,
 }
@@ -215,6 +222,8 @@ impl ClosedLoopController {
             let estimate =
                 estimate_state(obs, &self.target, self.config.completion_threshold);
             return StepResult {
+                index: self.step_index,
+                timestamp_s: obs.timestamp_s,
                 phase: self.phase,
                 audit_kind: AuditKind::Hold,
                 estimate,
@@ -222,6 +231,7 @@ impl ClosedLoopController {
                 emitted: Vec::new(),
                 plan: StimulusPlan::rest(),
                 embedding,
+                physio: obs.physio.clone(),
                 message: "session terminal; no action".into(),
             };
         }
@@ -347,6 +357,8 @@ impl ClosedLoopController {
         }
 
         StepResult {
+            index: idx,
+            timestamp_s: obs.timestamp_s,
             phase: self.phase,
             audit_kind: kind,
             estimate,
@@ -354,6 +366,7 @@ impl ClosedLoopController {
             emitted,
             plan,
             embedding,
+            physio: obs.physio.clone(),
             message,
         }
     }

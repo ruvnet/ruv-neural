@@ -52,6 +52,7 @@ pub mod audit;
 pub mod controller;
 pub mod embedding;
 pub mod envelope;
+pub mod evidence;
 pub mod outcome;
 pub mod protocol;
 pub mod sim;
@@ -61,6 +62,7 @@ pub use audit::{AuditEvent, AuditKind, AuditRecord, AuditTrail, SignedAuditHead}
 pub use controller::{ClosedLoopController, ControllerConfig, ControllerPhase, StepResult};
 pub use embedding::{PersonalBaseline, PersonalStateEmbedding, EMBEDDING_DIM, FEATURE_NAMES};
 pub use envelope::{BreachReason, EnvelopeStatus, SafetyEnvelope};
+pub use evidence::{AcceptanceResult, EvidenceBundle, EvidenceStep, SCHEMA_VERSION};
 pub use outcome::SessionReport;
 pub use protocol::{DosingPolicy, GammaEntrainmentProtocol, Protocol, StimulusPlan};
 pub use sim::LoopSimulation;
@@ -256,6 +258,56 @@ mod tests {
         let json = serde_json::to_string_pretty(&c.report()).unwrap();
         assert!(json.contains("audit_head_hash"));
         let _: SessionReport = serde_json::from_str(&json).unwrap();
+    }
+
+    #[test]
+    fn evidence_bundle_builds_and_chain_verifies() {
+        let mut c = new_controller(TargetState::relaxed());
+        let mut sim = LoopSimulation::responsive(11, 10.0);
+        let trace = sim.run(&mut c, 64);
+        let bundle = EvidenceBundle::build("relaxed", "demo", &trace, &c).signed();
+
+        assert_eq!(bundle.schema_version, SCHEMA_VERSION);
+        assert_eq!(bundle.steps.len(), trace.len());
+        assert!(bundle.verify_chain(), "bundle step chain must verify");
+        assert!(bundle.acceptance.passed);
+        assert!(bundle.acceptance.verified_stimulus_delivered);
+        // Signature present and well-formed.
+        let sig = bundle.signature.as_ref().unwrap();
+        assert_eq!(sig.head_hash, bundle.bundle_chain_head);
+
+        // Round-trips through JSON (the wire format the UI consumes).
+        let json = serde_json::to_string(&bundle).unwrap();
+        let back: EvidenceBundle = serde_json::from_str(&json).unwrap();
+        assert!(back.verify_chain());
+        assert!(json.contains("schemaVersion"));
+        assert!(json.contains("waveformSha256"));
+    }
+
+    #[test]
+    fn evidence_bundle_chain_detects_tampering() {
+        let mut c = new_controller(TargetState::relaxed());
+        let mut sim = LoopSimulation::responsive(3, 10.0);
+        let trace = sim.run(&mut c, 64);
+        let mut bundle = EvidenceBundle::build("relaxed", "demo", &trace, &c);
+        assert!(bundle.verify_chain());
+        if bundle.steps.len() > 2 {
+            bundle.steps[1].intensity += 0.2; // tamper
+            assert!(!bundle.verify_chain());
+        }
+    }
+
+    #[test]
+    fn evidence_bundle_safe_stop_records_breach() {
+        let mut c = new_controller(TargetState::relaxed());
+        let mut sim = LoopSimulation::responsive(7, 10.0).with_perturbation(5, 0.9);
+        let trace = sim.run(&mut c, 64);
+        let bundle = EvidenceBundle::build("relaxed", "demo", &trace, &c);
+        assert!(bundle.verify_chain());
+        assert!(bundle.acceptance.stopped_safely_outside_envelope);
+        let last = bundle.steps.last().unwrap();
+        assert!(!last.envelope.within);
+        assert!(!last.envelope.breaches.is_empty());
     }
 
     #[test]

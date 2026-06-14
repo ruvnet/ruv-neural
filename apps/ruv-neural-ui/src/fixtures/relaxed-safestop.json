@@ -1,0 +1,425 @@
+{
+  "schemaVersion": "ruflo-evidence/1",
+  "sessionId": "3b6d0590f7fbcc03",
+  "createdAt": "epoch:1781405274",
+  "mode": "demo",
+  "targetState": "relaxed",
+  "protocol": "gamma-40hz-entrainment",
+  "steps": [
+    {
+      "index": 1,
+      "timestampS": 0.0,
+      "phase": "Baselining",
+      "auditKind": "baseline",
+      "distanceToTarget": 0.43204482659424936,
+      "intensity": 0.0,
+      "embedding": [
+        0.4644405890148542,
+        0.2003509358263554,
+        0.2409363193492854,
+        0.6025618412519799,
+        0.12211648812978076,
+        0.238,
+        0.1,
+        0.4,
+        0.43000000000000005
+      ],
+      "featureNames": [
+        "arousal",
+        "relaxation",
+        "vagal_tone",
+        "hr_norm",
+        "resp_calm",
+        "stillness",
+        "gamma_index",
+        "alpha_index",
+        "connectivity"
+      ],
+      "biosense": {
+        "heartRateBpm": 82.11528285633909,
+        "sdnnMs": 17.64903073073354,
+        "rmssdMs": 24.09363193492854,
+        "pnn50": 0.0,
+        "lfHfRatio": 0.5588959453286292,
+        "respirationRateBpm": 18.0,
+        "motionIndex": 0.021250900609321537,
+        "stillness": 0.238,
+        "arousalScore": 0.4644405890148542,
+        "relaxationScore": 0.2003509358263554
+      },
+      "receipts": [],
+      "envelope": {
+        "within": true,
+        "breaches": []
+      },
+      "payloadSha256": "197f692ab846cfe73f0311bee10fdfdaad43f19f0bd64fbc5b348aabf53d9959",
+      "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hash": "8b94ddf0ea965c629a7ac10f111e6c1dd3fc6ced49df997df952d8dca50ae9a2"
+    },
+    {
+      "index": 2,
+      "timestampS": 10.0,
+      "phase": "Stimulating",
+      "auditKind": "baseline",
+      "distanceToTarget": 0.4164056126893507,
+      "intensity": 0.0,
+      "embedding": [
+        0.4416267206615591,
+        0.24009392309265506,
+        0.3426041963990988,
+        0.5756865754269805,
+        0.13167757287886642,
+        0.246,
+        0.1,
+        0.401,
+        0.43000000000000005
+      ],
+      "featureNames": [
+        "arousal",
+        "relaxation",
+        "vagal_tone",
+        "hr_norm",
+        "resp_calm",
+        "stillness",
+        "gamma_index",
+        "alpha_index",
+        "connectivity"
+      ],
+      "biosense": {
+        "heartRateBpm": 80.90589589421413,
+        "sdnnMs": 22.276177201349704,
+        "rmssdMs": 34.26041963990988,
+        "pnn50": 0.15384615384615385,
+        "lfHfRatio": 3.1498382231460034,
+        "respirationRateBpm": 18.0,
+        "motionIndex": 0.020833897247073657,
+        "stillness": 0.246,
+        "arousalScore": 0.4416267206615591,
+        "relaxationScore": 0.24009392309265506
+      },
+      "receipts": [],
+      "envelope": {
+        "within": true,
+        "breaches": []
+      },
+      "payloadSha256": "cfe8784e92a59d83623d0742771d77456655417aea9dc63c5f19988a9e0ae70e",
+      "prevHash": "8b94ddf0ea965c629a7ac10f111e6c1dd3fc6ced49df997df952d8dca50ae9a2",
+      "hash": "0cc29db01cc9eeb50d77ac3677acd693199737dfaab91ddb544ab7f2d45a5f2e"
+    },
+    {
+      "index": 3,
+      "timestampS": 20.0,
+      "phase": "Stimulating",
+      "auditKind": "stimulate",
+      "distanceToTarget": 0.36236821670075864,
+      "intensity": 0.15,
+      "embedding": [
+        0.379546691355748,
+        0.3628850499314149,
+        0.23612449008161118,
+        0.5922849958881428,
+        0.6065306597126334,
+        0.246,
+        0.1,
+        0.40198,
+        0.43000000000000005
+      ],
+      "featureNames": [
+        "arousal",
+        "relaxation",
+        "vagal_tone",
+        "hr_norm",
+        "resp_calm",
+        "stillness",
+        "gamma_index",
+        "alpha_index",
+        "connectivity"
+      ],
+      "biosense": {
+        "heartRateBpm": 81.65282481496642,
+        "sdnnMs": 18.746370110308373,
+        "rmssdMs": 23.612449008161118,
+        "pnn50": 0.0,
+        "lfHfRatio": 3.1167221727712584,
+        "respirationRateBpm": 12.0,
+        "motionIndex": 0.02105598211639783,
+        "stillness": 0.246,
+        "arousalScore": 0.379546691355748,
+        "relaxationScore": 0.3628850499314149
+      },
+      "receipts": [
+        {
+          "modality": "audio",
+          "intendedFrequencyHz": 10.0,
+          "measuredFrequencyHz": 10.0,
+          "frequencyErrorHz": 0.0,
+          "dutyCycle": 0.5,
+          "intensity": 0.15,
+          "waveformSha256": "dc023a1d413846628f817113ac5af897c9e30de7d87c6f7e6f09c72d491fce9d",
+          "verified": true
+        },
+        {
+          "modality": "haptic",
+          "intendedFrequencyHz": 10.0,
+          "measuredFrequencyHz": 10.0,
+          "frequencyErrorHz": 0.0,
+          "dutyCycle": 0.5,
+          "intensity": 0.15,
+          "waveformSha256": "d887846fd24e70357691f3d0555883fb042a07b5ea06cd92052ae7df97e3b56d",
+          "verified": true
+        }
+      ],
+      "envelope": {
+        "within": true,
+        "breaches": []
+      },
+      "payloadSha256": "e585b77dcf9af8bf386f447ca15b48d6801e753ff5d94459c814c1829f809734",
+      "prevHash": "0cc29db01cc9eeb50d77ac3677acd693199737dfaab91ddb544ab7f2d45a5f2e",
+      "hash": "0d01282d8af464a33d13b0b68f11d895c7622e2c8f443e8944d06cf72905408e"
+    },
+    {
+      "index": 4,
+      "timestampS": 30.0,
+      "phase": "Stimulating",
+      "auditKind": "stimulate",
+      "distanceToTarget": 0.3788273522880713,
+      "intensity": 0.2,
+      "embedding": [
+        0.43589121603631004,
+        0.24531824028554203,
+        0.3488419512070934,
+        0.5718836120172821,
+        0.11511276964953264,
+        0.272,
+        0.16885,
+        0.43804576400000006,
+        0.45065500000000003
+      ],
+      "featureNames": [
+        "arousal",
+        "relaxation",
+        "vagal_tone",
+        "hr_norm",
+        "resp_calm",
+        "stillness",
+        "gamma_index",
+        "alpha_index",
+        "connectivity"
+      ],
+      "biosense": {
+        "heartRateBpm": 80.7347625407777,
+        "sdnnMs": 20.73193227208795,
+        "rmssdMs": 34.884195120709336,
+        "pnn50": 0.07692307692307693,
+        "lfHfRatio": 1.280960128856196,
+        "respirationRateBpm": 18.0,
+        "motionIndex": 0.019615281770383585,
+        "stillness": 0.272,
+        "arousalScore": 0.43589121603631004,
+        "relaxationScore": 0.24531824028554203
+      },
+      "receipts": [
+        {
+          "modality": "audio",
+          "intendedFrequencyHz": 10.0,
+          "measuredFrequencyHz": 10.0,
+          "frequencyErrorHz": 0.0,
+          "dutyCycle": 0.5,
+          "intensity": 0.2,
+          "waveformSha256": "fafaf5821d2d468f9666bfe0e5239131d5ca45717a3a5d5c68386a74dd4f59ca",
+          "verified": true
+        },
+        {
+          "modality": "haptic",
+          "intendedFrequencyHz": 10.0,
+          "measuredFrequencyHz": 10.0,
+          "frequencyErrorHz": 0.0,
+          "dutyCycle": 0.5,
+          "intensity": 0.2,
+          "waveformSha256": "f3f52550f2bdb7b93d21764b1280e98bb126bdb170b130b138d7120026596004",
+          "verified": true
+        }
+      ],
+      "envelope": {
+        "within": true,
+        "breaches": []
+      },
+      "payloadSha256": "fd473ab3ce620a96fd080cdfe8a36163e74786341ed32c2113ad2a8246f36890",
+      "prevHash": "0d01282d8af464a33d13b0b68f11d895c7622e2c8f443e8944d06cf72905408e",
+      "hash": "ddd5d941e3720534b04b0f457a6cece31ad28ef8cd68a992c4aeccbd7caf14c2"
+    },
+    {
+      "index": 5,
+      "timestampS": 40.0,
+      "phase": "Stimulating",
+      "auditKind": "stimulate",
+      "distanceToTarget": 0.32168995008326373,
+      "intensity": 0.25,
+      "embedding": [
+        0.3490707155066719,
+        0.4199656197497596,
+        0.3073661995366452,
+        0.5281612363557476,
+        0.6065306597126334,
+        0.346,
+        0.2432998,
+        0.4808506668736,
+        0.47298994000000005
+      ],
+      "featureNames": [
+        "arousal",
+        "relaxation",
+        "vagal_tone",
+        "hr_norm",
+        "resp_calm",
+        "stillness",
+        "gamma_index",
+        "alpha_index",
+        "connectivity"
+      ],
+      "biosense": {
+        "heartRateBpm": 78.76725563600864,
+        "sdnnMs": 21.692868033018325,
+        "rmssdMs": 30.73661995366452,
+        "pnn50": 0.15384615384615385,
+        "lfHfRatio": 1.2893561106331353,
+        "respirationRateBpm": 12.0,
+        "motionIndex": 0.01868146281104647,
+        "stillness": 0.346,
+        "arousalScore": 0.3490707155066719,
+        "relaxationScore": 0.4199656197497596
+      },
+      "receipts": [
+        {
+          "modality": "audio",
+          "intendedFrequencyHz": 10.0,
+          "measuredFrequencyHz": 10.0,
+          "frequencyErrorHz": 0.0,
+          "dutyCycle": 0.5,
+          "intensity": 0.25,
+          "waveformSha256": "dde52d32a042754cde1b678e7ad763b6520e77433820bb17d0fff8ea4b4aaa31",
+          "verified": true
+        },
+        {
+          "modality": "haptic",
+          "intendedFrequencyHz": 10.0,
+          "measuredFrequencyHz": 10.0,
+          "frequencyErrorHz": 0.0,
+          "dutyCycle": 0.5,
+          "intensity": 0.25,
+          "waveformSha256": "d49a8935efb446970e906c4030c4ace285cc794513ab5e9818415ba275c4f4a1",
+          "verified": true
+        }
+      ],
+      "envelope": {
+        "within": true,
+        "breaches": []
+      },
+      "payloadSha256": "2db9e5b365a39ecb889c827cd67dea6f22130ff69e4227aa348a1192246f7003",
+      "prevHash": "ddd5d941e3720534b04b0f457a6cece31ad28ef8cd68a992c4aeccbd7caf14c2",
+      "hash": "5ef939023fc60ed2ccf6d0b9fdf53dba113d6985a09acdc75dbd08f66a430fb8"
+    },
+    {
+      "index": 6,
+      "timestampS": 50.0,
+      "phase": "SafeStopped",
+      "auditKind": "safe_stop",
+      "distanceToTarget": 0.43066323471157403,
+      "intensity": 0.0,
+      "embedding": [
+        0.6026745101736257,
+        0.12340147149385712,
+        0.07886913124495865,
+        1.0,
+        0.1353352832366127,
+        0.156,
+        0.3182841055,
+        0.0,
+        0.49548523165
+      ],
+      "featureNames": [
+        "arousal",
+        "relaxation",
+        "vagal_tone",
+        "hr_norm",
+        "resp_calm",
+        "stillness",
+        "gamma_index",
+        "alpha_index",
+        "connectivity"
+      ],
+      "biosense": {
+        "heartRateBpm": 100.15427591168117,
+        "sdnnMs": 5.74822577616537,
+        "rmssdMs": 7.886913124495865,
+        "pnn50": 0.0,
+        "lfHfRatio": 1.6705915780029386,
+        "respirationRateBpm": 18.0,
+        "motionIndex": 0.03474580961433564,
+        "stillness": 0.156,
+        "arousalScore": 0.6026745101736257,
+        "relaxationScore": 0.12340147149385712
+      },
+      "receipts": [],
+      "envelope": {
+        "within": false,
+        "breaches": [
+          "HeartRateHigh(100.2>100.0)"
+        ]
+      },
+      "payloadSha256": "69dbd5d5be25c345b1c457658f25aac19bed742a9b01732e6401b781962f6aed",
+      "prevHash": "5ef939023fc60ed2ccf6d0b9fdf53dba113d6985a09acdc75dbd08f66a430fb8",
+      "hash": "3b6d0590f7fbcc03023e84a975cc892cf89ab3a67a9a117baa6b8da6ca1619ca"
+    }
+  ],
+  "acceptance": {
+    "targetStateIdentified": true,
+    "verifiedStimulusDelivered": true,
+    "responseMeasured": true,
+    "stoppedSafelyOutsideEnvelope": true,
+    "goalReached": false,
+    "passed": true
+  },
+  "report": {
+    "target": {
+      "label": "Rest",
+      "target_relaxation": 0.8,
+      "target_arousal": 0.2,
+      "gamma_entrainment": false,
+      "target_gamma": 0.0
+    },
+    "protocol": "gamma-40hz-entrainment",
+    "final_phase": "SafeStopped",
+    "total_steps": 6,
+    "baseline_steps": 2,
+    "stimulate_steps": 3,
+    "total_stimulation_s": 30.0,
+    "peak_intensity": 0.25,
+    "goal_reached": false,
+    "safe_stopped": true,
+    "stop_reasons": [
+      {
+        "HeartRateHigh": {
+          "bpm": 100.15427591168117,
+          "max": 100.0
+        }
+      }
+    ],
+    "best_distance": 0.32168995008326373,
+    "final_distance": 0.43066323471157403,
+    "num_receipts": 6,
+    "all_receipts_verified": true,
+    "audit_head_hash": "3db40eb1034986de5ecb10042aea54c7f7dc7abe61df20c95a1ef3107dd6b06f",
+    "audit_records": 7,
+    "audit_chain_valid": true
+  },
+  "bundleChainHead": "3b6d0590f7fbcc03023e84a975cc892cf89ab3a67a9a117baa6b8da6ca1619ca",
+  "auditHeadHash": "3db40eb1034986de5ecb10042aea54c7f7dc7abe61df20c95a1ef3107dd6b06f",
+  "auditRecords": 7,
+  "auditChainValid": true,
+  "signature": {
+    "headHash": "3b6d0590f7fbcc03023e84a975cc892cf89ab3a67a9a117baa6b8da6ca1619ca",
+    "signature": "35d5368f36c4a6f004d672ddd07d7b7c7c1c9b6e280f7ec4f77f3dd777daf72b888e3e5ca0aa4e85b81134178aa581342be081280eab775b62d4260471794609",
+    "publicKey": "11f6e2d7d5ad5226408e2915829dd9efb0bcac5044b1c97a7e29cf0444b4ad5e"
+  }
+}

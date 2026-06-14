@@ -509,6 +509,13 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             source_hash: "".into(),
             status: "verified".into(),
         },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-loop".into(),
+            capability: "Portable evidence bundle (ruflo-evidence/1) with browser-recomputable hash chain".into(),
+            evidence: "tests::evidence_bundle_builds_and_chain_verifies, ..._evidence_bundle_chain_detects_tampering".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
     ]
 }
 

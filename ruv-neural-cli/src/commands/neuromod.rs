@@ -7,8 +7,8 @@
 //! audit trail to disk.
 
 use ruv_neural_loop::{
-    ClosedLoopController, ControllerConfig, GammaEntrainmentProtocol, LoopSimulation,
-    SafetyEnvelope, TargetState,
+    ClosedLoopController, ControllerConfig, EvidenceBundle, GammaEntrainmentProtocol,
+    LoopSimulation, SafetyEnvelope, TargetState,
 };
 use ruv_neural_stim::{SensorySafetyLimits, StimulusGenerator};
 use std::path::PathBuf;
@@ -24,6 +24,7 @@ pub fn run(
     screened: bool,
     report_out: Option<PathBuf>,
     audit_out: Option<PathBuf>,
+    bundle_out: Option<PathBuf>,
     sign: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let target_state = match target {
@@ -140,6 +141,18 @@ pub fn run(
         std::fs::write(&path, serde_json::to_string_pretty(controller.audit())?)?;
         println!("  Audit trail written to {}", path.display());
     }
+    if let Some(path) = bundle_out {
+        let mut bundle = EvidenceBundle::build(target, "demo", &trace, &controller);
+        if sign {
+            bundle = bundle.signed();
+        }
+        std::fs::write(&path, serde_json::to_string_pretty(&bundle)?)?;
+        println!(
+            "  Evidence bundle written to {} (chain {})",
+            path.display(),
+            if bundle.verify_chain() { "VALID" } else { "INVALID" }
+        );
+    }
 
     if !report.passes_acceptance() {
         std::process::exit(1);
@@ -153,16 +166,38 @@ mod tests {
 
     #[test]
     fn neuromod_relaxed_session_passes() {
-        run("relaxed", "audio-haptic", 64, 7, None, false, None, None, false).unwrap();
+        run("relaxed", "audio-haptic", 64, 7, None, false, None, None, None, false).unwrap();
     }
 
     #[test]
     fn neuromod_safe_stop_session() {
-        run("relaxed", "audio-haptic", 64, 7, Some(5), false, None, None, false).unwrap();
+        run("relaxed", "audio-haptic", 64, 7, Some(5), false, None, None, None, false).unwrap();
     }
 
     #[test]
     fn neuromod_unknown_target_errors() {
-        assert!(run("nope", "audio-haptic", 64, 7, None, false, None, None, false).is_err());
+        assert!(run("nope", "audio-haptic", 64, 7, None, false, None, None, None, false).is_err());
+    }
+
+    #[test]
+    fn neuromod_writes_evidence_bundle() {
+        let dir = std::env::temp_dir();
+        let path = dir.join("ruflo_test_bundle.json");
+        run(
+            "relaxed",
+            "audio-haptic",
+            64,
+            11,
+            None,
+            false,
+            None,
+            None,
+            Some(path.clone()),
+            true,
+        )
+        .unwrap();
+        let json = std::fs::read_to_string(&path).unwrap();
+        assert!(json.contains("ruflo-evidence/1"));
+        let _ = std::fs::remove_file(&path);
     }
 }

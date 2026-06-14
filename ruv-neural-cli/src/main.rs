@@ -105,7 +105,10 @@ enum Commands {
         /// Write the tamper-evident audit trail (JSON) to this path
         #[arg(long)]
         audit: Option<String>,
-        /// Ed25519-sign the audit-chain head
+        /// Write a portable Ruflo evidence bundle (JSON) for the web console
+        #[arg(long)]
+        bundle: Option<String>,
+        /// Ed25519-sign the audit-chain head and evidence bundle
         #[arg(long)]
         sign: bool,
     },
@@ -168,6 +171,7 @@ async fn main() {
             screened,
             output,
             audit,
+            bundle,
             sign,
         } => commands::neuromod::run(
             &target,
@@ -178,6 +182,7 @@ async fn main() {
             screened,
             output.map(std::path::PathBuf::from),
             audit.map(std::path::PathBuf::from),
+            bundle.map(std::path::PathBuf::from),
             sign,
         ),
         Commands::Info => {
