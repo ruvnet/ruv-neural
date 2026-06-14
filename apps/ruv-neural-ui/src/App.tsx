@@ -2,6 +2,7 @@ import { useEffect, useRef, type ChangeEvent } from "react";
 import { useStore, DEMO_PRESETS, type ScreenId } from "./store/store";
 import { ActiveScreen } from "./screens";
 import { RealMode } from "./screens/realmode";
+import { Research } from "./screens/research";
 import { StatusPill } from "./components/common";
 import { BOUNDARY } from "./util/constants";
 
@@ -52,9 +53,14 @@ function ModeBar() {
         <button className={mode === "real" ? "active" : ""} onClick={() => setMode("real")} role="tab" aria-selected={mode === "real"} data-testid="mode-real">
           Real ⚠
         </button>
+        <button className={mode === "research" ? "active" : ""} onClick={() => setMode("research")} role="tab" aria-selected={mode === "research"} data-testid="mode-research">
+          Research
+        </button>
       </div>
 
-      {mode === "real" ? (
+      {mode === "research" ? (
+        <div className="preset-row"><span className="muted">Guided, non-medical, local-first study workflow.</span></div>
+      ) : mode === "real" ? (
         <div className="preset-row"><span className="muted">Experimental local-hardware mode — gated, local-only, off by default.</span></div>
       ) : mode === "demo" ? (
         <div className="preset-row">
@@ -131,6 +137,10 @@ export default function App() {
       {mode === "real" ? (
         <main className="content">
           <RealMode />
+        </main>
+      ) : mode === "research" ? (
+        <main className="content">
+          <Research />
         </main>
       ) : (
         <div className="layout">

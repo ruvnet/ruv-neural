@@ -80,3 +80,32 @@ test("real mode is gated and the mock device emergency-stops", async ({ page }) 
   await expect(page.getByTestId("estop-btn")).toBeDisabled();
   await expect(page.getByTestId("device-log")).toBeVisible();
 });
+
+test("research workflow runs end to end and exports a verified study", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("mode-research").click();
+
+  // Consent (all three required).
+  await page.getByTestId("rc-boundary").check();
+  await page.getByTestId("rc-voluntary").check();
+  await page.getByTestId("rc-local").check();
+  await page.getByTestId("research-next").click();
+
+  // Contraindication (none) → baseline → protocol.
+  await expect(page.getByTestId("research-contra")).toBeVisible();
+  await page.getByTestId("research-next").click();
+  await expect(page.getByTestId("research-baseline")).toBeVisible();
+  await page.getByTestId("research-next").click();
+  await page.getByTestId("rp-relaxed").click();
+  await page.getByTestId("research-next").click();
+
+  // Verified session → survey → export.
+  const session = page.getByTestId("research-session");
+  await expect(session).toBeVisible();
+  await expect(session.getByText("VERIFIED", { exact: true })).toBeVisible();
+  await page.getByTestId("research-next").click();
+  await expect(page.getByTestId("research-survey")).toBeVisible();
+  await page.getByTestId("research-next").click();
+  await expect(page.getByTestId("study-export-btn")).toBeVisible();
+  await page.screenshot({ path: "screenshots/research.png", fullPage: true });
+});

@@ -192,9 +192,14 @@ A **gated Real mode** (Phase 4) adds explicit opt-in/consent + contraindication
 screening, a Web Serial bridge (with an in-browser mock device so the flow is
 demonstrable without hardware), a hardware-validation handshake, an
 always-visible emergency stop, an enforced intensity ceiling, and a
-hash-chained device-event log — all local-only, off by default.
+hash-chained device-event log — all local-only, off by default. A guided
+**Research workflow** (Phase 5) walks consent → contraindication → baseline →
+protocol → verified session → survey → **signed evidence export**, re-verifiable
+in Replay mode, with nothing uploaded.
 
-![Real mode](docs/images/realmode.png)
+| Real mode — gated local hardware | Research workflow — signed study export |
+|---|---|
+| ![Real mode](docs/images/realmode.png) | ![Research workflow](docs/images/research.png) |
 
 ```bash
 cd apps/ruv-neural-ui

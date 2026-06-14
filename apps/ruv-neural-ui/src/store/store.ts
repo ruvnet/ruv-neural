@@ -14,7 +14,7 @@ export type ScreenId =
   | "audit"
   | "witness";
 
-export type Mode = "demo" | "replay" | "real";
+export type Mode = "demo" | "replay" | "real" | "research";
 
 interface State {
   mode: Mode;
