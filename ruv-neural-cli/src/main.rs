@@ -112,6 +112,12 @@ enum Commands {
         #[arg(long)]
         sign: bool,
     },
+    /// Verify a Ruflo evidence bundle (reference verifier; matches the web UI)
+    VerifyBundle {
+        /// Path to a Ruflo evidence bundle (JSON)
+        #[arg(short, long)]
+        input: String,
+    },
     /// Show system info and capabilities
     Info,
     /// Generate or verify Ed25519-signed capability witness bundles
@@ -185,6 +191,9 @@ async fn main() {
             bundle.map(std::path::PathBuf::from),
             sign,
         ),
+        Commands::VerifyBundle { input } => {
+            commands::verify_bundle::run(std::path::PathBuf::from(input))
+        }
         Commands::Info => {
             commands::info::run();
             Ok(())

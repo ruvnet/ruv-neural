@@ -281,6 +281,34 @@ impl EvidenceBundle {
         }
         prev == self.bundle_chain_head
     }
+
+    /// Verify the Ed25519 signature (if present) over the bundle chain head.
+    /// Returns `None` when unsigned, `Some(true/false)` otherwise.
+    pub fn verify_signature(&self) -> Option<bool> {
+        use ed25519_dalek::{Signature, Verifier, VerifyingKey};
+        let sig = self.signature.as_ref()?;
+        let ok = (|| -> Option<bool> {
+            if sig.head_hash != self.bundle_chain_head {
+                return Some(false);
+            }
+            let pk: [u8; 32] = unhex(&sig.public_key)?.try_into().ok()?;
+            let sg: [u8; 64] = unhex(&sig.signature)?.try_into().ok()?;
+            let vk = VerifyingKey::from_bytes(&pk).ok()?;
+            Some(vk.verify(sig.head_hash.as_bytes(), &Signature::from_bytes(&sg)).is_ok())
+        })()
+        .unwrap_or(false);
+        Some(ok)
+    }
+}
+
+fn unhex(s: &str) -> Option<Vec<u8>> {
+    if s.len() % 2 != 0 {
+        return None;
+    }
+    (0..s.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).ok())
+        .collect()
 }
 
 // ── canonical hashing (must mirror the TypeScript verifier exactly) ─────────

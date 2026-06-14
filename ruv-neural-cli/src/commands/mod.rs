@@ -7,4 +7,5 @@ pub mod mincut;
 pub mod neuromod;
 pub mod pipeline;
 pub mod simulate;
+pub mod verify_bundle;
 pub mod witness;

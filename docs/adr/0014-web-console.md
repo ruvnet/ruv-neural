@@ -9,7 +9,11 @@ validation, always-visible emergency stop, enforced intensity ceiling, and a
 hash-chained device-event log. The Research workflow (Phase 5) is a guided,
 non-medical, local-first study flow (consent → contraindication → baseline →
 protocol → verified session → survey → signed evidence export → local replay
-verification). Only the WASM verifier (Phase 3) remains deferred.
+verification). Phase 3 (verifier parity) is delivered as a **reference Rust
+verifier** (`ruv-neural verify-bundle`) plus a corpus-wide Rust↔TS hash-parity
+test over the committed fixtures, so the binary and the browser agree
+byte-for-byte; packaging the Rust verifier *as WebAssembly* (shared code rather
+than parallel implementations) remains a future optimization.
 
 Date: 2026-06-13 · Deciders: rUv ·
 Tags: ruv-neural, Ruflo, neuromodulation, web-ui, GitHub Pages, verifier,
