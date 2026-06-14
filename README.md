@@ -16,7 +16,7 @@ stimulation · HRV · computational neuroscience · Rust · ESP32 · WebAssembly
 [![crates.io](https://img.shields.io/crates/v/ruv-neural-core.svg)](https://crates.io/crates/ruv-neural-core)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)]()
 [![Rust](https://img.shields.io/badge/rust-1.75+-orange.svg)]()
-[![Tests](https://img.shields.io/badge/tests-396%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-398%20passed-brightgreen.svg)]()
 
 ---
 
@@ -142,6 +142,11 @@ cargo run -p ruv-neural-cli -- neuromod --target relaxed --seed 11 \
 
 # Demonstrate the fail-safe stop: inject an arousal spike mid-session
 cargo run -p ruv-neural-cli -- neuromod --target relaxed --perturb 5
+
+# Export a portable evidence bundle and verify it with the reference verifier
+# (the same checks the web console runs in-browser — verdict matches byte-for-byte)
+cargo run -p ruv-neural-cli -- neuromod --target relaxed --bundle bundle.json --sign
+cargo run -p ruv-neural-cli -- verify-bundle -i bundle.json   # → VERDICT: PASS
 ```
 
 ```rust
@@ -321,7 +326,7 @@ exercise the full pipeline.
 5. **Verification**
    - Generate a witness bundle: `cargo run -p ruv-neural-cli -- witness --output witness.json`
    - Verify Ed25519 signature: `cargo run -p ruv-neural-cli -- witness --verify witness.json`
-   - Expected output: `VERDICT: PASS` (51 capability attestations, 396 tests)
+   - Expected output: `VERDICT: PASS` (51 capability attestations, 398 tests)
 
 ## Architecture
 

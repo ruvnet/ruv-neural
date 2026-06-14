@@ -11,7 +11,7 @@ export const SAFETY = {
 
 export const PLATFORM = {
   version: "0.1.0",
-  workspaceTests: 396,
+  workspaceTests: 398,
   attestations: 51,
   crates: 15,
   gammaHz: 40,
