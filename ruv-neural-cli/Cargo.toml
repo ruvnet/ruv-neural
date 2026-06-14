@@ -19,6 +19,9 @@ ruv-neural-mincut = { workspace = true }
 ruv-neural-embed = { workspace = true }
 ruv-neural-memory = { workspace = true }
 ruv-neural-decoder = { workspace = true }
+ruv-neural-stim = { workspace = true }
+ruv-neural-biosense = { workspace = true }
+ruv-neural-loop = { workspace = true }
 ruv-neural-viz = { workspace = true }
 clap = { workspace = true }
 serde = { workspace = true }

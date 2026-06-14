@@ -443,6 +443,79 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             source_hash: "".into(),
             status: "verified".into(),
         },
+        // Stim — multi-modal sensory neuromodulation
+        CapabilityAttestation {
+            crate_name: "ruv-neural-stim".into(),
+            capability: "40 Hz multi-modal stimulus synthesis (light/audio/haptic envelope)".into(),
+            evidence: "tests::waveform_measures_40hz_envelope_audio, ..._haptic".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-stim".into(),
+            capability: "Sensory-safety limits (photosensitivity screen, audio SPL, intensity)".into(),
+            evidence: "tests::safety_blocks_unscreened_light_in_caution_band, ..._caps_loud_audio".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-stim".into(),
+            capability: "Cryptographic delivery receipts (SHA-256 waveform binding, verified flag)".into(),
+            evidence: "tests::receipt_binds_to_waveform, ..._generator_clamped_limits_and_verifies".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        // Biosense — physiological response sensing
+        CapabilityAttestation {
+            crate_name: "ruv-neural-biosense".into(),
+            capability: "HRV metrics (SDNN, RMSSD, pNN50, LF/HF, vagal tone)".into(),
+            evidence: "tests::hrv_basic_time_domain, ..._high_variability_has_higher_rmssd".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-biosense".into(),
+            capability: "Respiration / motion / sleep-proxy sensing and autonomic fusion".into(),
+            evidence: "tests::respiration_detects_rate, ..._sleep_proxy_stages, ..._physio_fusion_calm_vs_aroused".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        // Loop (Ruflo) — closed-loop controller
+        CapabilityAttestation {
+            crate_name: "ruv-neural-loop".into(),
+            capability: "Personal state embedding (ruVector neural+physio fusion)".into(),
+            evidence: "tests::personal_embedding_dimension_and_export, ..._baseline_deviation_grows_with_change".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-loop".into(),
+            capability: "Safety envelope with fail-safe stop on response divergence".into(),
+            evidence: "tests::controller_safe_stops_on_perturbation, ..._never_exceeds_safety_intensity".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-loop".into(),
+            capability: "Tamper-evident hash-chained audit trail (Ed25519-attestable)".into(),
+            evidence: "tests::audit_chain_verifies_and_detects_tampering, ..._signed_audit_head_verifies".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-loop".into(),
+            capability: "Closed-loop acceptance: identify target, deliver verified stimulus, measure, safe-stop".into(),
+            evidence: "closed_loop_acceptance::acceptance_identify_deliver_measure_converge, ..._safe_stop_outside_envelope".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-loop".into(),
+            capability: "Portable evidence bundle (ruflo-evidence/1) with browser-recomputable hash chain".into(),
+            evidence: "tests::evidence_bundle_builds_and_chain_verifies, ..._evidence_bundle_chain_detects_tampering".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
     ]
 }
 
@@ -531,6 +604,9 @@ mod tests {
         assert!(crate_names.contains("ruv-neural-viz"));
         assert!(crate_names.contains("ruv-neural-cli"));
         assert!(crate_names.contains("ruv-neural-wasm"));
+        assert!(crate_names.contains("ruv-neural-stim"));
+        assert!(crate_names.contains("ruv-neural-biosense"));
+        assert!(crate_names.contains("ruv-neural-loop"));
     }
 
     #[test]

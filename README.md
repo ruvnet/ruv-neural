@@ -10,12 +10,13 @@
 neural decoding · real-time connectivity analysis · graph theory · minimum cut ·
 network topology · connectomics · NV-diamond magnetometry · optically pumped
 magnetometer (OPM) · quantum sensing · neurotechnology · neurofeedback ·
-computational neuroscience · Rust · ESP32 · WebAssembly</sub>
+closed-loop neuromodulation · 40 Hz gamma entrainment (GENUS) · sensory
+stimulation · HRV · computational neuroscience · Rust · ESP32 · WebAssembly</sub>
 
 [![crates.io](https://img.shields.io/crates/v/ruv-neural-core.svg)](https://crates.io/crates/ruv-neural-core)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)]()
 [![Rust](https://img.shields.io/badge/rust-1.75+-orange.svg)]()
-[![Tests](https://img.shields.io/badge/tests-338%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-398%20passed-brightgreen.svg)]()
 
 ---
 
@@ -96,6 +97,122 @@ minimum cut algorithms to detect cognitive state transitions.
 
 This is not mind reading — it measures **how cognition organizes itself** by tracking the
 topology of brain networks in real time.
+
+## Closed-Loop Sensory Neuromodulation (Ruflo)
+
+> **Research-grade wellness & cognitive-state platform — not a medical device.**
+> Only safe external sensory channels are used. Transcranial/implanted
+> neuromodulation (TMS, tDCS/tACS, focused ultrasound, DBS, VNS) is **out of
+> scope** — that is medical-device territory requiring clinical validation,
+> dosing controls, contraindication screening, and regulatory review.
+> See [ADR-0001](docs/adr/0001-scope.md).
+
+Beyond *observing* topology, rUv Neural can *gently steer* cognitive state with a
+**closed loop**: detect the state, deliver a verified sensory stimulus, measure
+the physiological response, adapt conservatively, and **stop safely** the moment
+the response leaves an allowed envelope.
+
+| Channel | Role | Crate |
+|---------|------|-------|
+| 40 Hz light / audio / haptic | sensory entrainment (GENUS) | [`ruv-neural-stim`](ruv-neural-stim) |
+| HRV · breathing · motion · sleep | response sensing | [`ruv-neural-biosense`](ruv-neural-biosense) |
+| personal state embedding (ruVector) | per-person state fusion | [`ruv-neural-loop`](ruv-neural-loop) |
+| protocol selection · guardrails · audit trail (Ruflo) | closed-loop control | [`ruv-neural-loop`](ruv-neural-loop) |
+
+```text
+  observe ─▶ embed (ruVector) ─▶ estimate state ─▶ SAFETY ENVELOPE
+                                                       │
+                            within ──────────────────┴────── breach
+                               │                                 │
+                     select protocol & dose               fail-safe STOP
+                               │                            (intensity 0)
+                     deliver VERIFIED stimulus ──▶ audit (hash-chained, signed)
+```
+
+**Acceptance test** ([ADR-0011](docs/adr/0011-acceptance-test.md)): the system can
+*identify a target state, deliver a **verified** stimulus, measure a response, and
+stop safely when the response moves outside the allowed envelope* — encoded as
+`SessionReport::passes_acceptance()` and asserted in
+[`ruv-neural-loop/tests/closed_loop_acceptance.rs`](ruv-neural-loop/tests/closed_loop_acceptance.rs).
+
+```bash
+# Drive a closed-loop session toward a relaxed state, then write signed evidence
+cargo run -p ruv-neural-cli -- neuromod --target relaxed --seed 11 \
+    --output report.json --audit audit.json --sign
+
+# Demonstrate the fail-safe stop: inject an arousal spike mid-session
+cargo run -p ruv-neural-cli -- neuromod --target relaxed --perturb 5
+
+# Export a portable evidence bundle and verify it with the reference verifier
+# (the same checks the web console runs in-browser — verdict matches byte-for-byte)
+cargo run -p ruv-neural-cli -- neuromod --target relaxed --bundle bundle.json --sign
+cargo run -p ruv-neural-cli -- verify-bundle -i bundle.json   # → VERDICT: PASS
+```
+
+```rust
+use ruv_neural_loop::*;
+use ruv_neural_stim::StimulusGenerator;
+
+let mut controller = ClosedLoopController::new(
+    ControllerConfig::default(),
+    TargetState::relaxed(),
+    StimulusGenerator::conservative(),       // sensory-safety limits enforced
+    SafetyEnvelope::default(),                // fail-safe stop bounds
+    Box::new(GammaEntrainmentProtocol::audio_haptic()),
+);
+let mut sim = LoopSimulation::responsive(11, 10.0); // closed-loop subject model
+sim.run(&mut controller, 64);
+
+let report = controller.report();
+assert!(report.passes_acceptance());          // verified delivery + safe outcome
+assert!(controller.sign_session().verify());   // Ed25519-attested audit head
+```
+
+Design decisions are documented as Architecture Decision Records in
+[`docs/adr/`](docs/adr/0000-template.md); the drive-to-validated iteration log is
+in [`docs/closed-loop-loop-log.md`](docs/closed-loop-loop-log.md).
+
+### Web console — rUv Neural UI
+
+A **static, local-first** web console ([`apps/ruv-neural-ui`](apps/ruv-neural-ui),
+[ADR-0014](docs/adr/0014-web-console.md)) makes Ruflo understandable in five
+minutes and **verifies the evidence entirely in your browser** — no backend, no
+accounts, no health data leaves the page. It plays back real, signed evidence
+bundles (`ruv-neural neuromod --bundle … --sign`) in **Demo** mode and verifies
+any imported bundle in **Replay** mode: schema validity, a **recomputed** hash
+chain, receipt integrity + frequency tolerance, fail-safe-stop semantics, the
+Ed25519 signature, and the acceptance result. The Rust exporter and the
+TypeScript verifier hash from the *same* fixed-precision canonical string, so the
+chain is reproduced, not trusted.
+
+| Overview — session summary + local verification | Live session — convergence |
+|---|---|
+| ![Overview](docs/images/overview.png) | ![Live session](docs/images/session.png) |
+
+| Stimulus verifier — verified 40 Hz receipts | Safety envelope — fail-safe stop |
+|---|---|
+| ![Stimulus verifier](docs/images/stimulus.png) | ![Safety envelope](docs/images/safety.png) |
+
+A **gated Real mode** (Phase 4) adds explicit opt-in/consent + contraindication
+screening, a Web Serial bridge (with an in-browser mock device so the flow is
+demonstrable without hardware), a hardware-validation handshake, an
+always-visible emergency stop, an enforced intensity ceiling, and a
+hash-chained device-event log — all local-only, off by default. A guided
+**Research workflow** (Phase 5) walks consent → contraindication → baseline →
+protocol → verified session → survey → **signed evidence export**, re-verifiable
+in Replay mode, with nothing uploaded.
+
+| Real mode — gated local hardware | Research workflow — signed study export |
+|---|---|
+| ![Real mode](docs/images/realmode.png) | ![Research workflow](docs/images/research.png) |
+
+```bash
+cd apps/ruv-neural-ui
+npm install
+npm run test      # vitest — schema + verifier + tamper-detection (Rust↔TS hash parity)
+npm run dev       # local dev server
+npm run build     # static build → dist/ (deploys to GitHub Pages)
+```
 
 ## Hardware Parts List
 
@@ -209,7 +326,7 @@ exercise the full pipeline.
 5. **Verification**
    - Generate a witness bundle: `cargo run -p ruv-neural-cli -- witness --output witness.json`
    - Verify Ed25519 signature: `cargo run -p ruv-neural-cli -- witness --verify witness.json`
-   - Expected output: `VERDICT: PASS` (41 capability attestations, 338 tests)
+   - Expected output: `VERDICT: PASS` (51 capability attestations, 398 tests)
 
 ## Architecture
 
@@ -274,6 +391,9 @@ All crates are published on [crates.io](https://crates.io/search?q=ruv-neural):
 | [`ruv-neural-embed`](https://crates.io/crates/ruv-neural-embed) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-embed.svg)](https://crates.io/crates/ruv-neural-embed) | RuVector graph embeddings | core |
 | [`ruv-neural-memory`](https://crates.io/crates/ruv-neural-memory) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-memory.svg)](https://crates.io/crates/ruv-neural-memory) | Persistent neural state memory + HNSW | core |
 | [`ruv-neural-decoder`](https://crates.io/crates/ruv-neural-decoder) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-decoder.svg)](https://crates.io/crates/ruv-neural-decoder) | Cognitive state classification + BCI | core |
+| [`ruv-neural-stim`](https://crates.io/crates/ruv-neural-stim) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-stim.svg)](https://crates.io/crates/ruv-neural-stim) | 40 Hz light/audio/haptic stimulus synthesis + verified delivery receipts | core |
+| [`ruv-neural-biosense`](https://crates.io/crates/ruv-neural-biosense) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-biosense.svg)](https://crates.io/crates/ruv-neural-biosense) | Physiological response sensing (HRV, respiration, motion, sleep) | core |
+| [`ruv-neural-loop`](https://crates.io/crates/ruv-neural-loop) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-loop.svg)](https://crates.io/crates/ruv-neural-loop) | Ruflo closed-loop controller: safety envelope, dosing, audit trail | core, stim, biosense, embed |
 | [`ruv-neural-esp32`](https://crates.io/crates/ruv-neural-esp32) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-esp32.svg)](https://crates.io/crates/ruv-neural-esp32) | ESP32 edge sensor integration | core |
 | `ruv-neural-wasm` | — | WebAssembly browser bindings | core |
 | [`ruv-neural-viz`](https://crates.io/crates/ruv-neural-viz) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-viz.svg)](https://crates.io/crates/ruv-neural-viz) | Visualization and ASCII rendering | core, graph, mincut |
@@ -395,9 +515,9 @@ Each crate is independently usable. Common combinations:
 
 | Platform | Status | Crates Available |
 |----------|--------|-----------------|
-| Linux x86_64 | Full | All 12 |
-| macOS ARM64 | Full | All 12 |
-| Windows x86_64 | Full | All 12 |
+| Linux x86_64 | Full | All 15 |
+| macOS ARM64 | Full | All 15 |
+| Windows x86_64 | Full | All 15 |
 | WASM (browser) | Partial | core, wasm, viz |
 | ESP32 (no_std) | Partial | core, esp32 |
 
@@ -467,7 +587,7 @@ cargo run -p ruv-neural-cli -- witness --verify witness-bundle.json
 ```
 
 The bundle contains:
-- **41 capability attestations** covering all 12 crates
+- **51 capability attestations** covering all 15 crates
 - **SHA-256 digest** of the capability matrix
 - **Ed25519 signature** (unique per generation)
 - **Public key** for independent verification
@@ -506,8 +626,11 @@ Crates must be published in dependency order:
 8. `ruv-neural-viz` (depends on core, graph)
 9. `ruv-neural-memory` (depends on core, embed)
 10. `ruv-neural-decoder` (depends on core, embed)
-11. `ruv-neural-wasm` (depends on core)
-12. `ruv-neural-cli` (depends on all)
+11. `ruv-neural-stim` (depends on core)
+12. `ruv-neural-biosense` (depends on core)
+13. `ruv-neural-loop` (depends on core, stim, biosense, embed)
+14. `ruv-neural-wasm` (depends on core)
+15. `ruv-neural-cli` (depends on all)
 
 ## License
 

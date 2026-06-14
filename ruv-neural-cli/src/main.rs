@@ -79,6 +79,45 @@ enum Commands {
         #[arg(short, long)]
         output: String,
     },
+    /// Run a closed-loop sensory neuromodulation session (Ruflo)
+    Neuromod {
+        /// Target state: relaxed, focused, or gamma
+        #[arg(short, long, default_value = "relaxed")]
+        target: String,
+        /// Protocol: audio-haptic or multimodal
+        #[arg(short, long, default_value = "audio-haptic")]
+        protocol: String,
+        /// Maximum control steps
+        #[arg(short, long, default_value = "64")]
+        steps: u64,
+        /// Deterministic RNG seed
+        #[arg(long, default_value = "7")]
+        seed: u64,
+        /// Inject an arousal-spike perturbation at this step (to demo safe-stop)
+        #[arg(long)]
+        perturb: Option<u64>,
+        /// Photosensitivity screen cleared (enables the light channel)
+        #[arg(long)]
+        screened: bool,
+        /// Write the session report (JSON) to this path
+        #[arg(short, long)]
+        output: Option<String>,
+        /// Write the tamper-evident audit trail (JSON) to this path
+        #[arg(long)]
+        audit: Option<String>,
+        /// Write a portable Ruflo evidence bundle (JSON) for the web console
+        #[arg(long)]
+        bundle: Option<String>,
+        /// Ed25519-sign the audit-chain head and evidence bundle
+        #[arg(long)]
+        sign: bool,
+    },
+    /// Verify a Ruflo evidence bundle (reference verifier; matches the web UI)
+    VerifyBundle {
+        /// Path to a Ruflo evidence bundle (JSON)
+        #[arg(short, long)]
+        input: String,
+    },
     /// Show system info and capabilities
     Info,
     /// Generate or verify Ed25519-signed capability witness bundles
@@ -129,6 +168,32 @@ async fn main() {
             format,
             output,
         } => commands::export::run(&input, &format, &output),
+        Commands::Neuromod {
+            target,
+            protocol,
+            steps,
+            seed,
+            perturb,
+            screened,
+            output,
+            audit,
+            bundle,
+            sign,
+        } => commands::neuromod::run(
+            &target,
+            &protocol,
+            steps,
+            seed,
+            perturb,
+            screened,
+            output.map(std::path::PathBuf::from),
+            audit.map(std::path::PathBuf::from),
+            bundle.map(std::path::PathBuf::from),
+            sign,
+        ),
+        Commands::VerifyBundle { input } => {
+            commands::verify_bundle::run(std::path::PathBuf::from(input))
+        }
         Commands::Info => {
             commands::info::run();
             Ok(())
