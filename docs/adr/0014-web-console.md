@@ -2,8 +2,12 @@
 
 ## Status
 
-Accepted — **v1 (Demo + Replay) implemented** in `apps/ruv-neural-ui`. Real mode
-and Research mode remain feature-gated / deferred per the phased plan below.
+Accepted — **Demo + Replay + gated Real mode implemented** in
+`apps/ruv-neural-ui`. Real mode (Phase 4) ships behind an explicit
+opt-in/consent gate with a Web Serial bridge + in-browser mock device, hardware
+validation, always-visible emergency stop, enforced intensity ceiling, and a
+hash-chained device-event log. Research mode (Phase 5) and the WASM verifier
+(Phase 3) remain deferred per the phased plan below.
 
 Date: 2026-06-13 · Deciders: rUv ·
 Tags: ruv-neural, Ruflo, neuromodulation, web-ui, GitHub Pages, verifier,

@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ChangeEvent } from "react";
 import { useStore, DEMO_PRESETS, type ScreenId } from "./store/store";
 import { ActiveScreen } from "./screens";
+import { RealMode } from "./screens/realmode";
 import { StatusPill } from "./components/common";
 import { BOUNDARY } from "./util/constants";
 
@@ -48,9 +49,14 @@ function ModeBar() {
         <button className={mode === "replay" ? "active" : ""} onClick={() => setMode("replay")} role="tab" aria-selected={mode === "replay"}>
           Replay
         </button>
+        <button className={mode === "real" ? "active" : ""} onClick={() => setMode("real")} role="tab" aria-selected={mode === "real"} data-testid="mode-real">
+          Real ⚠
+        </button>
       </div>
 
-      {mode === "demo" ? (
+      {mode === "real" ? (
+        <div className="preset-row"><span className="muted">Experimental local-hardware mode — gated, local-only, off by default.</span></div>
+      ) : mode === "demo" ? (
         <div className="preset-row">
           {DEMO_PRESETS.map((p) => (
             <button
@@ -86,7 +92,7 @@ function ModeBar() {
 }
 
 export default function App() {
-  const { screen, setScreen, bundle, playing, step, setStep, pause, error } = useStore();
+  const { mode, screen, setScreen, bundle, playing, step, setStep, pause, error } = useStore();
 
   // Playback timer: advance the cursor while playing.
   useEffect(() => {
@@ -122,23 +128,29 @@ export default function App() {
 
       {error && <div className="error-banner" role="alert" data-testid="error">⚠ {error}</div>}
 
-      <div className="layout">
-        <nav className="sidenav" aria-label="Screens">
-          {NAV.map((n) => (
-            <button
-              key={n.id}
-              className={screen === n.id ? "active" : ""}
-              onClick={() => setScreen(n.id)}
-              data-testid={`nav-${n.id}`}
-            >
-              {n.label}
-            </button>
-          ))}
-        </nav>
+      {mode === "real" ? (
         <main className="content">
-          <ActiveScreen />
+          <RealMode />
         </main>
-      </div>
+      ) : (
+        <div className="layout">
+          <nav className="sidenav" aria-label="Screens">
+            {NAV.map((n) => (
+              <button
+                key={n.id}
+                className={screen === n.id ? "active" : ""}
+                onClick={() => setScreen(n.id)}
+                data-testid={`nav-${n.id}`}
+              >
+                {n.label}
+              </button>
+            ))}
+          </nav>
+          <main className="content">
+            <ActiveScreen />
+          </main>
+        </div>
+      )}
 
       <footer className="footer">
         <span>

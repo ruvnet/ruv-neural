@@ -54,3 +54,29 @@ test("audit trail chain verifies", async ({ page }) => {
   await expect(page.getByTestId("timeline")).toBeVisible();
   await page.screenshot({ path: "screenshots/audit.png", fullPage: true });
 });
+
+test("real mode is gated and the mock device emergency-stops", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("mode-real").click();
+
+  // Gated: opt-in is blocked until all acknowledgements are checked.
+  await expect(page.getByTestId("consent-gate")).toBeVisible();
+  await page.getByTestId("ack-boundary").check();
+  await page.getByTestId("ack-contra").check();
+  await page.getByTestId("ack-photo").check();
+  await page.getByTestId("optin-btn").click();
+
+  // Connect + validate the mock device.
+  await page.getByTestId("connect-btn").click();
+  await page.getByTestId("validate-btn").click();
+  await expect(page.getByTestId("validation-panel")).toBeVisible();
+  await expect(page.getByTestId("stim-controls")).toBeVisible();
+  await page.screenshot({ path: "screenshots/realmode.png", fullPage: true });
+
+  // Start, then emergency stop — must engage and refuse auto-restart.
+  await page.getByTestId("start-btn").click();
+  await page.getByTestId("estop-btn").click();
+  await expect(page.getByTestId("estop-bar")).toContainText("EMERGENCY STOP ENGAGED");
+  await expect(page.getByTestId("estop-btn")).toBeDisabled();
+  await expect(page.getByTestId("device-log")).toBeVisible();
+});

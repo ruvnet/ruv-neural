@@ -188,6 +188,14 @@ chain is reproduced, not trusted.
 |---|---|
 | ![Stimulus verifier](docs/images/stimulus.png) | ![Safety envelope](docs/images/safety.png) |
 
+A **gated Real mode** (Phase 4) adds explicit opt-in/consent + contraindication
+screening, a Web Serial bridge (with an in-browser mock device so the flow is
+demonstrable without hardware), a hardware-validation handshake, an
+always-visible emergency stop, an enforced intensity ceiling, and a
+hash-chained device-event log — all local-only, off by default.
+
+![Real mode](docs/images/realmode.png)
+
 ```bash
 cd apps/ruv-neural-ui
 npm install
