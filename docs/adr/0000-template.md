@@ -49,8 +49,9 @@ ADRs are immutable once accepted; revisions are new ADRs that supersede.
 | [0020](0020-therapeutic-neuromod-out-of-scope.md) | Adaptive/closed-loop *therapeutic* neuromodulation is out of scope |
 | [0021](0021-privacy-preserving-personalization.md) | Privacy-preserving, on-device & federated personalization |
 | [0022](0022-neural-data-governance.md) | Neural-data governance & neurorights compliance |
+| [0023](0023-ruvector-backend.md) | RuVector as the embedding store, ANN retrieval & inference backend |
 
-> ADRs 0015–0022 form the **emerging-medical-breakthroughs research series**:
+> ADRs 0015–0023 form the **emerging-medical-breakthroughs research series**:
 > each records how rUv Neural relates to a 2024–2026 state-of-the-art frontier
 > (neural foundation models, invasive BCI, wearable OPM-MEG, NV-diamond
 > magnetometry, GENUS clinical evidence, therapeutic closed-loop neuromodulation,
