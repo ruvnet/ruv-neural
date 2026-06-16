@@ -1,0 +1,89 @@
+name: CI
+
+# Regression guard for the Rust workspace. Every push and PR must pass:
+#   fmt · clippy(-D warnings) · build+test · doc-tests · extended RVF fuzzing ·
+#   wasm32 build. The web-app (apps/ruv-neural-ui) is covered by pages.yml.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Newer pushes to the same ref cancel in-flight runs.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # Deny warnings on our own crates (registry deps are capped to `allow`).
+  RUSTFLAGS: "-D warnings"
+  # needless_range_loop is idiomatic in the numerical code and intentionally
+  # allow-listed; everything else is denied.
+  CLIPPY_FLAGS: "-D warnings -A clippy::needless_range_loop"
+
+jobs:
+  fmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all --check
+
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: clippy (workspace, all targets)
+        run: cargo clippy --workspace --all-targets -- ${{ env.CLIPPY_FLAGS }}
+      - name: clippy (excluded wasm crate)
+        run: cargo clippy --manifest-path ruv-neural-wasm/Cargo.toml --all-targets -- ${{ env.CLIPPY_FLAGS }}
+
+  test:
+    name: build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build (workspace, all targets incl. examples & benches)
+        run: cargo build --workspace --all-targets
+      - name: Test (workspace, all targets)
+        run: cargo test --workspace --all-targets
+      - name: Doc tests
+        run: cargo test --workspace --doc
+      - name: Host tests for the excluded wasm crate
+        run: cargo test --manifest-path ruv-neural-wasm/Cargo.toml
+
+  fuzz:
+    name: rvf parser fuzz (extended)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Extended proptest cases against the RVF container parser
+        env:
+          PROPTEST_CASES: "4096"
+        run: cargo test -p ruv-neural-core --test rvf_fuzz
+
+  wasm:
+    name: wasm32 build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Build the browser bindings for wasm32-unknown-unknown
+        run: cargo build --manifest-path ruv-neural-wasm/Cargo.toml --target wasm32-unknown-unknown --release
