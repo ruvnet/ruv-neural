@@ -30,11 +30,17 @@ pub mod animation;
 #[cfg(feature = "std")]
 pub mod ascii;
 #[cfg(feature = "std")]
+pub mod bids;
+#[cfg(feature = "std")]
 pub mod export;
 #[cfg(feature = "std")]
 pub mod layout;
 
 #[cfg(feature = "std")]
 pub use animation::{AnimatedEdge, AnimatedNode, AnimationFrame, AnimationFrames, LayoutType};
+// BIDS export writes a dataset to disk, so it is std-only like the other
+// graph-bound modules.
+#[cfg(feature = "std")]
+pub use bids::{export_bids_eeg, BidsMetadata};
 #[cfg(feature = "std")]
 pub use layout::{AnatomicalLayout, ForceDirectedLayout};
