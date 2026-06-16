@@ -53,6 +53,7 @@ pub mod controller;
 pub mod embedding;
 pub mod envelope;
 pub mod evidence;
+pub mod federated;
 pub mod outcome;
 pub mod protocol;
 pub mod sim;
@@ -63,6 +64,10 @@ pub use controller::{ClosedLoopController, ControllerConfig, ControllerPhase, St
 pub use embedding::{PersonalBaseline, PersonalStateEmbedding, EMBEDDING_DIM, FEATURE_NAMES};
 pub use envelope::{BreachReason, EnvelopeStatus, SafetyEnvelope};
 pub use evidence::{AcceptanceResult, EvidenceBundle, EvidenceStep, SCHEMA_VERSION};
+pub use federated::{
+    attach_federated_manifest, federated_average, read_federated_manifest, DpConfig,
+    FederatedManifest, FederatedModel, FederatedUpdate,
+};
 pub use outcome::SessionReport;
 pub use protocol::{DosingPolicy, GammaEntrainmentProtocol, Protocol, StimulusPlan};
 pub use sim::LoopSimulation;
