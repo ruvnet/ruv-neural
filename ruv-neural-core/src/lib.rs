@@ -49,8 +49,8 @@ pub use rvf_container::{
 };
 pub use rvf_quant::VecDType;
 pub use rvf_witness::{
-    attach_witness, read_witness, sign_container, verify_container_signature, WitnessChain,
-    WitnessEntry, WitnessType,
+    attach_witness, read_witness, sign_container, sign_container_ephemeral,
+    verify_container_signature, WitnessChain, WitnessEntry, WitnessType,
 };
 pub use sensor::{SensorArray, SensorChannel, SensorType};
 pub use signal::{FrequencyBand, MultiChannelTimeSeries, SpectralFeatures, TimeFrequencyMap};

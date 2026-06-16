@@ -252,6 +252,16 @@ pub fn sign_container(container: &mut RvfContainer, signing_key: &SigningKey) {
     container.add_segment(SegmentType::Crypto, FLAG_SIGNED, payload);
 }
 
+/// Sign the container with a freshly generated ephemeral Ed25519 key
+/// (a self-signed, tamper-evident artifact), returning the public key embedded
+/// in the `CRYPTO` segment.
+pub fn sign_container_ephemeral(container: &mut RvfContainer) -> VerifyingKey {
+    use rand::rngs::OsRng;
+    let key = SigningKey::generate(&mut OsRng);
+    sign_container(container, &key);
+    key.verifying_key()
+}
+
 /// Verify the container's `CRYPTO` Ed25519 signature.
 ///
 /// Returns `Ok(true)` if a valid signature is present, `Ok(false)` if it is
