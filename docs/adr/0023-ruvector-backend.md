@@ -2,11 +2,37 @@
 
 ## Status
 
-Proposed — integration direction. The RVF export seam exists today
-(`ruv-neural-core`, `ruv-neural-embed`); adopting RuVector as the downstream
-store/search/inference layer is a roadmap, gated on the format reconciliation
-below. Does **not** alter the ADR-0001 wellness scope — RuVector is
-infrastructure, not a new sensing or stimulation capability.
+Accepted — partially implemented. The RVF container substrate (points 1–3
+below) ships in `ruv-neural-core`; remaining points (HNSW wiring, federation,
+ONNX inference) stay roadmap. Does **not** alter the ADR-0001 wellness scope —
+RuVector is infrastructure, not a new sensing or stimulation capability.
+
+### Implemented
+
+The toy single-blob RVF was replaced by a faithful, dependency-free port of
+RuVector's **RVFS** container framing (verified against `ruvnet/ruvector`,
+`crates/rvf`):
+
+- `ruv-neural-core/src/rvf_container.rs` — `RVFS` magic (`0x52564653`), 64-byte
+  `repr(C)` segment headers at the exact upstream offsets, the real segment-type
+  codes (`VEC=0x01`, `INDEX=0x02`, `MANIFEST=0x05`, `QUANT=0x06`, `META=0x07`,
+  `WITNESS=0x0A`, `CRYPTO=0x0C`, …), 64-byte alignment, CRC32C (Castagnoli) +
+  128-bit content-hash integrity, and `NeuralEmbedding ⇄ VEC`/`META` mapping.
+- `ruv-neural-core/src/rvf_quant.rs` — `VEC` quantization codecs (`f64` lossless
+  default, plus `f32`/`f16`/`int8`/`binary`) matching RuVector's temperature-tier
+  dtypes, all pure Rust (`no_std`/`wasm` friendly).
+- `ruv-neural-core/src/rvf_witness.rs` — the 73-byte `WITNESS` chain entry layout
+  and an Ed25519 `CRYPTO` segment, tying ADR-0009's hash-chained audit to the
+  on-disk container (point 3).
+- `ruv-neural-embed/src/rvf_export.rs` — `.rvf` files are now the binary
+  container (was ad-hoc JSON), reconciling the two divergent formats (point 2);
+  JSON remains only as an explicit debug string form.
+
+Profile note: upstream uses SHAKE-256 for hashing; to stay dependency-free this
+profile substitutes SHA-256 (same 256-bit size, same byte layout) and records
+the choice in the `checksum_algo` field. 21 new unit tests cover header
+round-trips, segment-code conformance, quantization error bounds, corruption
+detection, witness linkage, and signature forgery.
 
 ## Context
 

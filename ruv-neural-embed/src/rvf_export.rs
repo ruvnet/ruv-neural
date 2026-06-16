@@ -1,12 +1,19 @@
 //! Export neural embeddings to the RuVector File (.rvf) format.
 //!
-//! The RVF (RuVector Format) is a JSON-based file format for storing
-//! embedding vectors with metadata. This module provides round-trip
-//! serialization for interoperability with the RuVector ecosystem.
+//! The canonical `.rvf` on-disk form is the **binary multi-segment container**
+//! ([`ruv_neural_core::rvf_container`]), byte-compatible with RuVector's RVF
+//! framing: a sealed `META` directory plus a `VEC` segment that can be stored
+//! lossless (`f32`) or quantized (`f16`/`int8`/`binary`). [`export_rvf`] /
+//! [`import_rvf`] read and write that container; [`to_rvf_string`] /
+//! [`from_rvf_string`] expose a human-readable JSON form for debugging only.
 
 use ruv_neural_core::brain::Atlas;
 use ruv_neural_core::embedding::{EmbeddingMetadata, NeuralEmbedding};
 use ruv_neural_core::error::{Result, RuvNeuralError};
+use ruv_neural_core::rvf_container::{
+    container_to_embeddings, embeddings_to_container, RvfContainer,
+};
+use ruv_neural_core::rvf_quant::VecDType;
 use serde::{Deserialize, Serialize};
 
 /// RVF file header.
@@ -48,27 +55,45 @@ pub struct RvfDocument {
     pub records: Vec<RvfRecord>,
 }
 
-/// Export embeddings to an RVF JSON file.
+/// Export embeddings to a lossless (`f64`) binary RVF container file.
 ///
 /// # Errors
 /// Returns an error if the embedding list is empty or if file I/O fails.
 pub fn export_rvf(embeddings: &[NeuralEmbedding], path: &str) -> Result<()> {
-    let json = to_rvf_string(embeddings)?;
-    std::fs::write(path, json).map_err(|e| {
-        RuvNeuralError::Serialization(format!("Failed to write RVF file '{}': {}", path, e))
-    })?;
-    Ok(())
+    export_rvf_quantized(embeddings, path, VecDType::F64)
 }
 
-/// Import embeddings from an RVF JSON file.
+/// Export embeddings to a binary RVF container at a chosen quantization.
+///
+/// `f16` roughly halves and `int8`/`binary` further shrink the `VEC` segment,
+/// at the cost of reconstruction precision.
 ///
 /// # Errors
-/// Returns an error if the file cannot be read or parsed.
+/// Returns an error if the embedding list is empty or if file I/O fails.
+pub fn export_rvf_quantized(
+    embeddings: &[NeuralEmbedding],
+    path: &str,
+    dtype: VecDType,
+) -> Result<()> {
+    let container = embeddings_to_container(embeddings, dtype)?;
+    let bytes = container.to_bytes();
+    std::fs::write(path, bytes).map_err(|e| {
+        RuvNeuralError::Serialization(format!("Failed to write RVF file '{}': {}", path, e))
+    })
+}
+
+/// Import embeddings from a binary RVF container file.
+///
+/// # Errors
+/// Returns an error if the file cannot be read, is not a valid container, or
+/// fails an integrity check.
 pub fn import_rvf(path: &str) -> Result<Vec<NeuralEmbedding>> {
-    let json = std::fs::read_to_string(path).map_err(|e| {
+    let bytes = std::fs::read(path).map_err(|e| {
         RuvNeuralError::Serialization(format!("Failed to read RVF file '{}': {}", path, e))
     })?;
-    from_rvf_string(&json)
+    let container = RvfContainer::from_bytes(&bytes)?;
+    container.verify_integrity()?;
+    container_to_embeddings(&container)
 }
 
 /// Serialize embeddings to RVF JSON string (without writing to file).
@@ -206,5 +231,50 @@ mod tests {
     fn test_rvf_empty_fails() {
         assert!(to_rvf_string(&[]).is_err());
         assert!(export_rvf(&[], "/tmp/empty.rvf").is_err());
+    }
+
+    #[test]
+    fn test_rvf_file_is_binary_container() {
+        let embeddings = vec![NeuralEmbedding::new(
+            vec![1.0, 2.0, 3.0, 4.0],
+            0.0,
+            default_metadata("spectral", Atlas::Custom(4)),
+        )
+        .unwrap()];
+        let path = "/tmp/ruv_neural_embed_magic_test.rvf";
+        export_rvf(&embeddings, path).unwrap();
+        let bytes = std::fs::read(path).unwrap();
+        // Canonical `.rvf` files start with the RVFS magic, not `{` (JSON).
+        assert_eq!(&bytes[0..4], b"RVFS");
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_rvf_quantized_roundtrip() {
+        let embeddings = vec![
+            NeuralEmbedding::new(
+                vec![1.0, -2.0, 3.0, -4.0],
+                0.0,
+                default_metadata("spectral", Atlas::Custom(4)),
+            )
+            .unwrap(),
+            NeuralEmbedding::new(
+                vec![0.5, 0.5, -0.5, -0.5],
+                1.0,
+                default_metadata("spectral", Atlas::Custom(4)),
+            )
+            .unwrap(),
+        ];
+        let path = "/tmp/ruv_neural_embed_quant_test.rvf";
+        export_rvf_quantized(&embeddings, path, VecDType::F16).unwrap();
+        let restored = import_rvf(path).unwrap();
+        assert_eq!(restored.len(), 2);
+        // f16 keeps these exactly-representable values lossless.
+        for (orig, rest) in embeddings.iter().zip(restored.iter()) {
+            for (a, b) in orig.vector.iter().zip(rest.vector.iter()) {
+                assert!((a - b).abs() < 1e-3);
+            }
+        }
+        let _ = std::fs::remove_file(path);
     }
 }

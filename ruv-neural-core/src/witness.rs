@@ -157,6 +157,27 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
         },
         CapabilityAttestation {
             crate_name: "ruv-neural-core".into(),
+            capability: "RVF multi-segment container (RVFS magic, 64-byte segment headers, CRC32C, VEC/META/WITNESS/CRYPTO)".into(),
+            evidence: "rvf_container::tests::container_roundtrip_lossless_f64, ..::segment_type_codes_match_spec, ..::corrupted_payload_is_detected".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-core".into(),
+            capability: "Vector quantization codecs for RVF VEC (f16/int8/binary, f64 lossless)".into(),
+            evidence: "rvf_quant::tests::int8_roundtrip_error_bounded, ..::f16_roundtrip_error_bounded, ..::binary_preserves_sign".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-core".into(),
+            capability: "RVF WITNESS audit chain (73-byte entries) + Ed25519 CRYPTO segment signing".into(),
+            evidence: "rvf_witness::tests::witness_chain_links_and_verifies, ..::sign_and_verify_container, ..::tampered_vector_fails_signature".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-core".into(),
             capability: "Neural embedding vectors with cosine/euclidean distance".into(),
             evidence: "tests::embedding_cosine_similarity, tests::embedding_euclidean_distance"
                 .into(),
