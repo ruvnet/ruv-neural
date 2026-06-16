@@ -1,74 +1,105 @@
-# rUv Neural — Real-Time Brain Network Topology Analysis in Rust
+# rUv Neural — the open closed-loop OS for gamma-entrainment research
 
-> **Open-source brain-computer interface (BCI) and neural signal-processing
-> framework in Rust.** Real-time EEG / quantum-sensor (NV-diamond, OPM)
-> connectivity analysis: DSP → brain-network graph → dynamic minimum-cut
-> topology → cognitive-state decoding. Edge (ESP32) + WebAssembly + cryptographic
-> witness verification.
-
-<sub>**Keywords:** brain-computer interface · BCI · EEG signal processing ·
-neural decoding · real-time connectivity analysis · graph theory · minimum cut ·
-network topology · connectomics · NV-diamond magnetometry · optically pumped
-magnetometer (OPM) · quantum sensing · neurotechnology · neurofeedback ·
-closed-loop neuromodulation · 40 Hz gamma entrainment (GENUS) · sensory
-stimulation · HRV · computational neuroscience · Rust · ESP32 · WebAssembly</sub>
+<sub>**Keywords:** 40 Hz gamma entrainment (GENUS) · multisensory stimulation ·
+closed-loop neuromodulation · protocol optimization · sensory stimulation ·
+neurofeedback · EEG signal processing · HRV · brain-network connectivity · graph
+theory · minimum cut · NV-diamond magnetometry · OPM · quantum sensing ·
+neurotechnology · reproducible research · Rust · ESP32 · WebAssembly</sub>
 
 [![crates.io](https://img.shields.io/crates/v/ruv-neural-core.svg)](https://crates.io/crates/ruv-neural-core)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)]()
 [![Rust](https://img.shields.io/badge/rust-1.75+-orange.svg)]()
 [![Tests](https://img.shields.io/badge/tests-398%20passed-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/status-research%20harness%20—%20not%20a%20medical%20device-important.svg)]()
 
 ---
 
-An open-source Rust framework for watching the **architecture of thought** form
-in real time.
+**rUv Neural is the open, closed-loop operating system for gamma-entrainment
+research** — a research-grade harness to **measure, adapt, and compare** 40 Hz
+sensory-stimulation protocols, with auditable, reproducible, cryptographically
+signed evidence. Built in Rust; runs native, in the browser (WASM), and on the
+edge (ESP32).
 
-**Not mind-reading.** rUv Neural does not touch words, memories, or private
-thoughts — and it cannot. It measures something more fundamental: **how**
-cognition organizes itself, by tracking the live *topology* of brain networks
-with graph theory and dynamic minimum-cut analysis. Think Google Maps for
-cognition — not *what* you're thinking, **how**.
+> **Not a medical device. Not a cure. Not a wellness toy.** rUv Neural makes **no
+> efficacy claim.** It is *evidence infrastructure* for studying whether, when, and
+> for whom sensory gamma stimulation does anything — and for running those
+> protocols safely and reproducibly.
 
-It detects the moments cognition is made of: when attention shifts, when
-confusion appears, when understanding emerges, when ideas connect, when
-cognitive load spikes, when someone drops into flow. Those are topology events
-in a connectivity graph — exactly what the min-cut layer surfaces.
+[![rUv Neural web console — local-first evidence verification](docs/images/overview.png)](apps/ruv-neural-ui)
 
-> **What it does *today*, honestly.** rUv Neural is a **framework and pipeline**
-> (sensors → DSP → connectivity graph → min-cut topology → cognitive-state
-> decode), validated on **EEG** and a **built-in deterministic simulator** — not
-> yet clinically validated on a population. The quantum-sensor front-end
-> (NV-diamond / OPM) is the **research frontier**: real magnetometry-grade
-> hardware is a five-figure instrument (see [the BOM reality check](#core-nv-diamond-magnetometer-single-odmr-channel)),
-> so EEG and the simulator are the practical paths to develop against. Every
-> capability below is what this **architecture could enable** — a direction, not
-> a delivered clinical claim.
+<sub>The in-browser console plays back **signed evidence bundles** and re-verifies
+them entirely locally — no backend, no accounts, no data leaves the page.
+[See the full UI ↓](#web-console--ruv-neural-ui)</sub>
 
-RuView showed we could read human *behavior* from invisible radio signals.
-rUv Neural asks a bigger question: what happens when we can observe the
-*architecture of cognition* as it unfolds? The future isn't reading minds — it's
-understanding the structure of thought.
+## Contents
 
-## Applications — what this architecture could enable
+[Thesis](#the-thesis--the-wave-is-protocol-optimization) ·
+[Five primitives](#five-primitives) · [Who it's for](#who-its-for) ·
+[Why now](#why-now--the-research-wave) · [The wedge](#the-wedge--40-hz-protocol-workbench) ·
+[Ethics](#ethics--responsible-use) · [Closed loop (Ruflo)](#closed-loop-sensory-neuromodulation-ruflo) ·
+[Web console](#web-console--ruv-neural-ui) · [How it observes](#how-it-observes--brain-network-topology) ·
+[Architecture](#architecture) · [Crate map](#crate-map) ·
+[Hardware BOM](#hardware-parts-list) · [Witness verification](#cryptographic-witness-verification)
 
-> These are research and product **directions**, not validated capabilities or
-> medical claims. Clinical and neural-data uses are gated on informed consent,
-> IRB/ethics approval, and regulatory clearance (see Ethics, below).
+## The thesis — the wave is protocol *optimization*
 
-**Research & clinical (consent / IRB / regulatory-gated):**
+The coming wave isn't another 40 Hz blinking light — it's **protocol
+optimization**, and that is a *measurement, adaptation, and comparison* problem.
+The questions researchers actually have to answer, and where rUv Neural sits on
+each:
 
-- Brain-computer interfaces that respond to *intent* rather than buttons
-- Early-warning research for Alzheimer's, dementia, and neurological decline
-- Mental-health and depression biomarker research
-- Stroke recovery and neurorehabilitation
-- Sleep-stage and dream-state analysis
+| Problem | rUv Neural position |
+|---|---|
+| Which modality works best? | light · sound · vibration · phase-locked multimodal |
+| Who responds? | responder profiling (per-person state embedding) |
+| When should stimulation happen? | sleep · rest · task · circadian window |
+| How much is enough? | dose · duration · intensity |
+| Is entrainment real? | EEG · HRV · motion · sleep · cognition |
+| Is it safe? | photosensitivity · comfort · adherence · signed audit logs |
 
-**Consumer & developer (lower-stakes, EEG/simulator-friendly):**
+## Five primitives
 
-- Real-time focus / cognitive-load monitoring — a Fitbit-for-your-brain
-- Human–AI collaboration systems that adapt to cognitive load
-- Next-generation gaming, VR, and immersive computing
-- Education tools that detect comprehension in real time
+1. **Stimulus engine** — 40 Hz light, audio, haptic; phase-locked multimodal output with verified delivery receipts. → [`ruv-neural-stim`](ruv-neural-stim)
+2. **Closed-loop controller** — adapt intensity, duty cycle, modality, and timing from the measured response, inside a hard safety envelope. → [`ruv-neural-loop`](ruv-neural-loop)
+3. **Response measurement** — EEG optional; also HRV, sleep, actigraphy, reaction time, adherence, subjective state. → [`ruv-neural-biosense`](ruv-neural-biosense) + the [topology pipeline](#how-it-observes--brain-network-topology)
+4. **Protocol registry** — versioned protocols with receipts: frequency, waveform, lux, SPL, vibration amplitude, duration, time of day.
+5. **Research evidence layer** — link protocols to papers, trials, results, safety notes, and reproducibility metadata — hash-chained and Ed25519-signed.
+
+## Who it's for
+
+| User | Value |
+|---|---|
+| **Labs** | reproducible stimulation protocols |
+| **Startups** | faster device iteration |
+| **Clinicians** | structured observational data |
+| **Care homes** | safe, supervised pilots |
+| **Researchers** | multimodal protocol comparison |
+| **Developers** | Rust / WASM / edge SDK |
+
+## Why now — the research wave
+
+MIT and others report that multisensory 40 Hz stimulation may activate glymphatic
+clearance pathways and affect amyloid and tau biology **in animal models**. Human
+evidence is promising but still **mixed**, with large sham-controlled trials (such
+as Cognito's pivotal study) ongoing.¹
+
+That uncertainty **is the opportunity.** The field doesn't need another device
+claiming fixed efficacy — it needs a system for **measuring, adapting, and
+comparing** protocols. rUv Neural is that harness: the bridge between cheap sensory
+hardware, serious neuroscience, and auditable adaptive protocols.
+
+<sub>¹ Multisensory gamma stimulation & glymphatic clearance —
+[Nature (2024)](https://www.nature.com/articles/s41586-024-07132-6). Human
+efficacy remains under active, sham-controlled investigation; nothing here is a
+clinical claim.</sub>
+
+## The wedge — 40 Hz Protocol Workbench
+
+The first demo turns a protocol into reproducible evidence:
+
+- **Inputs** — frequency, modality, duration, intensity, time of day, safety limits
+- **Outputs** — entrainment proxy, HRV shift, adherence, sleep impact, cognitive-microtask score, signed protocol receipt
+- **Acceptance test** — run 7 days of mock or real sessions and generate a reproducible report: protocol version, delivered-waveform hash, safety events, adherence, and response trend
 
 ---
 
@@ -88,15 +119,24 @@ understanding the structure of thought.
 
 ---
 
-## Overview
+## How it observes — brain-network topology
 
-**rUv Neural** is a modular Rust crate ecosystem for real-time brain network topology
-analysis. It transforms neural magnetic field measurements from quantum sensors (NV diamond
-magnetometers, optically pumped magnetometers) into dynamic connectivity graphs, then uses
-minimum cut algorithms to detect cognitive state transitions.
+"Is entrainment real?" needs a response signal. rUv Neural's measurement core is a
+modular Rust pipeline that turns multi-channel neural data — EEG, or magnetic fields
+from quantum sensors (NV-diamond, OPM) — into a **dynamic connectivity graph**, then
+applies **minimum-cut** algorithms to surface topology events: when brain networks
+form, dissolve, merge, or split. That topology stream is the entrainment /
+cognitive-response proxy the closed loop adapts to.
 
-This is not mind reading — it measures **how cognition organizes itself** by tracking the
-topology of brain networks in real time.
+**This is not mind-reading.** It does not touch words, memories, or private
+thoughts — it measures *how* cognition organizes itself (its live network
+*topology*), not *what* you are thinking. Think Google Maps for cognition.
+
+> **Honest scope.** Validated today on **EEG** and a **deterministic simulator** —
+> not yet clinically validated on a population. The quantum-sensor front-end
+> (NV-diamond / OPM) is the **research frontier**: magnetometry-grade hardware is a
+> five-figure instrument (see [the BOM reality check](#core-nv-diamond-magnetometer-single-odmr-channel)),
+> so EEG and the simulator are the practical paths to build against.
 
 ## Closed-Loop Sensory Neuromodulation (Ruflo)
 
