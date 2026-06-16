@@ -101,15 +101,11 @@ fn generate_random_graph(num_nodes: usize, density: f64, seed: u64) -> BrainGrap
     let mut edges = Vec::new();
     for i in 0..num_nodes {
         for j in (i + 1)..num_nodes {
-            rng_state = rng_state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
             let rand_val = (rng_state >> 33) as f64 / (1u64 << 31) as f64;
 
             if rand_val < density {
-                rng_state = rng_state
-                    .wrapping_mul(6364136223846793005)
-                    .wrapping_add(1);
+                rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
                 let weight = ((rng_state >> 33) as f64 / (1u64 << 31) as f64) * 0.9 + 0.1;
 
                 edges.push(BrainEdge {

@@ -135,7 +135,9 @@ pub fn export_bids_eeg(
 
     let root = Path::new(root);
     let eeg_dir = match &meta.session {
-        Some(s) => root.join(format!("sub-{}", meta.subject)).join(format!("ses-{s}")),
+        Some(s) => root
+            .join(format!("sub-{}", meta.subject))
+            .join(format!("ses-{s}")),
         None => root.join(format!("sub-{}", meta.subject)),
     }
     .join("eeg");
@@ -214,7 +216,10 @@ pub fn export_bids_eeg(
             signal.sample_rate_hz,
         ));
     }
-    write_file(&eeg_dir.join(format!("{stem}_channels.tsv")), tsv.as_bytes())?;
+    write_file(
+        &eeg_dir.join(format!("{stem}_channels.tsv")),
+        tsv.as_bytes(),
+    )?;
 
     // ── BIDS sidecar (_eeg.json) ────────────────────────────────────────
     let eeg_count = array
@@ -225,7 +230,12 @@ pub fn export_bids_eeg(
     let meg_count = array
         .channels
         .iter()
-        .filter(|c| matches!(c.sensor_type, SensorType::Opm | SensorType::SquidMeg | SensorType::NvDiamond))
+        .filter(|c| {
+            matches!(
+                c.sensor_type,
+                SensorType::Opm | SensorType::SquidMeg | SensorType::NvDiamond
+            )
+        })
         .count();
     let sidecar = serde_json::json!({
         "TaskName": meta.task,
@@ -291,7 +301,9 @@ mod tests {
         assert!(eeg_dir.join("sub-01_ses-1_task-rest_eeg.vhdr").is_file());
         assert!(eeg_dir.join("sub-01_ses-1_task-rest_eeg.vmrk").is_file());
         assert!(eeg_dir.join("sub-01_ses-1_task-rest_eeg.eeg").is_file());
-        assert!(eeg_dir.join("sub-01_ses-1_task-rest_channels.tsv").is_file());
+        assert!(eeg_dir
+            .join("sub-01_ses-1_task-rest_channels.tsv")
+            .is_file());
         assert!(eeg_dir.join("sub-01_ses-1_task-rest_eeg.json").is_file());
 
         // Binary size = channels * samples * 4 bytes (float32, multiplexed).
@@ -299,13 +311,15 @@ mod tests {
         assert_eq!(eeg.len(), 4 * 256 * 4);
 
         // Header declares the right channel count and float format.
-        let vhdr = std::fs::read_to_string(eeg_dir.join("sub-01_ses-1_task-rest_eeg.vhdr")).unwrap();
+        let vhdr =
+            std::fs::read_to_string(eeg_dir.join("sub-01_ses-1_task-rest_eeg.vhdr")).unwrap();
         assert!(vhdr.contains("NumberOfChannels=4"));
         assert!(vhdr.contains("BinaryFormat=IEEE_FLOAT_32"));
         assert!(vhdr.contains("SamplingInterval=3906.25")); // 1e6/256
 
         // channels.tsv has a header + one row per channel.
-        let tsv = std::fs::read_to_string(eeg_dir.join("sub-01_ses-1_task-rest_channels.tsv")).unwrap();
+        let tsv =
+            std::fs::read_to_string(eeg_dir.join("sub-01_ses-1_task-rest_channels.tsv")).unwrap();
         assert_eq!(tsv.lines().count(), 5);
 
         let _ = std::fs::remove_dir_all(&dir);
@@ -334,7 +348,12 @@ mod tests {
     #[test]
     fn channel_count_mismatch_errors() {
         let meta = BidsMetadata::new("03", "rest");
-        let err = export_bids_eeg("/tmp/should_not_exist_bids", &signal(3, 16), &array(2), &meta);
+        let err = export_bids_eeg(
+            "/tmp/should_not_exist_bids",
+            &signal(3, 16),
+            &array(2),
+            &meta,
+        );
         assert!(err.is_err());
     }
 

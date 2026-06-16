@@ -71,9 +71,7 @@ pub use federated::{
 pub use outcome::SessionReport;
 pub use protocol::{DosingPolicy, GammaEntrainmentProtocol, Protocol, StimulusPlan};
 pub use sim::LoopSimulation;
-pub use state::{
-    estimate_state, NeuralFeatures, StateEstimate, StateObservation, TargetState,
-};
+pub use state::{estimate_state, NeuralFeatures, StateEstimate, StateObservation, TargetState};
 
 #[cfg(test)]
 mod tests {
@@ -145,7 +143,8 @@ mod tests {
         }
         assert!(base.is_established());
         let calm = PersonalStateEmbedding::from_observation(&observe(&mut sim, 100.0, 0.2, 0.1));
-        let aroused = PersonalStateEmbedding::from_observation(&observe(&mut sim, 110.0, 0.95, 0.1));
+        let aroused =
+            PersonalStateEmbedding::from_observation(&observe(&mut sim, 110.0, 0.95, 0.1));
         assert!(base.deviation(&aroused) > base.deviation(&calm));
     }
 
@@ -206,7 +205,10 @@ mod tests {
         let mut sim = LoopSimulation::responsive(11, 10.0);
         sim.run(&mut c, 64);
         let report = c.report();
-        assert!(report.num_receipts >= 1, "must deliver at least one stimulus");
+        assert!(
+            report.num_receipts >= 1,
+            "must deliver at least one stimulus"
+        );
         assert!(report.all_receipts_verified, "all stimuli must verify");
         assert!(report.audit_chain_valid);
         assert!(report.goal_reached || report.safe_stopped);
@@ -220,7 +222,10 @@ mod tests {
         let mut sim = LoopSimulation::responsive(5, 10.0).with_perturbation(5, 0.9);
         sim.run(&mut c, 64);
         let report = c.report();
-        assert!(report.safe_stopped, "perturbation must trigger a fail-safe stop");
+        assert!(
+            report.safe_stopped,
+            "perturbation must trigger a fail-safe stop"
+        );
         assert!(!report.stop_reasons.is_empty());
         // Even a safe-stopped session must have delivered verified stimuli first.
         assert!(report.num_receipts >= 1);

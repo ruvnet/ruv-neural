@@ -287,10 +287,7 @@ mod tests {
             },
         );
 
-        let output = pipeline.decode(
-            &make_embedding(vec![0.5, 0.5]),
-            &make_metrics(8.0, 0.6),
-        );
+        let output = pipeline.decode(&make_embedding(vec![0.5, 0.5]), &make_metrics(8.0, 0.6));
         assert_eq!(output.state, CognitiveState::Focused);
     }
 
@@ -310,15 +307,15 @@ mod tests {
         let mut pipeline = DecoderPipeline::new()
             .with_knn(1)
             .with_clinical(baseline, std_met);
-        pipeline.knn_mut().unwrap().train(vec![(
-            make_embedding(vec![1.0]),
-            CognitiveState::Rest,
-        )]);
+        pipeline
+            .knn_mut()
+            .unwrap()
+            .train(vec![(make_embedding(vec![1.0]), CognitiveState::Rest)]);
 
         let output = pipeline.decode(&make_embedding(vec![1.0]), &make_metrics(5.0, 0.4));
         assert!(output.brain_health_index.is_some());
         let health = output.brain_health_index.unwrap();
-        assert!(health >= 0.0 && health <= 1.0);
+        assert!((0.0..=1.0).contains(&health));
     }
 
     #[test]

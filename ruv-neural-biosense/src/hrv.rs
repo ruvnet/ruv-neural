@@ -140,7 +140,10 @@ fn lf_hf_power(rr_ms: &[f64]) -> (f64, f64) {
         p / steps as f64
     };
 
-    (band_power(LF_BAND_HZ.0, LF_BAND_HZ.1), band_power(HF_BAND_HZ.0, HF_BAND_HZ.1))
+    (
+        band_power(LF_BAND_HZ.0, LF_BAND_HZ.1),
+        band_power(HF_BAND_HZ.0, HF_BAND_HZ.1),
+    )
 }
 
 /// Goertzel power of `x` at frequency `f` (Hz), sampled at `fs` (Hz).

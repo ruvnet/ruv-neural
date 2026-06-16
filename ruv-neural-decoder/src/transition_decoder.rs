@@ -203,11 +203,7 @@ fn gaussian_score(value: f64, center: f64, sigma: f64) -> f64 {
 mod tests {
     use super::*;
 
-    fn make_metrics(
-        mincut: f64,
-        modularity: f64,
-        timestamp: f64,
-    ) -> TopologyMetrics {
+    fn make_metrics(mincut: f64, modularity: f64, timestamp: f64) -> TopologyMetrics {
         TopologyMetrics {
             global_mincut: mincut,
             modularity,

@@ -5,15 +5,10 @@ use std::fs;
 use ruv_neural_core::graph::BrainGraph;
 
 /// Run the export command.
-pub fn run(
-    input: &str,
-    format: &str,
-    output: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub fn run(input: &str, format: &str, output: &str) -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!(input, format, output, "Exporting brain graph");
 
-    let json =
-        fs::read_to_string(input).map_err(|e| format!("Failed to read {input}: {e}"))?;
+    let json = fs::read_to_string(input).map_err(|e| format!("Failed to read {input}: {e}"))?;
     let graph: BrainGraph =
         serde_json::from_str(&json).map_err(|e| format!("Failed to parse graph JSON: {e}"))?;
 
@@ -24,10 +19,9 @@ pub fn run(
         "csv" => export_csv(&graph),
         "rvf" => export_rvf(&graph)?,
         _ => {
-            return Err(format!(
-                "Unknown format '{format}'. Supported: d3, dot, gexf, csv, rvf"
-            )
-            .into());
+            return Err(
+                format!("Unknown format '{format}'. Supported: d3, dot, gexf, csv, rvf").into(),
+            );
         }
     };
 
@@ -99,9 +93,7 @@ fn export_dot(graph: &BrainGraph) -> String {
     for i in 0..graph.num_nodes {
         let degree = graph.node_degree(i);
         let size = 0.3 + degree * 0.1;
-        dot.push_str(&format!(
-            "  n{i} [label=\"{i}\", width={size:.2}];\n"
-        ));
+        dot.push_str(&format!("  n{i} [label=\"{i}\", width={size:.2}];\n"));
     }
     dot.push('\n');
 
@@ -119,7 +111,8 @@ fn export_dot(graph: &BrainGraph) -> String {
 
 /// Export to GEXF (Graph Exchange XML Format).
 fn export_gexf(graph: &BrainGraph) -> String {
-    let mut gexf = String::from(r#"<?xml version="1.0" encoding="UTF-8"?>
+    let mut gexf = String::from(
+        r#"<?xml version="1.0" encoding="UTF-8"?>
 <gexf xmlns="http://gexf.net/1.3" version="1.3">
   <meta>
     <creator>rUv Neural</creator>
@@ -127,12 +120,11 @@ fn export_gexf(graph: &BrainGraph) -> String {
   </meta>
   <graph defaultedgetype="undirected">
     <nodes>
-"#);
+"#,
+    );
 
     for i in 0..graph.num_nodes {
-        gexf.push_str(&format!(
-            "      <node id=\"{i}\" label=\"Region {i}\" />\n"
-        ));
+        gexf.push_str(&format!("      <node id=\"{i}\" label=\"Region {i}\" />\n"));
     }
 
     gexf.push_str("    </nodes>\n    <edges>\n");

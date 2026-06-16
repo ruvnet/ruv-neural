@@ -235,8 +235,16 @@ mod tests {
 
     #[test]
     fn test_power_mode_current() {
-        assert!(PowerMode::Active.estimated_current_ma() > PowerMode::LowPower.estimated_current_ma());
-        assert!(PowerMode::LowPower.estimated_current_ma() > PowerMode::UltraLowPower.estimated_current_ma());
-        assert!(PowerMode::UltraLowPower.estimated_current_ma() > PowerMode::Sleep.estimated_current_ma());
+        assert!(
+            PowerMode::Active.estimated_current_ma() > PowerMode::LowPower.estimated_current_ma()
+        );
+        assert!(
+            PowerMode::LowPower.estimated_current_ma()
+                > PowerMode::UltraLowPower.estimated_current_ma()
+        );
+        assert!(
+            PowerMode::UltraLowPower.estimated_current_ma()
+                > PowerMode::Sleep.estimated_current_ma()
+        );
     }
 }

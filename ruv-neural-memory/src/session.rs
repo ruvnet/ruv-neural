@@ -73,10 +73,8 @@ impl SessionMemory {
             cognitive_states_observed: Vec::new(),
         };
 
-        self.session_metadata
-            .insert(session_id.clone(), metadata);
-        self.session_indices
-            .insert(session_id.clone(), Vec::new());
+        self.session_metadata.insert(session_id.clone(), metadata);
+        self.session_indices.insert(session_id.clone(), Vec::new());
         self.current_session = Some(session_id.clone());
 
         session_id
@@ -136,10 +134,7 @@ impl SessionMemory {
     /// Get all embeddings from a specific session.
     pub fn get_session_history(&self, session_id: &str) -> Vec<&NeuralEmbedding> {
         match self.session_indices.get(session_id) {
-            Some(indices) => indices
-                .iter()
-                .filter_map(|&i| self.store.get(i))
-                .collect(),
+            Some(indices) => indices.iter().filter_map(|&i| self.store.get(i)).collect(),
             None => Vec::new(),
         }
     }
@@ -232,15 +227,12 @@ mod tests {
         let mut mem = SessionMemory::new(100);
 
         let s1 = mem.start_session("subj1");
-        mem.store(make_embedding(vec![1.0], "subj1", 1.0))
-            .unwrap();
+        mem.store(make_embedding(vec![1.0], "subj1", 1.0)).unwrap();
         mem.end_session();
 
         let s2 = mem.start_session("subj1");
-        mem.store(make_embedding(vec![2.0], "subj1", 2.0))
-            .unwrap();
-        mem.store(make_embedding(vec![3.0], "subj1", 3.0))
-            .unwrap();
+        mem.store(make_embedding(vec![2.0], "subj1", 2.0)).unwrap();
+        mem.store(make_embedding(vec![3.0], "subj1", 3.0)).unwrap();
         mem.end_session();
 
         assert_eq!(mem.get_session_history(&s1).len(), 1);
@@ -256,8 +248,7 @@ mod tests {
         let mut mem = SessionMemory::new(100);
 
         let s1 = mem.start_session("subj1");
-        mem.store(make_embedding(vec![1.0], "subj1", 1.0))
-            .unwrap();
+        mem.store(make_embedding(vec![1.0], "subj1", 1.0)).unwrap();
 
         // Starting a new session auto-ends the previous one
         let _s2 = mem.start_session("subj2");

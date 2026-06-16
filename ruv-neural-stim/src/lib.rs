@@ -77,9 +77,15 @@ mod tests {
 
     #[test]
     fn audio_carrier_present_light_haptic_absent() {
-        assert!(StimulusParams::gamma_40hz(Modality::Audio, 1.0).carrier_hz.is_some());
-        assert!(StimulusParams::gamma_40hz(Modality::Light, 1.0).carrier_hz.is_none());
-        assert!(StimulusParams::gamma_40hz(Modality::Haptic, 1.0).carrier_hz.is_none());
+        assert!(StimulusParams::gamma_40hz(Modality::Audio, 1.0)
+            .carrier_hz
+            .is_some());
+        assert!(StimulusParams::gamma_40hz(Modality::Light, 1.0)
+            .carrier_hz
+            .is_none());
+        assert!(StimulusParams::gamma_40hz(Modality::Haptic, 1.0)
+            .carrier_hz
+            .is_none());
     }
 
     #[test]

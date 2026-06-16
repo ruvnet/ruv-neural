@@ -179,11 +179,7 @@ impl DynamicMincutTracker {
             .fold(f64::NEG_INFINITY, f64::max);
 
         if max_cut <= 0.0 {
-            return self
-                .timestamps
-                .iter()
-                .map(|&t| (t, 1.0))
-                .collect();
+            return self.timestamps.iter().map(|&t| (t, 1.0)).collect();
         }
 
         self.timestamps
@@ -226,7 +222,10 @@ impl DynamicMincutTracker {
 }
 
 /// Compute the Jaccard similarity between two sets.
-fn jaccard_similarity(a: &std::collections::HashSet<usize>, b: &std::collections::HashSet<usize>) -> f64 {
+fn jaccard_similarity(
+    a: &std::collections::HashSet<usize>,
+    b: &std::collections::HashSet<usize>,
+) -> f64 {
     let intersection = a.intersection(b).count() as f64;
     let union = a.union(b).count() as f64;
     if union == 0.0 {
@@ -381,7 +380,11 @@ mod tests {
         assert!((stability[0].1 - 1.0).abs() < 1e-9);
         // Same graph should yield high stability.
         for (_, s) in &stability {
-            assert!(*s >= 0.5, "Same graph should have high stability, got {}", s);
+            assert!(
+                *s >= 0.5,
+                "Same graph should have high stability, got {}",
+                s
+            );
         }
     }
 

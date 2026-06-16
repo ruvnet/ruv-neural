@@ -265,12 +265,10 @@ async fn main() {
             commands::info::run();
             Ok(())
         }
-        Commands::Witness { output, verify } => {
-            commands::witness::run(
-                output.map(std::path::PathBuf::from),
-                verify.map(std::path::PathBuf::from),
-            )
-        }
+        Commands::Witness { output, verify } => commands::witness::run(
+            output.map(std::path::PathBuf::from),
+            verify.map(std::path::PathBuf::from),
+        ),
     };
 
     if let Err(e) = result {
@@ -355,8 +353,8 @@ mod tests {
 
     #[test]
     fn parse_mincut() {
-        let cli = Cli::try_parse_from(["ruv-neural", "mincut", "-i", "graph.json", "-k", "4"])
-            .unwrap();
+        let cli =
+            Cli::try_parse_from(["ruv-neural", "mincut", "-i", "graph.json", "-k", "4"]).unwrap();
         match cli.command {
             Commands::Mincut { input, k } => {
                 assert_eq!(input, "graph.json");
@@ -434,7 +432,15 @@ mod tests {
     #[test]
     fn parse_train() {
         let cli = Cli::try_parse_from([
-            "ruv-neural", "train", "-i", "d.csv", "-o", "m.rvf", "--skip-cols", "1", "--shuffle",
+            "ruv-neural",
+            "train",
+            "-i",
+            "d.csv",
+            "-o",
+            "m.rvf",
+            "--skip-cols",
+            "1",
+            "--shuffle",
         ])
         .unwrap();
         match cli.command {
@@ -458,9 +464,16 @@ mod tests {
 
     #[test]
     fn parse_predict_and_model_info() {
-        let cli =
-            Cli::try_parse_from(["ruv-neural", "predict", "-m", "m.rvf", "-i", "f.csv", "--proba"])
-                .unwrap();
+        let cli = Cli::try_parse_from([
+            "ruv-neural",
+            "predict",
+            "-m",
+            "m.rvf",
+            "-i",
+            "f.csv",
+            "--proba",
+        ])
+        .unwrap();
         match cli.command {
             Commands::Predict { model, proba, .. } => {
                 assert_eq!(model, "m.rvf");

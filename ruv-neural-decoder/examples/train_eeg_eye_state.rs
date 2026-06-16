@@ -79,11 +79,7 @@ fn parse_arff(path: &str) -> (Vec<Vec<f64>>, Vec<u8>) {
 /// variance of each channel over the causal window `[t-w, t)` (drift-robust,
 /// uses only past samples — safe for a chronological split), keeping the label
 /// `y[t]`.
-fn windowed_variance_features(
-    raw: &[Vec<f64>],
-    y: &[u8],
-    w: usize,
-) -> (Vec<Vec<f64>>, Vec<u8>) {
+fn windowed_variance_features(raw: &[Vec<f64>], y: &[u8], w: usize) -> (Vec<Vec<f64>>, Vec<u8>) {
     let mut x = Vec::with_capacity(raw.len().saturating_sub(w));
     let mut yo = Vec::with_capacity(raw.len().saturating_sub(w));
     for t in w..raw.len() {
@@ -118,7 +114,11 @@ fn nonoverlapping_features(raw: &[Vec<f64>], y: &[u8], w: usize) -> (Vec<Vec<f64
         let mut feats = Vec::with_capacity(N_FEATURES);
         for c in 0..N_FEATURES {
             let mean = raw[t - w..t].iter().map(|r| r[c]).sum::<f64>() / w as f64;
-            let var = raw[t - w..t].iter().map(|r| (r[c] - mean).powi(2)).sum::<f64>() / w as f64;
+            let var = raw[t - w..t]
+                .iter()
+                .map(|r| (r[c] - mean).powi(2))
+                .sum::<f64>()
+                / w as f64;
             feats.push((var + 1.0).ln());
         }
         x.push(feats);
@@ -184,10 +184,7 @@ fn print_metrics(label: &str, m: &BinaryMetrics) {
 }
 
 /// Tune over a small grid using a validation slice carved from `train`.
-fn tune(
-    x_train: &[Vec<f64>],
-    y_train: &[u8],
-) -> TrainConfig {
+fn tune(x_train: &[Vec<f64>], y_train: &[u8]) -> TrainConfig {
     let n = x_train.len();
     let cut = (n as f64 * 0.85) as usize;
     let (xt, xv) = x_train.split_at(cut);
@@ -286,7 +283,11 @@ fn main() {
     idx.shuffle(&mut StdRng::seed_from_u64(42));
     let xs: Vec<Vec<f64>> = idx.iter().map(|&i| xf[i].clone()).collect();
     let ys: Vec<u8> = idx.iter().map(|&i| yf[i]).collect();
-    run_split("VARIANCE, SHUFFLED [optimistic — temporal leakage]", &xs, &ys);
+    run_split(
+        "VARIANCE, SHUFFLED [optimistic — temporal leakage]",
+        &xs,
+        &ys,
+    );
 
     // Cleanest "does it learn?" evidence: k-fold CV on NON-overlapping windows
     // (no shared samples between folds), swept over window size, beside baseline.

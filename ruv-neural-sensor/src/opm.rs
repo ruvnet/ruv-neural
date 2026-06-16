@@ -296,8 +296,12 @@ impl SensorSource for OpmArray {
                 // White noise: sensitivity in fT/sqrt(Hz) -> per-sample sigma
                 let white_sigma = sens * (self.config.sample_rate_hz / 2.0).sqrt();
                 let scale = sens / 7.0; // normalized to default sensitivity
-                let shielding = self.config.active_shielding_coeffs
-                    .get(ch).copied().unwrap_or(1.0);
+                let shielding = self
+                    .config
+                    .active_shielding_coeffs
+                    .get(ch)
+                    .copied()
+                    .unwrap_or(1.0);
 
                 (0..num_samples)
                     .map(|s| {
@@ -314,7 +318,8 @@ impl SensorSource for OpmArray {
                         // A shielding coeff of 1.0 means "fully compensated" (no residual).
                         // Values < 1.0 leave residual interference.
                         let residual = (1.0 - shielding.clamp(0.0, 1.0)).max(0.0);
-                        let powerline = 500.0 * residual
+                        let powerline = 500.0
+                            * residual
                             * ((2.0 * PI * powerline_freq * t).sin()
                                 + 0.3 * (2.0 * PI * 2.0 * powerline_freq * t).sin()
                                 + 0.1 * (2.0 * PI * 3.0 * powerline_freq * t).sin());
@@ -389,20 +394,14 @@ mod tests {
         let opm = make_opm(ct);
         opm.compensate_cross_talk(&mut raw).unwrap();
         for (got, want) in raw.iter().zip(expected.iter()) {
-            assert!(
-                (got - want).abs() < 1e-10,
-                "got {got}, want {want}"
-            );
+            assert!((got - want).abs() < 1e-10, "got {got}, want {want}");
         }
     }
 
     #[test]
     fn singular_matrix_falls_back_to_diagonal() {
         // Singular: row 1 == row 0.
-        let ct = vec![
-            vec![2.0, 1.0],
-            vec![2.0, 1.0],
-        ];
+        let ct = vec![vec![2.0, 1.0], vec![2.0, 1.0]];
         let opm = make_opm(ct);
         let mut data = vec![4.0, 6.0];
         // Should not error -- falls back to diagonal.
@@ -414,10 +413,7 @@ mod tests {
 
     #[test]
     fn solve_linear_system_basic() {
-        let mat = vec![
-            vec![1.0, 0.0],
-            vec![0.0, 1.0],
-        ];
+        let mat = vec![vec![1.0, 0.0], vec![0.0, 1.0]];
         let rhs = vec![5.0, 7.0];
         let x = solve_linear_system(&mat, &rhs).unwrap();
         assert!((x[0] - 5.0).abs() < 1e-12);
@@ -426,10 +422,7 @@ mod tests {
 
     #[test]
     fn solve_linear_system_singular_returns_none() {
-        let mat = vec![
-            vec![1.0, 2.0],
-            vec![2.0, 4.0],
-        ];
+        let mat = vec![vec![1.0, 2.0], vec![2.0, 4.0]];
         let rhs = vec![3.0, 6.0];
         assert!(solve_linear_system(&mat, &rhs).is_none());
     }
@@ -468,13 +461,14 @@ mod tests {
             .iter()
             .enumerate()
             .flat_map(|(t, exp)| exp.iter().enumerate().map(move |(ch, &v)| (ch, (t, v))))
-            .fold(
-                vec![(0.0, 0.0); 3],
-                |mut acc, (ch, (t, v))| {
-                    if t == 0 { acc[ch].0 = v; } else { acc[ch].1 = v; }
-                    acc
-                },
-            )
+            .fold(vec![(0.0, 0.0); 3], |mut acc, (ch, (t, v))| {
+                if t == 0 {
+                    acc[ch].0 = v;
+                } else {
+                    acc[ch].1 = v;
+                }
+                acc
+            })
             .into_iter()
             .enumerate()
         {

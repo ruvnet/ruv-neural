@@ -1,8 +1,8 @@
 //! Simplified HNSW (Hierarchical Navigable Small World) index for approximate
 //! nearest neighbor search on embedding vectors.
 
-use std::collections::{BinaryHeap, HashSet};
 use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashSet};
 
 use serde::{Deserialize, Serialize};
 
@@ -162,12 +162,10 @@ impl HnswIndex {
 
         // Insert into layers from insert_layer down to 0
         for layer in (0..=insert_layer.min(self.max_layer)).rev() {
-            let neighbors =
-                self.search_layer(vector, current_entry, self.ef_construction, layer);
+            let neighbors = self.search_layer(vector, current_entry, self.ef_construction, layer);
 
             // Select up to m neighbors
-            let selected: Vec<(usize, f64)> =
-                neighbors.into_iter().take(self.m).collect();
+            let selected: Vec<(usize, f64)> = neighbors.into_iter().take(self.m).collect();
 
             // Ensure adjacency list exists for this node at this layer
             while self.layers[layer].len() <= id {
@@ -333,7 +331,11 @@ impl HnswIndex {
 
         visited.insert(entry);
 
-        while let Some(ScoredNode { id: current, distance: current_dist }) = candidates.pop() {
+        while let Some(ScoredNode {
+            id: current,
+            distance: current_dist,
+        }) = candidates.pop()
+        {
             // If current candidate is further than the worst result and we have enough, stop
             if let Some(worst) = results.peek() {
                 if current_dist > worst.distance && results.len() >= ef {
@@ -348,10 +350,7 @@ impl HnswIndex {
                         let dist = Self::distance(query, &self.embeddings[neighbor]);
 
                         let should_add = results.len() < ef
-                            || results
-                                .peek()
-                                .map(|w| dist < w.distance)
-                                .unwrap_or(true);
+                            || results.peek().map(|w| dist < w.distance).unwrap_or(true);
 
                         if should_add {
                             candidates.push(ScoredNode {
@@ -446,8 +445,7 @@ mod tests {
                 .enumerate()
                 .map(|(i, v)| (i, HnswIndex::distance(&query, v)))
                 .collect();
-            bf_distances
-                .sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+            bf_distances.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
             let bf_top_k: Vec<usize> = bf_distances.iter().take(k).map(|(i, _)| *i).collect();
 
             // HNSW search
@@ -455,10 +453,7 @@ mod tests {
             let hnsw_top_k: Vec<usize> = hnsw_results.iter().map(|(i, _)| *i).collect();
 
             // Compute recall
-            let hits = hnsw_top_k
-                .iter()
-                .filter(|id| bf_top_k.contains(id))
-                .count();
+            let hits = hnsw_top_k.iter().filter(|id| bf_top_k.contains(id)).count();
             total_recall += hits as f64 / k as f64;
         }
 

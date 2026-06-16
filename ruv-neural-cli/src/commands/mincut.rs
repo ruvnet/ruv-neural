@@ -9,21 +9,24 @@ use ruv_neural_mincut::{multiway_cut, stoer_wagner_mincut};
 pub fn run(input: &str, k: Option<usize>) -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!(input, ?k, "Computing minimum cut");
 
-    let json =
-        fs::read_to_string(input).map_err(|e| format!("Failed to read {input}: {e}"))?;
+    let json = fs::read_to_string(input).map_err(|e| format!("Failed to read {input}: {e}"))?;
     let graph: BrainGraph =
         serde_json::from_str(&json).map_err(|e| format!("Failed to parse graph JSON: {e}"))?;
 
     println!("=== rUv Neural — Minimum Cut Analysis ===");
     println!();
-    println!("  Graph: {} nodes, {} edges", graph.num_nodes, graph.edges.len());
+    println!(
+        "  Graph: {} nodes, {} edges",
+        graph.num_nodes,
+        graph.edges.len()
+    );
     println!();
 
     match k {
         Some(k_val) if k_val > 2 => {
             // Multi-way cut.
-            let result = multiway_cut(&graph, k_val)
-                .map_err(|e| format!("Multiway cut failed: {e}"))?;
+            let result =
+                multiway_cut(&graph, k_val).map_err(|e| format!("Multiway cut failed: {e}"))?;
 
             println!("  Multi-way cut (k={k_val}):");
             println!("    Total cut value: {:.4}", result.cut_value);
@@ -32,7 +35,11 @@ pub fn run(input: &str, k: Option<usize>) -> Result<(), Box<dyn std::error::Erro
             println!();
 
             for (i, partition) in result.partitions.iter().enumerate() {
-                println!("    Partition {i}: {} nodes {:?}", partition.len(), partition);
+                println!(
+                    "    Partition {i}: {} nodes {:?}",
+                    partition.len(),
+                    partition
+                );
             }
             println!();
 
@@ -46,8 +53,16 @@ pub fn run(input: &str, k: Option<usize>) -> Result<(), Box<dyn std::error::Erro
 
             println!("  Stoer-Wagner minimum cut:");
             println!("    Cut value:     {:.4}", mc.cut_value);
-            println!("    Partition A:   {} nodes {:?}", mc.partition_a.len(), mc.partition_a);
-            println!("    Partition B:   {} nodes {:?}", mc.partition_b.len(), mc.partition_b);
+            println!(
+                "    Partition A:   {} nodes {:?}",
+                mc.partition_a.len(),
+                mc.partition_a
+            );
+            println!(
+                "    Partition B:   {} nodes {:?}",
+                mc.partition_b.len(),
+                mc.partition_b
+            );
             println!("    Balance ratio: {:.4}", mc.balance_ratio());
             println!();
 

@@ -56,9 +56,12 @@ pub fn run(
 
     // Step 4: Compute mincut and topology metrics.
     println!("  [4/7] Computing minimum cut and topology metrics...");
-    let mc = stoer_wagner_mincut(&graph)
-        .map_err(|e| format!("Mincut failed: {e}"))?;
-    println!("        Cut value: {:.4}, balance: {:.4}", mc.cut_value, mc.balance_ratio());
+    let mc = stoer_wagner_mincut(&graph).map_err(|e| format!("Mincut failed: {e}"))?;
+    println!(
+        "        Cut value: {:.4}, balance: {:.4}",
+        mc.cut_value,
+        mc.balance_ratio()
+    );
     println!(
         "        Partition A: {} nodes, Partition B: {} nodes",
         mc.partition_a.len(),
@@ -68,14 +71,20 @@ pub fn run(
     // Step 5: Generate embedding.
     println!("  [5/7] Generating topology embedding...");
     let embedder = TopologyEmbedder::new();
-    let embedding = embedder.embed_graph(&graph)
+    let embedding = embedder
+        .embed_graph(&graph)
         .map_err(|e| format!("Embedding failed: {e}"))?;
-    println!("        Dimension: {}, norm: {:.4}", embedding.dimension, embedding.norm());
+    println!(
+        "        Dimension: {}, norm: {:.4}",
+        embedding.dimension,
+        embedding.norm()
+    );
 
     // Also generate spectral embedding.
-    let spectral_dim = channels.min(8).max(2);
+    let spectral_dim = channels.clamp(2, 8);
     let spectral = SpectralEmbedder::new(spectral_dim);
-    let spectral_emb = spectral.embed_graph(&graph)
+    let spectral_emb = spectral
+        .embed_graph(&graph)
         .map_err(|e| format!("Spectral embedding failed: {e}"))?;
     println!(
         "        Spectral embedding: dim={}, norm={:.4}",
@@ -108,15 +117,36 @@ pub fn run(
     println!("  │         Pipeline Results Summary         │");
     println!("  ├─────────────────────────────────────────┤");
     println!("  │  Channels:         {:<20} │", channels);
-    println!("  │  Duration:         {:<20} │", format!("{duration:.1} s"));
-    println!("  │  Graph density:    {:<20} │", format!("{:.4}", graph.density()));
-    println!("  │  Mincut value:     {:<20} │", format!("{:.4}", mc.cut_value));
-    println!("  │  Balance ratio:    {:<20} │", format!("{:.4}", mc.balance_ratio()));
-    println!("  │  Modularity:       {:<20} │", format!("{:.4}", metrics.modularity));
-    println!("  │  Graph entropy:    {:<20} │", format!("{:.4}", metrics.graph_entropy));
+    println!(
+        "  │  Duration:         {:<20} │",
+        format!("{duration:.1} s")
+    );
+    println!(
+        "  │  Graph density:    {:<20} │",
+        format!("{:.4}", graph.density())
+    );
+    println!(
+        "  │  Mincut value:     {:<20} │",
+        format!("{:.4}", mc.cut_value)
+    );
+    println!(
+        "  │  Balance ratio:    {:<20} │",
+        format!("{:.4}", mc.balance_ratio())
+    );
+    println!(
+        "  │  Modularity:       {:<20} │",
+        format!("{:.4}", metrics.modularity)
+    );
+    println!(
+        "  │  Graph entropy:    {:<20} │",
+        format!("{:.4}", metrics.graph_entropy)
+    );
     println!("  │  Embedding dim:    {:<20} │", embedding.dimension);
     println!("  │  Cognitive state:  {:<20} │", format!("{state:?}"));
-    println!("  │  Confidence:       {:<20} │", format!("{confidence:.4}"));
+    println!(
+        "  │  Confidence:       {:<20} │",
+        format!("{confidence:.4}")
+    );
     println!("  └─────────────────────────────────────────┘");
     println!();
 
@@ -133,7 +163,9 @@ fn generate_data(channels: usize, num_samples: usize, sample_rate: f64) -> Vec<V
     for ch in 0..channels {
         let mut channel_data = Vec::with_capacity(num_samples);
         let phase = (ch as f64) * PI / (channels as f64);
-        let mut rng: u64 = (ch as u64).wrapping_mul(2862933555777941757).wrapping_add(3037000493);
+        let mut rng: u64 = (ch as u64)
+            .wrapping_mul(2862933555777941757)
+            .wrapping_add(3037000493);
 
         for i in 0..num_samples {
             let t = i as f64 / sample_rate;
@@ -141,9 +173,13 @@ fn generate_data(channels: usize, num_samples: usize, sample_rate: f64) -> Vec<V
             let beta = 30.0 * (2.0 * PI * 20.0 * t + phase * 1.3).sin();
             let gamma = 15.0 * (2.0 * PI * 40.0 * t + phase * 0.7).sin();
 
-            rng = rng.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            rng = rng
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
             let u1 = (rng >> 11) as f64 / (1u64 << 53) as f64;
-            rng = rng.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            rng = rng
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
             let u2 = (rng >> 11) as f64 / (1u64 << 53) as f64;
             let noise = if u1 > 1e-15 {
                 5.0 * (-2.0 * u1.ln()).sqrt() * (2.0 * PI * u2).cos()
@@ -166,7 +202,12 @@ fn build_plv_graph(channels: &[Vec<f64>], sample_rate: f64) -> BrainGraph {
 
     for i in 0..n {
         for j in (i + 1)..n {
-            let plv = phase_locking_value(&channels[i], &channels[j], sample_rate, FrequencyBand::Alpha);
+            let plv = phase_locking_value(
+                &channels[i],
+                &channels[j],
+                sample_rate,
+                FrequencyBand::Alpha,
+            );
             if plv > plv_threshold {
                 edges.push(BrainEdge {
                     source: i,
@@ -332,12 +373,20 @@ fn print_dashboard(
     }
 
     println!("  ║                                                   ║");
-    println!("  ║  Graph:  {} nodes, {} edges              ║",
-        format!("{:>3}", graph.num_nodes),
-        format!("{:>4}", graph.edges.len()),
+    println!(
+        "  ║  Graph:  {:>3} nodes, {:>4} edges              ║",
+        graph.num_nodes,
+        graph.edges.len(),
     );
-    println!("  ║  Mincut: {:.4}  Balance: {:.4}              ║", mc.cut_value, mc.balance_ratio());
-    println!("  ║  Modularity: {:.4}  Entropy: {:.4}          ║", metrics.modularity, metrics.graph_entropy);
+    println!(
+        "  ║  Mincut: {:.4}  Balance: {:.4}              ║",
+        mc.cut_value,
+        mc.balance_ratio()
+    );
+    println!(
+        "  ║  Modularity: {:.4}  Entropy: {:.4}          ║",
+        metrics.modularity, metrics.graph_entropy
+    );
     println!("  ║                                                   ║");
     println!("  ╚═══════════════════════════════════════════════════╝");
     println!();

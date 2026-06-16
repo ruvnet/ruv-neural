@@ -43,9 +43,8 @@ pub fn build_indexed_container(
         index.insert(&emb.vector);
     }
 
-    let payload = bincode::serialize(&index.export_graph()).map_err(|e| {
-        RuvNeuralError::Serialization(format!("INDEX segment encode: {e}"))
-    })?;
+    let payload = bincode::serialize(&index.export_graph())
+        .map_err(|e| RuvNeuralError::Serialization(format!("INDEX segment encode: {e}")))?;
     container.add_segment(SegmentType::Index, FLAG_SEALED, payload);
     Ok(container)
 }

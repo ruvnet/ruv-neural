@@ -13,8 +13,8 @@ pub mod session;
 pub mod store;
 
 pub use hnsw::{HnswGraph, HnswIndex};
-pub use rvf_index::{build_indexed_container, load_indexed_container};
 pub use longitudinal::{LongitudinalTracker, TrendDirection};
 pub use persistence::{load_rvf, load_store, save_rvf, save_store};
+pub use rvf_index::{build_indexed_container, load_indexed_container};
 pub use session::{SessionMemory, SessionMetadata};
 pub use store::NeuralMemoryStore;

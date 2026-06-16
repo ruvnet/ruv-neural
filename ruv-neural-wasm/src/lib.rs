@@ -162,8 +162,7 @@ pub fn export_rvf(json_graph: &str) -> Result<Vec<u8>, JsError> {
     let graph: BrainGraph =
         serde_json::from_str(json_graph).map_err(|e| JsError::new(&e.to_string()))?;
 
-    let graph_json =
-        serde_json::to_vec(&graph).map_err(|e| JsError::new(&e.to_string()))?;
+    let graph_json = serde_json::to_vec(&graph).map_err(|e| JsError::new(&e.to_string()))?;
 
     let mut rvf = RvfFile::new(RvfDataType::BrainGraph);
     rvf.header.num_entries = 1;
@@ -292,10 +291,7 @@ mod tests {
         };
         let state = wasm_decode(&metrics).unwrap();
         // High modularity + low efficiency + moderate entropy => Rest.
-        assert_eq!(
-            state,
-            ruv_neural_core::topology::CognitiveState::Rest
-        );
+        assert_eq!(state, ruv_neural_core::topology::CognitiveState::Rest);
     }
 
     #[test]

@@ -42,8 +42,14 @@ fn acceptance_identify_deliver_measure_converge() {
     let mut verified_emitted = 0;
     for step in &trace {
         for stim in &step.emitted {
-            assert!(stim.receipt.verified, "every delivered stimulus must verify");
-            assert!(stim.receipt.matches(&stim.waveform), "receipt must bind to waveform");
+            assert!(
+                stim.receipt.verified,
+                "every delivered stimulus must verify"
+            );
+            assert!(
+                stim.receipt.matches(&stim.waveform),
+                "receipt must bind to waveform"
+            );
             assert!(
                 (stim.receipt.measured_envelope_hz - stim.waveform.params.envelope_hz).abs() <= 2.0,
                 "measured entrainment frequency must match the command"
@@ -51,7 +57,10 @@ fn acceptance_identify_deliver_measure_converge() {
             verified_emitted += 1;
         }
     }
-    assert!(verified_emitted >= 1, "the loop must deliver verified stimuli");
+    assert!(
+        verified_emitted >= 1,
+        "the loop must deliver verified stimuli"
+    );
     assert_eq!(report.num_receipts, verified_emitted as u64);
     assert!(report.all_receipts_verified);
 
@@ -63,7 +72,10 @@ fn acceptance_identify_deliver_measure_converge() {
         "the measured response must move toward the target (best distance {:.3})",
         report.best_distance
     );
-    assert!(report.goal_reached, "a responsive subject should reach the target");
+    assert!(
+        report.goal_reached,
+        "a responsive subject should reach the target"
+    );
 
     // Evidence integrity: the audit chain verifies and records the full story.
     assert!(report.audit_chain_valid);
@@ -90,9 +102,15 @@ fn acceptance_safe_stop_outside_envelope() {
     assert!(report.all_receipts_verified);
 
     // ...and then stopped safely when the response left the envelope.
-    assert!(report.safe_stopped, "perturbation must trigger a fail-safe stop");
+    assert!(
+        report.safe_stopped,
+        "perturbation must trigger a fail-safe stop"
+    );
     assert_eq!(controller.phase(), ControllerPhase::SafeStopped);
-    assert!(!report.stop_reasons.is_empty(), "a stop must record its reasons");
+    assert!(
+        !report.stop_reasons.is_empty(),
+        "a stop must record its reasons"
+    );
 
     // After the stop, the controller emits no further stimulation.
     let last = trace.last().unwrap();

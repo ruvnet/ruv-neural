@@ -59,10 +59,7 @@ pub trait StateDecoder {
     fn decode(&self, embedding: &NeuralEmbedding) -> Result<CognitiveState>;
 
     /// Decode with a confidence score in [0, 1].
-    fn decode_with_confidence(
-        &self,
-        embedding: &NeuralEmbedding,
-    ) -> Result<(CognitiveState, f64)>;
+    fn decode_with_confidence(&self, embedding: &NeuralEmbedding) -> Result<(CognitiveState, f64)>;
 }
 
 /// Trait for neural state memory (stores and queries embedding history).
@@ -71,11 +68,7 @@ pub trait NeuralMemory {
     fn store(&mut self, embedding: &NeuralEmbedding) -> Result<()>;
 
     /// Find the k nearest embeddings to the query.
-    fn query_nearest(
-        &self,
-        embedding: &NeuralEmbedding,
-        k: usize,
-    ) -> Result<Vec<NeuralEmbedding>>;
+    fn query_nearest(&self, embedding: &NeuralEmbedding, k: usize) -> Result<Vec<NeuralEmbedding>>;
 
     /// Find all stored embeddings matching a cognitive state.
     fn query_by_state(&self, state: CognitiveState) -> Result<Vec<NeuralEmbedding>>;

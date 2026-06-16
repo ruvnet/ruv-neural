@@ -40,7 +40,9 @@ pub fn rvf_report_inner(bytes: &[u8]) -> Result<RvfReport, String> {
         Err(_) => "none",
     }
     .to_string();
-    let model_features = container_to_model(&container).ok().map(|m| m.num_features());
+    let model_features = container_to_model(&container)
+        .ok()
+        .map(|m| m.num_features());
     Ok(RvfReport {
         num_segments: container.segments.len(),
         integrity_ok,

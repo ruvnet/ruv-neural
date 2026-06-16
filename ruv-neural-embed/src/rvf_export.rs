@@ -129,16 +129,14 @@ pub fn to_rvf_string(embeddings: &[NeuralEmbedding]) -> Result<String> {
 
     let doc = RvfDocument { header, records };
 
-    serde_json::to_string_pretty(&doc).map_err(|e| {
-        RuvNeuralError::Serialization(format!("Failed to serialize RVF: {}", e))
-    })
+    serde_json::to_string_pretty(&doc)
+        .map_err(|e| RuvNeuralError::Serialization(format!("Failed to serialize RVF: {}", e)))
 }
 
 /// Deserialize embeddings from an RVF JSON string.
 pub fn from_rvf_string(json: &str) -> Result<Vec<NeuralEmbedding>> {
-    let doc: RvfDocument = serde_json::from_str(json).map_err(|e| {
-        RuvNeuralError::Serialization(format!("Failed to parse RVF: {}", e))
-    })?;
+    let doc: RvfDocument = serde_json::from_str(json)
+        .map_err(|e| RuvNeuralError::Serialization(format!("Failed to parse RVF: {}", e)))?;
 
     doc.records
         .into_iter()
@@ -200,7 +198,7 @@ mod tests {
     fn test_rvf_file_roundtrip() {
         let embeddings = vec![
             NeuralEmbedding::new(
-                vec![1.0, -2.5, 3.14],
+                vec![1.0, -2.5, 3.2],
                 10.0,
                 default_metadata("spectral", Atlas::Custom(3)),
             )
@@ -221,7 +219,7 @@ mod tests {
         assert_eq!(restored[0].metadata.embedding_method, "spectral");
         assert!((restored[0].vector[0] - 1.0).abs() < 1e-10);
         assert!((restored[0].vector[1] - (-2.5)).abs() < 1e-10);
-        assert!((restored[0].vector[2] - 3.14).abs() < 1e-10);
+        assert!((restored[0].vector[2] - 3.2).abs() < 1e-10);
         assert!((restored[1].timestamp - 10.5).abs() < 1e-10);
 
         let _ = std::fs::remove_file(path);

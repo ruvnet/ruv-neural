@@ -13,10 +13,9 @@ pub fn run(
 ) -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!(input, "Loading brain graph");
 
-    let json = fs::read_to_string(input)
-        .map_err(|e| format!("Failed to read {input}: {e}"))?;
-    let graph: BrainGraph = serde_json::from_str(&json)
-        .map_err(|e| format!("Failed to parse graph JSON: {e}"))?;
+    let json = fs::read_to_string(input).map_err(|e| format!("Failed to read {input}: {e}"))?;
+    let graph: BrainGraph =
+        serde_json::from_str(&json).map_err(|e| format!("Failed to parse graph JSON: {e}"))?;
 
     println!("=== rUv Neural — Graph Analysis ===");
     println!();
@@ -30,9 +29,7 @@ pub fn run(
     println!();
 
     // Degree statistics.
-    let degrees: Vec<f64> = (0..graph.num_nodes)
-        .map(|i| graph.node_degree(i))
-        .collect();
+    let degrees: Vec<f64> = (0..graph.num_nodes).map(|i| graph.node_degree(i)).collect();
     let mean_degree = if degrees.is_empty() {
         0.0
     } else {
@@ -52,8 +49,16 @@ pub fn run(
         Ok(mc) => {
             println!("  Minimum cut:");
             println!("    Cut value:     {:.4}", mc.cut_value);
-            println!("    Partition A:   {} nodes {:?}", mc.partition_a.len(), mc.partition_a);
-            println!("    Partition B:   {} nodes {:?}", mc.partition_b.len(), mc.partition_b);
+            println!(
+                "    Partition A:   {} nodes {:?}",
+                mc.partition_a.len(),
+                mc.partition_a
+            );
+            println!(
+                "    Partition B:   {} nodes {:?}",
+                mc.partition_b.len(),
+                mc.partition_b
+            );
             println!("    Cut edges:     {}", mc.cut_edges.len());
             println!("    Balance ratio: {:.4}", mc.balance_ratio());
             println!();

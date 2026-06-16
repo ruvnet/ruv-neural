@@ -51,7 +51,10 @@ impl PhysioMetrics {
             None
         };
         let respiration = if w.respiration.len() >= 4 && w.respiration_fs > 0.0 {
-            Some(RespirationMetrics::from_waveform(&w.respiration, w.respiration_fs)?)
+            Some(RespirationMetrics::from_waveform(
+                &w.respiration,
+                w.respiration_fs,
+            )?)
         } else {
             None
         };

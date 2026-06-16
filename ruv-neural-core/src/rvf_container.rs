@@ -486,8 +486,8 @@ pub fn embeddings_to_container(
             })
             .collect(),
     };
-    let meta_json = serde_json::to_vec(&meta)
-        .map_err(|e| RuvNeuralError::Serialization(e.to_string()))?;
+    let meta_json =
+        serde_json::to_vec(&meta).map_err(|e| RuvNeuralError::Serialization(e.to_string()))?;
 
     let mut container = RvfContainer::new();
     container.add_segment(SegmentType::Meta, FLAG_SEALED, meta_json);
@@ -507,15 +507,17 @@ pub fn container_to_embeddings(container: &RvfContainer) -> Result<Vec<NeuralEmb
     let meta_seg = container.find(SegmentType::Meta).ok_or_else(|| {
         RuvNeuralError::Serialization("RVF container missing META segment".into())
     })?;
-    let vec_seg = container.find(SegmentType::Vec).ok_or_else(|| {
-        RuvNeuralError::Serialization("RVF container missing VEC segment".into())
-    })?;
+    let vec_seg = container
+        .find(SegmentType::Vec)
+        .ok_or_else(|| RuvNeuralError::Serialization("RVF container missing VEC segment".into()))?;
     let meta: VecMeta = serde_json::from_slice(&meta_seg.payload)
         .map_err(|e| RuvNeuralError::Serialization(e.to_string()))?;
 
     let p = &vec_seg.payload;
     if p.len() < 24 {
-        return Err(RuvNeuralError::Serialization("VEC segment too short".into()));
+        return Err(RuvNeuralError::Serialization(
+            "VEC segment too short".into(),
+        ));
     }
     let dim = u32::from_le_bytes(p[0..4].try_into().unwrap()) as usize;
     let count = u64::from_le_bytes(p[8..16].try_into().unwrap()) as usize;
@@ -599,7 +601,10 @@ mod tests {
         let bytes = header.to_bytes();
         assert_eq!(bytes.len(), SEGMENT_HEADER_LEN);
         assert_eq!(&bytes[0..4], b"RVFS");
-        assert_eq!(u32::from_be_bytes(bytes[0..4].try_into().unwrap()), RVFS_MAGIC);
+        assert_eq!(
+            u32::from_be_bytes(bytes[0..4].try_into().unwrap()),
+            RVFS_MAGIC
+        );
         let back = SegmentHeader::from_bytes(&bytes).unwrap();
         assert_eq!(back.seg_type, SegmentType::Vec);
         assert_eq!(back.segment_id, 7);

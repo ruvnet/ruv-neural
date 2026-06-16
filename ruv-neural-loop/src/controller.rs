@@ -219,8 +219,7 @@ impl ClosedLoopController {
 
         // Terminal phases are absorbing: emit a no-op snapshot.
         if self.phase.is_terminal() {
-            let estimate =
-                estimate_state(obs, &self.target, self.config.completion_threshold);
+            let estimate = estimate_state(obs, &self.target, self.config.completion_threshold);
             return StepResult {
                 index: self.step_index,
                 timestamp_s: obs.timestamp_s,
@@ -247,8 +246,9 @@ impl ClosedLoopController {
         // This is standard closed-loop practice and avoids both chattering doses
         // and spurious fail-safe stops on single-sample noise.
         let smoothed = match self.smoothed_distance {
-            Some(prev) => self.smoothing_alpha * raw.distance_to_target
-                + (1.0 - self.smoothing_alpha) * prev,
+            Some(prev) => {
+                self.smoothing_alpha * raw.distance_to_target + (1.0 - self.smoothing_alpha) * prev
+            }
             None => raw.distance_to_target,
         };
         self.smoothed_distance = Some(smoothed);
@@ -261,12 +261,9 @@ impl ClosedLoopController {
 
         // Evaluate the safety envelope against the *running best* distance, so
         // a response that climbs back away from the best achieved is caught.
-        let envelope = self.envelope.evaluate(
-            &obs.physio,
-            &estimate,
-            self.best_distance,
-            &self.target,
-        );
+        let envelope =
+            self.envelope
+                .evaluate(&obs.physio, &estimate, self.best_distance, &self.target);
 
         // Update running best after the envelope decision.
         if estimate.distance_to_target < self.best_distance {

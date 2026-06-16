@@ -129,9 +129,7 @@ impl WitnessBundle {
     /// Full verification: digest integrity + Ed25519 signature.
     pub fn verify_full(&self) -> Result<bool, String> {
         if !self.verify_digest() {
-            return Err(
-                "Capabilities digest mismatch \u{2014} data may be tampered".to_string(),
-            );
+            return Err("Capabilities digest mismatch \u{2014} data may be tampered".to_string());
         }
         self.verify()
     }
@@ -589,7 +587,7 @@ fn hex_encode(bytes: &[u8]) -> String {
 
 /// Decode a hex string into bytes.
 fn hex_decode(hex: &str) -> std::result::Result<Vec<u8>, String> {
-    if hex.len() % 2 != 0 {
+    if !hex.len().is_multiple_of(2) {
         return Err("Odd-length hex string".into());
     }
     (0..hex.len())

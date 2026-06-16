@@ -142,14 +142,13 @@ fn report(tag: &str, model: &LogisticRegression, x: &[Vec<f64>], y: &[u8]) {
 type Split = (Vec<Vec<f64>>, Vec<u8>, Vec<Vec<f64>>, Vec<u8>);
 
 /// Leakage-free grouped split: whole recordings go to train or test.
-fn grouped_split(
-    x: &[Vec<f64>],
-    y: &[u8],
-    g: &[u32],
-    train_frac: f64,
-    seed: u64,
-) -> Split {
-    let mut groups: Vec<u32> = g.iter().copied().collect::<BTreeSet<_>>().into_iter().collect();
+fn grouped_split(x: &[Vec<f64>], y: &[u8], g: &[u32], train_frac: f64, seed: u64) -> Split {
+    let mut groups: Vec<u32> = g
+        .iter()
+        .copied()
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect();
     groups.shuffle(&mut StdRng::seed_from_u64(seed));
     let cut = (groups.len() as f64 * train_frac) as usize;
     let train_groups: BTreeSet<u32> = groups[..cut].iter().copied().collect();
@@ -169,12 +168,16 @@ fn grouped_split(
 
 /// Grouped k-fold CV: each fold holds out a disjoint set of recordings.
 fn grouped_cv(x: &[Vec<f64>], y: &[u8], g: &[u32], k: usize, cfg: &TrainConfig) -> (f64, f64) {
-    let mut groups: Vec<u32> = g.iter().copied().collect::<BTreeSet<_>>().into_iter().collect();
+    let mut groups: Vec<u32> = g
+        .iter()
+        .copied()
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect();
     groups.shuffle(&mut StdRng::seed_from_u64(7));
     let (mut acc, mut bal) = (0.0, 0.0);
     for fold in 0..k {
-        let test_groups: BTreeSet<u32> =
-            groups.iter().copied().skip(fold).step_by(k).collect();
+        let test_groups: BTreeSet<u32> = groups.iter().copied().skip(fold).step_by(k).collect();
         let (mut xt, mut yt, mut xe, mut ye) = (Vec::new(), Vec::new(), Vec::new(), Vec::new());
         for i in 0..x.len() {
             if test_groups.contains(&g[i]) {
@@ -203,7 +206,11 @@ fn main() {
         "=== Epileptic Seizure Recognition — seizure vs rest ===\n\
          {} chunks, {} recordings, seizure={} ({:.1}%), majority baseline={:.4}",
         samples.len(),
-        samples.iter().map(|s| s.group).collect::<BTreeSet<_>>().len(),
+        samples
+            .iter()
+            .map(|s| s.group)
+            .collect::<BTreeSet<_>>()
+            .len(),
         pos,
         100.0 * pos as f64 / samples.len() as f64,
         (samples.len() - pos) as f64 / samples.len() as f64,

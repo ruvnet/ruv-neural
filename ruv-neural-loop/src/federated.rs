@@ -219,8 +219,8 @@ pub fn attach_federated_manifest(
     container: &mut RvfContainer,
     manifest: &FederatedManifest,
 ) -> Result<()> {
-    let payload = serde_json::to_vec(manifest)
-        .map_err(|e| RuvNeuralError::Serialization(e.to_string()))?;
+    let payload =
+        serde_json::to_vec(manifest).map_err(|e| RuvNeuralError::Serialization(e.to_string()))?;
     container.add_segment(SegmentType::FederatedManifest, FLAG_SEALED, payload);
     Ok(())
 }
@@ -253,10 +253,7 @@ mod tests {
 
     #[test]
     fn fedavg_is_count_weighted_mean() {
-        let updates = vec![
-            update(vec![0.0, 0.0], 1),
-            update(vec![1.0, 2.0], 3),
-        ];
+        let updates = vec![update(vec![0.0, 0.0], 1), update(vec![1.0, 2.0], 3)];
         let mut rng = StdRng::seed_from_u64(1);
         let model = federated_average(&updates, None, &mut rng).unwrap();
         // Weighted: (1*0 + 3*1)/4 = 0.75 ; (1*0 + 3*2)/4 = 1.5
@@ -295,10 +292,7 @@ mod tests {
     #[test]
     fn dp_clipping_bounds_a_huge_update() {
         // A single enormous update is clipped, so it cannot dominate the mean.
-        let updates = vec![
-            update(vec![1000.0, 1000.0], 1),
-            update(vec![0.0, 0.0], 1),
-        ];
+        let updates = vec![update(vec![1000.0, 1000.0], 1), update(vec![0.0, 0.0], 1)];
         let dp = DpConfig {
             clip_norm: 1.0,
             noise_multiplier: 0.0, // isolate the clipping effect
@@ -346,7 +340,10 @@ mod tests {
         assert_eq!(recovered.round, manifest.round);
         assert_eq!(recovered.num_participants, manifest.num_participants);
         assert_eq!(recovered.feature_names, manifest.feature_names);
-        assert_eq!(recovered.aggregated_mean.len(), manifest.aggregated_mean.len());
+        assert_eq!(
+            recovered.aggregated_mean.len(),
+            manifest.aggregated_mean.len()
+        );
         for (a, b) in recovered
             .aggregated_mean
             .iter()

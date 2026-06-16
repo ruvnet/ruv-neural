@@ -78,10 +78,7 @@ impl CoherenceDetector {
     ///
     /// Processes each `(timestamp, mincut_value)` pair, detects transitions,
     /// and classifies them into coherence events.
-    pub fn detect_from_timeseries(
-        &self,
-        mincut_series: &[(f64, f64)],
-    ) -> Vec<CoherenceEvent> {
+    pub fn detect_from_timeseries(&self, mincut_series: &[(f64, f64)]) -> Vec<CoherenceEvent> {
         if mincut_series.len() < 2 {
             return Vec::new();
         }
@@ -112,8 +109,7 @@ impl CoherenceDetector {
 
                 if delta < 0.0 && magnitude >= self.threshold_integration {
                     // Integration: mincut decreased -> networks merging.
-                    let end_time =
-                        find_recovery_time_in_series(mincut_series, i, v_prev, baseline);
+                    let end_time = find_recovery_time_in_series(mincut_series, i, v_prev, baseline);
 
                     events.push(CoherenceEvent {
                         start_time: t_curr,
@@ -124,8 +120,7 @@ impl CoherenceDetector {
                     });
                 } else if delta > 0.0 && magnitude >= self.threshold_segregation {
                     // Segregation: mincut increased -> networks separating.
-                    let end_time =
-                        find_recovery_time_in_series(mincut_series, i, v_prev, baseline);
+                    let end_time = find_recovery_time_in_series(mincut_series, i, v_prev, baseline);
 
                     events.push(CoherenceEvent {
                         start_time: t_curr,
@@ -244,9 +239,7 @@ mod tests {
     #[test]
     fn test_detect_no_events_for_constant_series() {
         let detector = CoherenceDetector::new(0.3, 0.3);
-        let series: Vec<(f64, f64)> = (0..10)
-            .map(|i| (i as f64, 5.0))
-            .collect();
+        let series: Vec<(f64, f64)> = (0..10).map(|i| (i as f64, 5.0)).collect();
         let events = detector.detect_from_timeseries(&series);
         assert!(events.is_empty());
     }
