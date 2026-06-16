@@ -34,6 +34,10 @@ RuVector's **RVFS** container framing (verified against `ruvnet/ruvector`,
   segment so one `.rvf` carries vectors *and* a ready-to-query graph (point 4).
 - `ruv-neural-loop/src/federated.rs` — federated averaging + differential
   privacy recorded in a `FEDERATED_MANIFEST` segment (point 5; see ADR-0021).
+- `ruv-neural-decoder/src/rvf_model.rs` — a trained `LogisticRegression` decoder
+  persists into a `MODEL` segment, signed with Ed25519 (`CRYPTO`), so a model
+  ships as one self-describing `.rvf` that is integrity- and signature-checked
+  before use (capstone tying the ML trainer to the container/crypto work).
 
 Profile note: upstream uses SHAKE-256 for hashing; to stay dependency-free this
 profile substitutes SHA-256 (same 256-bit size, same byte layout) and records

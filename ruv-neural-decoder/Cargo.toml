@@ -23,3 +23,5 @@ num-traits = { workspace = true }
 
 [dev-dependencies]
 approx = { workspace = true }
+ed25519-dalek = { workspace = true }
+sha2 = { workspace = true }

@@ -241,10 +241,55 @@ fn main() {
         report("random-row split [leaky/optimistic]", &model, &xe, &ye);
     }
 
+    // ── End-to-end: persist the trained model in a SIGNED RVF container ──
+    persist_signed(&samples, &cfg);
+
     println!(
         "\nThe GROUPED numbers are the honest ones — no recording is split across\n\
          train and test. Seizure detection has real, strongly separable signal, so\n\
          here the leakage-free model genuinely beats the baseline (contrast the\n\
          EEG-eye-state benchmark, where it did not)."
     );
+}
+
+/// Train on a grouped split, write the model to a signed `.rvf`, reload it,
+/// verify the signature, and confirm the reloaded model reproduces the test
+/// predictions — exercising the whole stack (trainer → RVFS container → Ed25519).
+fn persist_signed(samples: &[Sample], cfg: &TrainConfig) {
+    use ed25519_dalek::SigningKey;
+    use rand::rngs::OsRng;
+    use ruv_neural_core::rvf_container::RvfContainer;
+    use ruv_neural_core::rvf_witness::{sign_container, verify_container_signature};
+    use ruv_neural_decoder::{container_to_model, model_to_container};
+
+    println!("\n--- persist trained model in a signed .rvf ---");
+    let (x, y, g) = build(samples, true);
+    let (xt, yt, xe, ye) = grouped_split(&x, &y, &g, 0.7, 1);
+    let (model, _) = LogisticRegression::fit(&xt, &yt, cfg).unwrap();
+    let test_acc = model.evaluate(&xe, &ye).accuracy;
+
+    // Serialize → sign → bytes.
+    let mut container = model_to_container(&model).unwrap();
+    let key = SigningKey::generate(&mut OsRng);
+    sign_container(&mut container, &key);
+    let bytes = container.to_bytes();
+    let path = "/tmp/seizure_model.rvf";
+    std::fs::write(path, &bytes).unwrap();
+
+    // Reload → verify → predict.
+    let reloaded = RvfContainer::from_bytes(&std::fs::read(path).unwrap()).unwrap();
+    reloaded.verify_integrity().unwrap();
+    let sig_ok = verify_container_signature(&reloaded).unwrap();
+    let loaded = container_to_model(&reloaded).unwrap();
+    let loaded_acc = loaded.evaluate(&xe, &ye).accuracy;
+
+    println!(
+        "  wrote {} bytes to {path}; integrity+CRC ok, signature verified={sig_ok}",
+        bytes.len()
+    );
+    println!(
+        "  in-memory test acc={test_acc:.4}  ==  reloaded-model test acc={loaded_acc:.4}  (match={})",
+        (test_acc - loaded_acc).abs() < 1e-12
+    );
+    let _ = std::fs::remove_file(path);
 }

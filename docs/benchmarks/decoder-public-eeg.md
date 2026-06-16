@@ -73,3 +73,13 @@ rate]`. Two honest takeaways:
    statistics don't carry the per-sample autocorrelation that inflated the
    eye-state benchmark — so the seizure win is real, not a protocol artefact.
 
+## End-to-end: ship the trained model as a signed `.rvf`
+
+The example's final step persists the trained model through the full stack:
+`model_to_container` writes `MODEL` + `META` segments, `sign_container` adds an
+Ed25519 `CRYPTO` segment, and the bytes are written to disk. On reload, the
+container's CRC32C/content-hash **and** the signature are verified, and the
+reloaded model reproduces the held-out accuracy **exactly** (0.9727 == 0.9727)
+in an 832-byte file — closing the loop from training to a tamper-evident,
+self-describing artifact (ADR-0023).
+

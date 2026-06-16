@@ -417,6 +417,20 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             source_hash: "".into(),
             status: "verified".into(),
         },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-decoder".into(),
+            capability: "Trainable logistic-regression classifier (SGD, standardization, L2)".into(),
+            evidence: "logistic::tests::learns_separable_problem, ..::deterministic_training".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-decoder".into(),
+            capability: "Trained model persisted in a signed RVF MODEL segment (Ed25519, tamper-evident)".into(),
+            evidence: "rvf_model::tests::model_roundtrips_through_container, ..::signed_model_verifies_and_detects_tampering".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
         // ESP32
         CapabilityAttestation {
             crate_name: "ruv-neural-esp32".into(),
