@@ -37,3 +37,39 @@ auditable, and benchmarked out-of-sample rather than chasing leaky headline
 numbers. The model itself is verified correct on a separable problem
 (`logistic::tests::learns_separable_problem`, >0.95 accuracy); the limitation
 is the dataset-under-honest-evaluation, not the trainer.
+
+---
+
+# Benchmark — Epileptic Seizure Recognition (the honest win)
+
+The same trainer on a task with **real, separable signal** and a naturally
+**leakage-free split**, for contrast.
+
+- **Data:** "Epileptic Seizure Recognition" (the Bonn EEG corpus, reshaped) —
+  500 single-channel 23.6 s recordings, each cut into 23 one-second 178-sample
+  chunks → 11,500 rows, 5 classes. Task: **seizure (class 1) vs rest**.
+- **Leakage control:** the 23 chunks of a recording are correlated, so every
+  honest protocol is **grouped by source recording** (all chunks stay on one
+  side). A random-row split is shown only for contrast.
+- **Reproduce:** `cargo run -p ruv-neural-decoder --example train_seizure -- <csv>`
+
+## Results (seizure vs rest; majority baseline = 0.80)
+
+| Features | Protocol | Accuracy | Balanced acc | F1 |
+|---|---|---:|---:|---:|
+| raw 178-sample | grouped 5-fold CV | 0.81 | 0.53 | — |
+| **engineered 5-feature** | **grouped 5-fold CV [honest]** | **0.96** | **0.92** | — |
+| engineered 5-feature | grouped held-out split [honest] | 0.97 | 0.95 | 0.93 |
+| engineered 5-feature | random-row split [leaky] | 0.96 | 0.93 | 0.90 |
+
+The 5 features are compact band-power/morphology summaries per 1-second chunk:
+`[ln variance, ln line-length, ln range, ln mean-abs-deviation, zero-crossing
+rate]`. Two honest takeaways:
+
+1. **Feature engineering is the optimization.** Raw amplitude barely beats the
+   baseline (balanced-acc 0.53 ≈ chance); the band-power features lift it to
+   ~0.92 balanced accuracy out-of-sample.
+2. **Leakage didn't help here** (grouped 0.96 ≈ random-row 0.96) because summary
+   statistics don't carry the per-sample autocorrelation that inflated the
+   eye-state benchmark — so the seizure win is real, not a protocol artefact.
+
