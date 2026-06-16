@@ -4,6 +4,25 @@
 use std::collections::{BinaryHeap, HashSet};
 use std::cmp::Ordering;
 
+use serde::{Deserialize, Serialize};
+
+/// Serializable topology of an [`HnswIndex`] (graph + parameters, without the
+/// stored vectors). This is what an RVF `INDEX` segment carries; the vectors
+/// themselves live in the companion `VEC` segment.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HnswGraph {
+    /// Maximum connections per node per layer.
+    pub m: usize,
+    /// Search width used during construction.
+    pub ef_construction: usize,
+    /// Entry-point node id.
+    pub entry_point: usize,
+    /// Highest populated layer index.
+    pub max_layer: usize,
+    /// Per-layer adjacency: `layers[layer][node] = [(neighbor, distance)]`.
+    pub layers: Vec<Vec<Vec<(usize, f64)>>>,
+}
+
 /// A scored neighbor for use in the priority queue.
 #[derive(Debug, Clone)]
 struct ScoredNode {
@@ -228,6 +247,33 @@ impl HnswIndex {
     /// Returns true if the index has no vectors.
     pub fn is_empty(&self) -> bool {
         self.embeddings.is_empty()
+    }
+
+    /// Export the graph topology (adjacency + parameters) for serialization
+    /// into an RVF `INDEX` segment. Does not include the stored vectors.
+    pub fn export_graph(&self) -> HnswGraph {
+        HnswGraph {
+            m: self.m,
+            ef_construction: self.ef_construction,
+            entry_point: self.entry_point,
+            max_layer: self.max_layer,
+            layers: self.layers.clone(),
+        }
+    }
+
+    /// Rebuild an index from a serialized [`HnswGraph`] plus the vectors it
+    /// indexes (typically decoded from the companion `VEC` segment).
+    ///
+    /// The number of vectors must cover every node referenced by the graph.
+    pub fn from_graph(graph: HnswGraph, vectors: Vec<Vec<f64>>) -> Self {
+        Self {
+            layers: graph.layers,
+            entry_point: graph.entry_point,
+            max_layer: graph.max_layer,
+            ef_construction: graph.ef_construction,
+            m: graph.m,
+            embeddings: vectors,
+        }
     }
 
     /// Euclidean distance between two vectors.
