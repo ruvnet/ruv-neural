@@ -95,8 +95,10 @@ pub enum SegmentType {
     Crypto,
     /// WASM microkernel / bytecode.
     Wasm,
-    /// Federated-learning manifest.
+    /// Federated-learning manifest (profile-assigned code).
     FederatedManifest,
+    /// Serialized model / classifier weights (profile-assigned code).
+    Model,
 }
 
 impl SegmentType {
@@ -112,7 +114,11 @@ impl SegmentType {
             SegmentType::Profile => 0x0B,
             SegmentType::Crypto => 0x0C,
             SegmentType::Wasm => 0x10,
+            // 0x40+ are profile-assigned codes (not in the published upstream
+            // segment-type table); upstream names FEDERATED_MANIFEST but does
+            // not publish its numeric tag.
             SegmentType::FederatedManifest => 0x40,
+            SegmentType::Model => 0x41,
         }
     }
 
@@ -129,6 +135,7 @@ impl SegmentType {
             0x0C => SegmentType::Crypto,
             0x10 => SegmentType::Wasm,
             0x40 => SegmentType::FederatedManifest,
+            0x41 => SegmentType::Model,
             other => {
                 return Err(RuvNeuralError::Serialization(format!(
                     "unknown RVF segment type code: 0x{other:02x}"
@@ -617,6 +624,7 @@ mod tests {
             SegmentType::Crypto,
             SegmentType::Wasm,
             SegmentType::FederatedManifest,
+            SegmentType::Model,
         ] {
             assert_eq!(SegmentType::from_code(t.to_code()).unwrap(), t);
         }
