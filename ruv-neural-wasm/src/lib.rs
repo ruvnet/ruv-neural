@@ -13,10 +13,13 @@
 //! - Spectral embedding via power iteration (no LAPACK dependency)
 //! - Decode cognitive state from topology metrics
 //! - RVF file format load/export
+//! - Browser-side RVF verification (CRC32C + content-hash + Ed25519) and
+//!   on-device model inference from a signed `.rvf` (see [`rvf_wasm`])
 //! - Streaming data processor for WebSocket integration
 //! - Visualization data structures for D3.js / Three.js
 
 pub mod graph_wasm;
+pub mod rvf_wasm;
 pub mod streaming;
 pub mod viz_data;
 

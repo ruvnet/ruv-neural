@@ -38,6 +38,10 @@ RuVector's **RVFS** container framing (verified against `ruvnet/ruvector`,
   persists into a `MODEL` segment, signed with Ed25519 (`CRYPTO`), so a model
   ships as one self-describing `.rvf` that is integrity- and signature-checked
   before use (capstone tying the ML trainer to the container/crypto work).
+- `ruv-neural-cli` — `train` / `model-info` / `predict` subcommands over signed
+  `.rvf` models; `ruv-neural-wasm/src/rvf_wasm.rs` — the same verification and
+  model inference run **client-side in the browser** (ADR-0014 web console),
+  no server round-trip. Parser hardened by `tests/rvf_fuzz.rs` (proptest).
 
 Profile note: upstream uses SHAKE-256 for hashing; to stay dependency-free this
 profile substitutes SHA-256 (same 256-bit size, same byte layout) and records
