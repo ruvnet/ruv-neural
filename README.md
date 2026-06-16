@@ -65,6 +65,8 @@ each:
 4. **Protocol registry** — versioned protocols with receipts: frequency, waveform, lux, SPL, vibration amplitude, duration, time of day.
 5. **Research evidence layer** — link protocols to papers, trials, results, safety notes, and reproducibility metadata — hash-chained and Ed25519-signed.
 
+> **Companion tool — [`ruvn`](https://github.com/ruvnet/ruvn):** an AI research agent that turns a question into a **graded, cited evidence dossier** (searches → grades every source A/B/C/D → synthesizes from the best → fact-checks → cites). It's the practical front-end for the evidence layer above. Install `npm i -g @ruvnet/ruvn` ([npm](https://www.npmjs.com/package/@ruvnet/ruvn)), then run `ruvn`.
+
 ## Who it's for
 
 | User | Value |
