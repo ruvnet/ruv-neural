@@ -6,8 +6,8 @@
 //! stored target exemplars, and it exports cleanly to the core
 //! [`NeuralEmbedding`] / RVF ecosystem for evidence and offline analysis.
 
-use ruv_neural_core::embedding::{EmbeddingMetadata, NeuralEmbedding};
 use ruv_neural_core::brain::Atlas;
+use ruv_neural_core::embedding::{EmbeddingMetadata, NeuralEmbedding};
 use serde::{Deserialize, Serialize};
 
 use crate::state::StateObservation;
@@ -48,9 +48,15 @@ impl PersonalStateEmbedding {
             .as_ref()
             .map(|h| ((h.mean_hr_bpm - 55.0) / 45.0).clamp(0.0, 1.0))
             .unwrap_or(0.5);
-        let resp_calm = p.respiration.as_ref().map(|r| r.calm_index()).unwrap_or(0.5);
+        let resp_calm = p
+            .respiration
+            .as_ref()
+            .map(|r| r.calm_index())
+            .unwrap_or(0.5);
         let stillness = p.motion.as_ref().map(|m| m.stillness()).unwrap_or(0.5);
-        let neural = obs.neural.unwrap_or_else(crate::state::NeuralFeatures::neutral);
+        let neural = obs
+            .neural
+            .unwrap_or_else(crate::state::NeuralFeatures::neutral);
 
         Self {
             features: [

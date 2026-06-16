@@ -73,10 +73,7 @@ impl AnimationFrames {
     ///
     /// Each graph in the sequence becomes one animation frame. Positions are
     /// computed independently per frame using the specified layout algorithm.
-    pub fn from_graph_sequence(
-        graphs: &BrainGraphSequence,
-        layout_type: LayoutType,
-    ) -> Self {
+    pub fn from_graph_sequence(graphs: &BrainGraphSequence, layout_type: LayoutType) -> Self {
         let colormap = ColorMap::cool_warm();
 
         let frames = graphs

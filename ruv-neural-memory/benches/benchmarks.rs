@@ -39,11 +39,7 @@ fn euclidean_distance(a: &[f64], b: &[f64]) -> f64 {
 }
 
 /// Brute-force k-nearest-neighbor search.
-fn brute_force_knn(
-    embeddings: &[Vec<f64>],
-    query: &[f64],
-    k: usize,
-) -> Vec<(usize, f64)> {
+fn brute_force_knn(embeddings: &[Vec<f64>], query: &[f64], k: usize) -> Vec<(usize, f64)> {
     let mut distances: Vec<(usize, f64)> = embeddings
         .iter()
         .enumerate()

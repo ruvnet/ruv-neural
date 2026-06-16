@@ -42,9 +42,7 @@ pub fn normalized_cut(graph: &BrainGraph) -> Result<MincutResult> {
 
     // Sweep thresholds along the sorted Fiedler values to find the best Ncut.
     let adj = graph.adjacency_matrix();
-    let degrees: Vec<f64> = (0..n)
-        .map(|i| adj[i].iter().sum::<f64>())
-        .collect();
+    let degrees: Vec<f64> = (0..n).map(|i| adj[i].iter().sum::<f64>()).collect();
 
     // Sort node indices by Fiedler value.
     let mut sorted_indices: Vec<usize> = (0..n).collect();
@@ -103,8 +101,7 @@ pub fn normalized_cut(graph: &BrainGraph) -> Result<MincutResult> {
     let partition_a: Vec<usize> = sorted_indices[..best_split].to_vec();
     let partition_b: Vec<usize> = sorted_indices[best_split..].to_vec();
 
-    let partition_a_set: std::collections::HashSet<usize> =
-        partition_a.iter().copied().collect();
+    let partition_a_set: std::collections::HashSet<usize> = partition_a.iter().copied().collect();
 
     // Compute the actual cut edges and value.
     let mut actual_cut = 0.0;
@@ -232,10 +229,7 @@ mod tests {
     fn test_volume_computation() {
         let graph = BrainGraph {
             num_nodes: 3,
-            edges: vec![
-                make_edge(0, 1, 2.0),
-                make_edge(1, 2, 3.0),
-            ],
+            edges: vec![make_edge(0, 1, 2.0), make_edge(1, 2, 3.0)],
             timestamp: 0.0,
             window_duration_s: 1.0,
             atlas: Atlas::Custom(3),

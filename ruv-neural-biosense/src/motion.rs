@@ -47,7 +47,10 @@ impl MotionMetrics {
         let dyn_mean = dyn_mag.iter().sum::<f64>() / n as f64;
         let movement_index =
             (dyn_mag.iter().map(|d| (d - dyn_mean).powi(2)).sum::<f64>() / n as f64).sqrt();
-        let still = dyn_mag.iter().filter(|d| **d < STILLNESS_THRESHOLD_G).count();
+        let still = dyn_mag
+            .iter()
+            .filter(|d| **d < STILLNESS_THRESHOLD_G)
+            .count();
         Ok(Self {
             mean_magnitude_g: mean,
             movement_index,

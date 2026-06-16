@@ -33,10 +33,7 @@ pub use ruv_neural_core::graph::{BrainGraph, BrainGraphSequence};
 pub use ruv_neural_core::traits::EmbeddingGenerator;
 
 /// Helper to build an `EmbeddingMetadata` with just a method name and atlas.
-pub fn default_metadata(
-    method: &str,
-    atlas: ruv_neural_core::brain::Atlas,
-) -> EmbeddingMetadata {
+pub fn default_metadata(method: &str, atlas: ruv_neural_core::brain::Atlas) -> EmbeddingMetadata {
     EmbeddingMetadata {
         subject_id: None,
         session_id: None,

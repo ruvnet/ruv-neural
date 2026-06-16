@@ -126,14 +126,8 @@ fn compute_window_stats(window: &[f64], window_index: u64) -> WindowStats {
 
     let variance = window.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / n;
 
-    let min = window
-        .iter()
-        .cloned()
-        .fold(f64::INFINITY, f64::min);
-    let max = window
-        .iter()
-        .cloned()
-        .fold(f64::NEG_INFINITY, f64::max);
+    let min = window.iter().cloned().fold(f64::INFINITY, f64::min);
+    let max = window.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
 
     WindowStats {
         mean,

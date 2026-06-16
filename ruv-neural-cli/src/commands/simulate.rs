@@ -84,7 +84,9 @@ fn generate_neural_data(channels: usize, num_samples: usize, sample_rate: f64) -
         let phase_offset = (ch as f64) * PI / (channels as f64);
 
         // Simple LCG for deterministic pseudo-random noise per channel.
-        let mut rng_state: u64 = (ch as u64).wrapping_mul(6364136223846793005).wrapping_add(1);
+        let mut rng_state: u64 = (ch as u64)
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1);
 
         for i in 0..num_samples {
             let t = i as f64 / sample_rate;
@@ -100,9 +102,13 @@ fn generate_neural_data(channels: usize, num_samples: usize, sample_rate: f64) -
 
             // White noise (~10 fT/sqrt(Hz) density).
             // Approximate Gaussian via Box-Muller with LCG.
-            rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            rng_state = rng_state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
             let u1 = (rng_state >> 11) as f64 / (1u64 << 53) as f64;
-            rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            rng_state = rng_state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
             let u2 = (rng_state >> 11) as f64 / (1u64 << 53) as f64;
 
             let noise_amplitude = 10.0 * (sample_rate / 2.0).sqrt();

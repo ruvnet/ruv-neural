@@ -25,7 +25,11 @@ pub struct StimulusPlan {
 impl StimulusPlan {
     /// An explicit rest/no-stimulation plan.
     pub fn rest() -> Self {
-        Self { stimuli: Vec::new(), intensity: 0.0, active: false }
+        Self {
+            stimuli: Vec::new(),
+            intensity: 0.0,
+            active: false,
+        }
     }
 }
 
@@ -177,12 +181,17 @@ impl Protocol for GammaEntrainmentProtocol {
             .modalities
             .iter()
             .map(|&m| {
-                let mut p = StimulusParams::gamma_40hz(m, step_duration_s).with_intensity(intensity);
+                let mut p =
+                    StimulusParams::gamma_40hz(m, step_duration_s).with_intensity(intensity);
                 p.envelope_hz = envelope_hz;
                 p
             })
             .collect();
 
-        StimulusPlan { stimuli, intensity, active: true }
+        StimulusPlan {
+            stimuli,
+            intensity,
+            active: true,
+        }
     }
 }

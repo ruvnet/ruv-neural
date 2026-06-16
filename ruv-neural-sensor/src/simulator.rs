@@ -177,8 +177,7 @@ impl SimulatedSensorArray {
             // Add oscillation components with slight per-channel phase offset.
             let phase_offset = channel_idx as f64 * 0.1;
             for osc in &self.oscillations {
-                value +=
-                    osc.amplitude_ft * (2.0 * PI * osc.frequency_hz * t + phase_offset).sin();
+                value += osc.amplitude_ft * (2.0 * PI * osc.frequency_hz * t + phase_offset).sin();
             }
 
             // Add Gaussian noise.

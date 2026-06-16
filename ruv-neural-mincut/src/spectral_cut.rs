@@ -128,8 +128,7 @@ pub fn spectral_bisection(graph: &BrainGraph) -> Result<MincutResult> {
         partition_b = (1..graph.num_nodes).collect();
     }
 
-    let partition_a_set: std::collections::HashSet<usize> =
-        partition_a.iter().copied().collect();
+    let partition_a_set: std::collections::HashSet<usize> = partition_a.iter().copied().collect();
 
     // Compute cut value.
     let mut cut_value = 0.0;
@@ -170,9 +169,7 @@ pub fn cheeger_constant(graph: &BrainGraph) -> Result<f64> {
     // For small graphs (n <= 16), enumerate all subsets.
     if n <= 16 {
         let adj = graph.adjacency_matrix();
-        let degrees: Vec<f64> = (0..n)
-            .map(|i| adj[i].iter().sum::<f64>())
-            .collect();
+        let degrees: Vec<f64> = (0..n).map(|i| adj[i].iter().sum::<f64>()).collect();
 
         let mut best_h = f64::INFINITY;
 

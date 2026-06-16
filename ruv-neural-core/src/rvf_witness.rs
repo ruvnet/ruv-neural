@@ -268,12 +268,14 @@ pub fn sign_container_ephemeral(container: &mut RvfContainer) -> VerifyingKey {
 /// present but invalid, and an error if the `CRYPTO` segment is missing or
 /// malformed.
 pub fn verify_container_signature(container: &RvfContainer) -> Result<bool> {
-    let crypto = container.find(SegmentType::Crypto).ok_or_else(|| {
-        RuvNeuralError::Serialization("container has no CRYPTO segment".into())
-    })?;
+    let crypto = container
+        .find(SegmentType::Crypto)
+        .ok_or_else(|| RuvNeuralError::Serialization("container has no CRYPTO segment".into()))?;
     let p = &crypto.payload;
     if p.len() < 4 {
-        return Err(RuvNeuralError::Serialization("CRYPTO segment too short".into()));
+        return Err(RuvNeuralError::Serialization(
+            "CRYPTO segment too short".into(),
+        ));
     }
     let algo = u16::from_le_bytes([p[0], p[1]]);
     if algo != SIG_ALGO_ED25519 {

@@ -145,7 +145,7 @@ impl Node2VecEmbedder {
         let mut cooc = vec![vec![0.0; n]; n];
         for walk in walks {
             for (i, &center) in walk.iter().enumerate() {
-                let start = if i >= window { i - window } else { 0 };
+                let start = i.saturating_sub(window);
                 let end = (i + window + 1).min(walk.len());
                 for j in start..end {
                     if j != i {
@@ -207,11 +207,7 @@ impl Node2VecEmbedder {
                     let prev_norm: f64 = prev.iter().map(|x| x * x).sum::<f64>().sqrt();
                     if prev_norm > 1e-12 {
                         let prev_unit: Vec<f64> = prev.iter().map(|x| x / prev_norm).collect();
-                        let dot: f64 = new_v
-                            .iter()
-                            .zip(prev_unit.iter())
-                            .map(|(a, b)| a * b)
-                            .sum();
+                        let dot: f64 = new_v.iter().zip(prev_unit.iter()).map(|(a, b)| a * b).sum();
                         for i in 0..n {
                             new_v[i] -= dot * prev_unit[i];
                         }

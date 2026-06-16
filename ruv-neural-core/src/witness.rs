@@ -129,9 +129,7 @@ impl WitnessBundle {
     /// Full verification: digest integrity + Ed25519 signature.
     pub fn verify_full(&self) -> Result<bool, String> {
         if !self.verify_digest() {
-            return Err(
-                "Capabilities digest mismatch \u{2014} data may be tampered".to_string(),
-            );
+            return Err("Capabilities digest mismatch \u{2014} data may be tampered".to_string());
         }
         self.verify()
     }

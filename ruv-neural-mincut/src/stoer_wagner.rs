@@ -64,11 +64,8 @@ pub fn stoer_wagner_mincut(graph: &BrainGraph) -> Result<MincutResult> {
     // Build the two partitions.
     let mut partition_a: Vec<usize> = best_partition.clone();
     partition_a.sort_unstable();
-    let partition_a_set: std::collections::HashSet<usize> =
-        partition_a.iter().copied().collect();
-    let mut partition_b: Vec<usize> = (0..n)
-        .filter(|i| !partition_a_set.contains(i))
-        .collect();
+    let partition_a_set: std::collections::HashSet<usize> = partition_a.iter().copied().collect();
+    let mut partition_b: Vec<usize> = (0..n).filter(|i| !partition_a_set.contains(i)).collect();
     partition_b.sort_unstable();
 
     // Find cut edges.
@@ -264,10 +261,7 @@ mod tests {
             result.cut_value
         );
         // Verify partition sizes sum to total.
-        assert_eq!(
-            result.partition_a.len() + result.partition_b.len(),
-            4
-        );
+        assert_eq!(result.partition_a.len() + result.partition_b.len(), 4);
     }
 
     /// Complete graph K4 with unit weights: mincut = 3 (remove all edges to one vertex).
@@ -300,10 +294,7 @@ mod tests {
     fn test_stoer_wagner_disconnected() {
         let graph = BrainGraph {
             num_nodes: 4,
-            edges: vec![
-                make_edge(0, 1, 5.0),
-                make_edge(2, 3, 5.0),
-            ],
+            edges: vec![make_edge(0, 1, 5.0), make_edge(2, 3, 5.0)],
             timestamp: 0.0,
             window_duration_s: 1.0,
             atlas: Atlas::Custom(4),

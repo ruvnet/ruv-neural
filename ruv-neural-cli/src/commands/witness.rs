@@ -54,14 +54,7 @@ pub fn run(
     } else {
         // Generate mode
         let caps = attest_capabilities();
-        let bundle = WitnessBundle::new(
-            env!("CARGO_PKG_VERSION"),
-            "0.1.0",
-            398,
-            398,
-            0,
-            caps,
-        );
+        let bundle = WitnessBundle::new(env!("CARGO_PKG_VERSION"), "0.1.0", 398, 398, 0, caps);
 
         let json = serde_json::to_string_pretty(&bundle)?;
 

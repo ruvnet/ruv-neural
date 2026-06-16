@@ -161,7 +161,11 @@ fn design_highpass_sos(pole_re: f64, pole_im: f64, wc: f64, fs: f64) -> SecondOr
 }
 
 /// Design Butterworth lowpass filter as cascade of second-order sections.
-fn design_butterworth_lowpass(order: usize, cutoff_hz: f64, sample_rate: f64) -> Vec<SecondOrderSection> {
+fn design_butterworth_lowpass(
+    order: usize,
+    cutoff_hz: f64,
+    sample_rate: f64,
+) -> Vec<SecondOrderSection> {
     let wc = prewarp(cutoff_hz, sample_rate);
     let poles = butterworth_poles(order);
     let mut sections = Vec::new();
@@ -181,7 +185,11 @@ fn design_butterworth_lowpass(order: usize, cutoff_hz: f64, sample_rate: f64) ->
 }
 
 /// Design Butterworth highpass filter as cascade of second-order sections.
-fn design_butterworth_highpass(order: usize, cutoff_hz: f64, sample_rate: f64) -> Vec<SecondOrderSection> {
+fn design_butterworth_highpass(
+    order: usize,
+    cutoff_hz: f64,
+    sample_rate: f64,
+) -> Vec<SecondOrderSection> {
     let wc = prewarp(cutoff_hz, sample_rate);
     let poles = butterworth_poles(order);
     let mut sections = Vec::new();

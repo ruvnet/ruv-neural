@@ -66,7 +66,9 @@ mod tests {
     #[test]
     fn hrv_basic_time_domain() {
         // Alternating 800/840 ms → mean 820, successive diff 40 ms.
-        let rr: Vec<f64> = (0..40).map(|i| if i % 2 == 0 { 800.0 } else { 840.0 }).collect();
+        let rr: Vec<f64> = (0..40)
+            .map(|i| if i % 2 == 0 { 800.0 } else { 840.0 })
+            .collect();
         let h = HrvMetrics::from_rr_ms(&rr).unwrap();
         assert_abs_diff_eq!(h.mean_nn_ms, 820.0, epsilon = 0.5);
         assert_abs_diff_eq!(h.mean_hr_bpm, 60_000.0 / 820.0, epsilon = 0.1);
@@ -78,15 +80,21 @@ mod tests {
     #[test]
     fn hrv_pnn50_threshold() {
         // diffs of 40 ms are NOT > 50 ms, so pnn50 should be 0.
-        let rr: Vec<f64> = (0..20).map(|i| if i % 2 == 0 { 800.0 } else { 840.0 }).collect();
+        let rr: Vec<f64> = (0..20)
+            .map(|i| if i % 2 == 0 { 800.0 } else { 840.0 })
+            .collect();
         let h = HrvMetrics::from_rr_ms(&rr).unwrap();
         assert_abs_diff_eq!(h.pnn50, 0.0, epsilon = 1e-9);
     }
 
     #[test]
     fn hrv_high_variability_has_higher_rmssd() {
-        let calm: Vec<f64> = (0..60).map(|i| 1000.0 + 60.0 * ((i as f64) * 0.3).sin()).collect();
-        let tense: Vec<f64> = (0..60).map(|i| 700.0 + 8.0 * ((i as f64) * 0.3).sin()).collect();
+        let calm: Vec<f64> = (0..60)
+            .map(|i| 1000.0 + 60.0 * ((i as f64) * 0.3).sin())
+            .collect();
+        let tense: Vec<f64> = (0..60)
+            .map(|i| 700.0 + 8.0 * ((i as f64) * 0.3).sin())
+            .collect();
         let hc = HrvMetrics::from_rr_ms(&calm).unwrap();
         let ht = HrvMetrics::from_rr_ms(&tense).unwrap();
         assert!(hc.rmssd_ms > ht.rmssd_ms);
@@ -144,17 +152,29 @@ mod tests {
     fn sleep_proxy_stages() {
         // Moving → Wake.
         assert_eq!(
-            estimate_stage(&SleepProxyInput { mean_hr_bpm: 65.0, rmssd_ms: 30.0, stillness: 0.2 }),
+            estimate_stage(&SleepProxyInput {
+                mean_hr_bpm: 65.0,
+                rmssd_ms: 30.0,
+                stillness: 0.2
+            }),
             SleepStage::Wake
         );
         // Still + low HR → deep N3.
         assert_eq!(
-            estimate_stage(&SleepProxyInput { mean_hr_bpm: 52.0, rmssd_ms: 30.0, stillness: 0.95 }),
+            estimate_stage(&SleepProxyInput {
+                mean_hr_bpm: 52.0,
+                rmssd_ms: 30.0,
+                stillness: 0.95
+            }),
             SleepStage::N3
         );
         // Still + elevated HR + high HRV → REM.
         assert_eq!(
-            estimate_stage(&SleepProxyInput { mean_hr_bpm: 75.0, rmssd_ms: 55.0, stillness: 0.9 }),
+            estimate_stage(&SleepProxyInput {
+                mean_hr_bpm: 75.0,
+                rmssd_ms: 55.0,
+                stillness: 0.9
+            }),
             SleepStage::Rem
         );
         assert!(stimulation_inhibited(SleepStage::N3));

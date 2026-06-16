@@ -145,9 +145,7 @@ impl SensorySafetyLimits {
         let original = params.intensity;
         params.intensity = params.intensity.min(self.max_intensity);
 
-        if params.modality == Modality::Light
-            && Self::in_photic_caution_band(params.envelope_hz)
-        {
+        if params.modality == Modality::Light && Self::in_photic_caution_band(params.envelope_hz) {
             if !self.photosensitivity_screen_cleared {
                 params.intensity = 0.0;
             } else {

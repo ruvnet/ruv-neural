@@ -56,9 +56,7 @@ pub use rvf_witness::{
 };
 pub use sensor::{SensorArray, SensorChannel, SensorType};
 pub use signal::{FrequencyBand, MultiChannelTimeSeries, SpectralFeatures, TimeFrequencyMap};
-pub use topology::{
-    CognitiveState, MincutResult, MultiPartition, SleepStage, TopologyMetrics,
-};
+pub use topology::{CognitiveState, MincutResult, MultiPartition, SleepStage, TopologyMetrics};
 pub use traits::{
     EmbeddingGenerator, GraphConstructor, NeuralMemory, RvfSerializable, SensorSource,
     SignalProcessor, StateDecoder, TopologyAnalyzer,
@@ -83,10 +81,7 @@ mod tests {
         assert!(err.to_string().contains("68"));
         assert!(err.to_string().contains("100"));
 
-        let err = RuvNeuralError::ChannelOutOfRange {
-            channel: 5,
-            max: 3,
-        };
+        let err = RuvNeuralError::ChannelOutOfRange { channel: 5, max: 3 };
         assert!(err.to_string().contains("5"));
         assert!(err.to_string().contains("3"));
 
@@ -647,7 +642,7 @@ mod tests {
     #[allow(clippy::approx_constant)]
     fn topology_metrics_serialize_roundtrip() {
         let metrics = TopologyMetrics {
-            global_mincut: 3.14,
+            global_mincut: 3.2,
             modularity: 0.55,
             global_efficiency: 0.72,
             local_efficiency: 0.68,
@@ -658,7 +653,7 @@ mod tests {
         };
         let json = serde_json::to_string(&metrics).unwrap();
         let m2: TopologyMetrics = serde_json::from_str(&json).unwrap();
-        assert!((m2.global_mincut - 3.14).abs() < 1e-10);
+        assert!((m2.global_mincut - 3.2).abs() < 1e-10);
         assert_eq!(m2.num_modules, 4);
     }
 }

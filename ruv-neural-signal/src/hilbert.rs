@@ -81,10 +81,7 @@ pub fn instantaneous_phase(signal: &[f64]) -> Vec<f64> {
 ///
 /// Returns |analytic(t)| for each sample.
 pub fn instantaneous_amplitude(signal: &[f64]) -> Vec<f64> {
-    hilbert_transform(signal)
-        .iter()
-        .map(|z| z.norm())
-        .collect()
+    hilbert_transform(signal).iter().map(|z| z.norm()).collect()
 }
 
 #[cfg(test)]

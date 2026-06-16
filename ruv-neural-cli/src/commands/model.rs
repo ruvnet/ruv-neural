@@ -23,7 +23,10 @@ fn parse_table(path: &str, skip_cols: usize, positive: i64) -> Result<Rows, Box<
 
     for line in text.lines() {
         let line = line.trim();
-        if line.is_empty() || line.starts_with('@') || line.starts_with('%') || line.starts_with('#')
+        if line.is_empty()
+            || line.starts_with('@')
+            || line.starts_with('%')
+            || line.starts_with('#')
         {
             continue;
         }
@@ -87,7 +90,11 @@ pub fn train(
     let n = x.len();
     let pos = y.iter().filter(|&&v| v == 1).count();
     println!("=== rUv Neural \u{2014} train ===");
-    println!("  rows={n}  features={}  positives={pos} ({:.1}%)", x[0].len(), 100.0 * pos as f64 / n as f64);
+    println!(
+        "  rows={n}  features={}  positives={pos} ({:.1}%)",
+        x[0].len(),
+        100.0 * pos as f64 / n as f64
+    );
 
     let order = if shuffle {
         shuffle_indices(n, seed)
@@ -97,14 +104,25 @@ pub fn train(
     let cut = ((n as f64) * (1.0 - test_frac)) as usize;
     let cut = cut.clamp(1, n.saturating_sub(1).max(1));
     let pick = |ids: &[usize]| -> Rows {
-        (ids.iter().map(|&i| x[i].clone()).collect(), ids.iter().map(|&i| y[i]).collect())
+        (
+            ids.iter().map(|&i| x[i].clone()).collect(),
+            ids.iter().map(|&i| y[i]).collect(),
+        )
     };
     let (xt, yt) = pick(&order[..cut]);
     let (xe, ye) = pick(&order[cut..]);
 
-    let cfg = TrainConfig { learning_rate: 0.5, l2: 1e-3, epochs };
+    let cfg = TrainConfig {
+        learning_rate: 0.5,
+        l2: 1e-3,
+        epochs,
+    };
     let (model, history) = LogisticRegression::fit(&xt, &yt, &cfg)?;
-    println!("  log-loss {:.4} -> {:.4} over {epochs} epochs", history[0], history.last().unwrap());
+    println!(
+        "  log-loss {:.4} -> {:.4} over {epochs} epochs",
+        history[0],
+        history.last().unwrap()
+    );
 
     if !xe.is_empty() {
         let m = model.evaluate(&xe, &ye);
@@ -138,7 +156,11 @@ pub fn info(input: &str) -> Result<(), Box<dyn Error>> {
     let bytes = std::fs::read(input)?;
     let container = RvfContainer::from_bytes(&bytes)?;
     println!("=== rUv Neural \u{2014} model-info ===");
-    println!("  file: {input} ({} bytes, {} segments)", bytes.len(), container.segments.len());
+    println!(
+        "  file: {input} ({} bytes, {} segments)",
+        bytes.len(),
+        container.segments.len()
+    );
 
     match container.verify_integrity() {
         Ok(()) => println!("  integrity: OK (CRC32C + content-hash)"),
@@ -150,14 +172,22 @@ pub fn info(input: &str) -> Result<(), Box<dyn Error>> {
         Err(_) => println!("  signature: (none)"),
     }
     match container_to_model(&container) {
-        Ok(model) => println!("  model: logistic-regression, {} features", model.num_features()),
+        Ok(model) => println!(
+            "  model: logistic-regression, {} features",
+            model.num_features()
+        ),
         Err(e) => println!("  model: not loadable \u{2014} {e}"),
     }
     Ok(())
 }
 
 /// `predict` — load+verify a `.rvf` model and score rows from a CSV.
-pub fn predict(model_path: &str, input: &str, skip_cols: usize, proba: bool) -> Result<(), Box<dyn Error>> {
+pub fn predict(
+    model_path: &str,
+    input: &str,
+    skip_cols: usize,
+    proba: bool,
+) -> Result<(), Box<dyn Error>> {
     let container = RvfContainer::from_bytes(&std::fs::read(model_path)?)?;
     container.verify_integrity()?;
     if let Ok(false) = verify_container_signature(&container) {
@@ -171,7 +201,11 @@ pub fn predict(model_path: &str, input: &str, skip_cols: usize, proba: bool) -> 
     let mut count = 0usize;
     for line in text.lines() {
         let line = line.trim();
-        if line.is_empty() || line.starts_with('@') || line.starts_with('%') || line.starts_with('#') {
+        if line.is_empty()
+            || line.starts_with('@')
+            || line.starts_with('%')
+            || line.starts_with('#')
+        {
             continue;
         }
         let feats: Option<Vec<f64>> = line

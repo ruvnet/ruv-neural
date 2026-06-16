@@ -214,10 +214,7 @@ pub fn wasm_topology_metrics(graph: &BrainGraph) -> Result<TopologyMetrics, Wasm
 /// Computes the `dimension` smallest non-trivial eigenvectors of the normalized
 /// Laplacian using repeated power iteration with deflation. This avoids any
 /// dependency on LAPACK/BLAS.
-pub fn wasm_embed(
-    graph: &BrainGraph,
-    dimension: usize,
-) -> Result<NeuralEmbedding, WasmGraphError> {
+pub fn wasm_embed(graph: &BrainGraph, dimension: usize) -> Result<NeuralEmbedding, WasmGraphError> {
     let n = graph.num_nodes;
     if n == 0 {
         return Err(WasmGraphError("Graph has no nodes".into()));
@@ -523,11 +520,7 @@ fn approximate_fiedler(adj: &[Vec<f64>], n: usize) -> f64 {
 }
 
 /// Estimate Newman-Girvan modularity for a two-way partition.
-fn estimate_modularity(
-    graph: &BrainGraph,
-    partition_a: &[usize],
-    partition_b: &[usize],
-) -> f64 {
+fn estimate_modularity(graph: &BrainGraph, partition_a: &[usize], partition_b: &[usize]) -> f64 {
     let total_weight = graph.total_weight();
     if total_weight == 0.0 {
         return 0.0;
@@ -581,8 +574,7 @@ fn compute_local_efficiency(adj: &[Vec<f64>], n: usize) -> f64 {
             for &v in &neighbors {
                 if u < v && adj[u][v] > 0.0 {
                     // Weighted triangle contribution.
-                    triangle_weight +=
-                        (adj[i][u] * adj[i][v] * adj[u][v]).cbrt();
+                    triangle_weight += (adj[i][u] * adj[i][v] * adj[u][v]).cbrt();
                 }
             }
         }

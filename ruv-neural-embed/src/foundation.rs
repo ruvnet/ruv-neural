@@ -81,10 +81,7 @@ impl ReferenceFoundationEmbedder {
         let mean = samples.iter().sum::<f64>() / n;
         let variance = samples.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / n;
         let mean_abs = samples.iter().map(|x| x.abs()).sum::<f64>() / n;
-        let line_length = samples
-            .windows(2)
-            .map(|w| (w[1] - w[0]).abs())
-            .sum::<f64>();
+        let line_length = samples.windows(2).map(|w| (w[1] - w[0]).abs()).sum::<f64>();
         [mean, variance, mean_abs, line_length]
     }
 }
@@ -128,7 +125,9 @@ impl FoundationEmbedder for ReferenceFoundationEmbedder {
         let mut out = vec![0.0f64; self.dim];
         for (i, slot) in out.iter_mut().enumerate() {
             let start = i * feats.len() / self.dim;
-            let end = ((i + 1) * feats.len() / self.dim).max(start + 1).min(feats.len());
+            let end = ((i + 1) * feats.len() / self.dim)
+                .max(start + 1)
+                .min(feats.len());
             let bucket = &feats[start..end];
             *slot = bucket.iter().sum::<f64>() / bucket.len() as f64;
         }
@@ -188,7 +187,7 @@ mod tests {
         let fm = ReferenceFoundationEmbedder::new(16);
         let e = fm.embed(&signal(2.0), 0.0, None).unwrap();
         let path = "/tmp/ruv_neural_fm_seam_test.rvf";
-        export_rvf(&[e.clone()], path).unwrap();
+        export_rvf(std::slice::from_ref(&e), path).unwrap();
         let back = import_rvf(path).unwrap();
         assert_eq!(back.len(), 1);
         assert_eq!(back[0].metadata.embedding_method, "foundation:reference");

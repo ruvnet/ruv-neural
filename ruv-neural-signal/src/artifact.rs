@@ -39,11 +39,8 @@ pub fn detect_eye_blinks(signal: &[f64], sample_rate: f64) -> Vec<(usize, usize)
 
     // Compute mean and std of the absolute filtered signal
     let mean = abs_signal.iter().sum::<f64>() / abs_signal.len() as f64;
-    let variance = abs_signal
-        .iter()
-        .map(|x| (x - mean).powi(2))
-        .sum::<f64>()
-        / abs_signal.len() as f64;
+    let variance =
+        abs_signal.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / abs_signal.len() as f64;
     let std_dev = variance.sqrt();
 
     // Threshold at mean + 3*std
@@ -110,11 +107,7 @@ pub fn detect_muscle_artifact(signal: &[f64], sample_rate: f64) -> Vec<(usize, u
 
     // Threshold at mean + 3*std of RMS
     let mean = rms_signal.iter().sum::<f64>() / n as f64;
-    let variance = rms_signal
-        .iter()
-        .map(|x| (x - mean).powi(2))
-        .sum::<f64>()
-        / n as f64;
+    let variance = rms_signal.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / n as f64;
     let std_dev = variance.sqrt();
     let threshold = mean + 3.0 * std_dev;
 
@@ -184,11 +177,7 @@ pub fn detect_cardiac(signal: &[f64], sample_rate: f64) -> Vec<usize> {
 
     // Threshold: mean + 0.5*std (tuned for cardiac artifacts which are periodic)
     let mean = integrated.iter().sum::<f64>() / n as f64;
-    let variance = integrated
-        .iter()
-        .map(|x| (x - mean).powi(2))
-        .sum::<f64>()
-        / n as f64;
+    let variance = integrated.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / n as f64;
     let std_dev = variance.sqrt();
     let threshold = mean + 0.5 * std_dev;
 
@@ -322,10 +311,7 @@ mod tests {
 
         let blinks = detect_eye_blinks(&signal, sr);
         // Should detect at least one blink near sample 2500
-        assert!(
-            !blinks.is_empty(),
-            "Should detect the simulated eye blink"
-        );
+        assert!(!blinks.is_empty(), "Should detect the simulated eye blink");
 
         // At least one range should overlap with 2400..2600
         let found = blinks.iter().any(|&(s, e)| s < 2600 && e > 2400);

@@ -212,8 +212,7 @@ impl EvidenceBundle {
         let bundle_chain_head = prev_hash;
         let acceptance = AcceptanceResult {
             target_state_identified: true,
-            verified_stimulus_delivered: report.num_receipts >= 1
-                && report.all_receipts_verified,
+            verified_stimulus_delivered: report.num_receipts >= 1 && report.all_receipts_verified,
             response_measured: report.total_steps >= 1,
             stopped_safely_outside_envelope: report.safe_stopped,
             goal_reached: report.goal_reached,
@@ -260,8 +259,11 @@ impl EvidenceBundle {
             if s.prev_hash != prev {
                 return false;
             }
-            let receipts_hashes: Vec<String> =
-                s.receipts.iter().map(|r| r.waveform_sha256.clone()).collect();
+            let receipts_hashes: Vec<String> = s
+                .receipts
+                .iter()
+                .map(|r| r.waveform_sha256.clone())
+                .collect();
             let payload = canonical_payload(
                 s.index,
                 s.timestamp_s,
@@ -294,7 +296,10 @@ impl EvidenceBundle {
             let pk: [u8; 32] = unhex(&sig.public_key)?.try_into().ok()?;
             let sg: [u8; 64] = unhex(&sig.signature)?.try_into().ok()?;
             let vk = VerifyingKey::from_bytes(&pk).ok()?;
-            Some(vk.verify(sig.head_hash.as_bytes(), &Signature::from_bytes(&sg)).is_ok())
+            Some(
+                vk.verify(sig.head_hash.as_bytes(), &Signature::from_bytes(&sg))
+                    .is_ok(),
+            )
         })()
         .unwrap_or(false);
         Some(ok)
@@ -302,7 +307,7 @@ impl EvidenceBundle {
 }
 
 fn unhex(s: &str) -> Option<Vec<u8>> {
-    if s.len() % 2 != 0 {
+    if !s.len().is_multiple_of(2) {
         return None;
     }
     (0..s.len())
@@ -368,7 +373,10 @@ fn breach_tag(r: &BreachReason) -> String {
         }
         BreachReason::HeartRateLow { bpm, min } => format!("HeartRateLow({bpm:.1}<{min:.1})"),
         BreachReason::ArousalHigh { value, max } => format!("ArousalHigh({value:.2}>{max:.2})"),
-        BreachReason::ExcessiveMotion { movement_index, max } => {
+        BreachReason::ExcessiveMotion {
+            movement_index,
+            max,
+        } => {
             format!("ExcessiveMotion({movement_index:.3}>{max:.3})")
         }
         BreachReason::SleepInhibited => "SleepInhibited".to_string(),

@@ -115,9 +115,8 @@ impl TopologyTracker {
 
         let mut transitions = Vec::new();
         for i in 1..self.history.len() {
-            let delta = (self.history[i].global_efficiency
-                - self.history[i - 1].global_efficiency)
-                .abs();
+            let delta =
+                (self.history[i].global_efficiency - self.history[i - 1].global_efficiency).abs();
             if delta > threshold {
                 transitions.push(self.history[i].timestamp);
             }
@@ -185,11 +184,14 @@ mod tests {
         assert!(tracker.is_empty());
 
         let g1 = make_graph(0.0, vec![make_edge(0, 1, 1.0), make_edge(2, 3, 1.0)]);
-        let g2 = make_graph(1.0, vec![
-            make_edge(0, 1, 1.0),
-            make_edge(1, 2, 1.0),
-            make_edge(2, 3, 1.0),
-        ]);
+        let g2 = make_graph(
+            1.0,
+            vec![
+                make_edge(0, 1, 1.0),
+                make_edge(1, 2, 1.0),
+                make_edge(2, 3, 1.0),
+            ],
+        );
 
         tracker.track(&g1);
         tracker.track(&g2);
@@ -221,22 +223,22 @@ mod tests {
 
         // Stable phase: few edges
         for i in 0..3 {
-            let g = make_graph(
-                i as f64,
-                vec![make_edge(0, 1, 0.5)],
-            );
+            let g = make_graph(i as f64, vec![make_edge(0, 1, 0.5)]);
             tracker.track(&g);
         }
 
         // Sudden change: fully connected
-        let g = make_graph(3.0, vec![
-            make_edge(0, 1, 1.0),
-            make_edge(0, 2, 1.0),
-            make_edge(0, 3, 1.0),
-            make_edge(1, 2, 1.0),
-            make_edge(1, 3, 1.0),
-            make_edge(2, 3, 1.0),
-        ]);
+        let g = make_graph(
+            3.0,
+            vec![
+                make_edge(0, 1, 1.0),
+                make_edge(0, 2, 1.0),
+                make_edge(0, 3, 1.0),
+                make_edge(1, 2, 1.0),
+                make_edge(1, 3, 1.0),
+                make_edge(2, 3, 1.0),
+            ],
+        );
         tracker.track(&g);
 
         // With a small threshold, we should detect the transition at t=3.0

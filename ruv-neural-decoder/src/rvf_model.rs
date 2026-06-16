@@ -37,8 +37,8 @@ pub fn model_to_container(model: &LogisticRegression) -> Result<RvfContainer> {
     };
     let meta = serde_json::to_vec(&descriptor)
         .map_err(|e| RuvNeuralError::Serialization(e.to_string()))?;
-    let model_bytes = serde_json::to_vec(model)
-        .map_err(|e| RuvNeuralError::Serialization(e.to_string()))?;
+    let model_bytes =
+        serde_json::to_vec(model).map_err(|e| RuvNeuralError::Serialization(e.to_string()))?;
 
     let mut container = RvfContainer::new();
     container.add_segment(SegmentType::Meta, FLAG_SEALED, meta);

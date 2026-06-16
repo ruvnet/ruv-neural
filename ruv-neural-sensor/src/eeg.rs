@@ -16,8 +16,8 @@ use std::f64::consts::PI;
 
 /// Standard 10-20 system electrode labels (21 channels).
 pub const STANDARD_10_20_LABELS: &[&str] = &[
-    "Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "T3", "C3", "Cz", "C4", "T4", "T5", "P3",
-    "Pz", "P4", "T6", "O1", "Oz", "O2", "A1",
+    "Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "T3", "C3", "Cz", "C4", "T4", "T5", "P3", "Pz",
+    "P4", "T6", "O1", "Oz", "O2", "A1",
 ];
 
 /// Standard 10-20 system approximate positions on a unit sphere (nasion-inion axis = Y).
@@ -58,7 +58,10 @@ pub struct EegConfig {
 
 impl Default for EegConfig {
     fn default() -> Self {
-        let labels: Vec<String> = STANDARD_10_20_LABELS.iter().map(|s| s.to_string()).collect();
+        let labels: Vec<String> = STANDARD_10_20_LABELS
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
         let num_channels = labels.len();
         let positions = standard_10_20_positions();
         Self {
@@ -198,9 +201,10 @@ impl EegArray {
 
     /// Check if all channels have acceptable impedance (< 5 kOhm).
     pub fn impedance_ok(&self) -> bool {
-        self.config.impedances_kohm.iter().all(|imp| {
-            imp.map_or(false, |v| v < 5.0)
-        })
+        self.config
+            .impedances_kohm
+            .iter()
+            .all(|imp| imp.map_or(false, |v| v < 5.0))
     }
 
     /// Get channels with high impedance (> threshold kOhm).
@@ -282,13 +286,7 @@ impl SensorSource for EegArray {
 
         // Pre-compute channel properties.
         let labels: Vec<String> = (0..self.config.num_channels)
-            .map(|i| {
-                self.config
-                    .labels
-                    .get(i)
-                    .cloned()
-                    .unwrap_or_default()
-            })
+            .map(|i| self.config.labels.get(i).cloned().unwrap_or_default())
             .collect();
 
         // Generate per-sample shared source oscillations first, then mix

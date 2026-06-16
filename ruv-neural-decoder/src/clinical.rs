@@ -37,7 +37,11 @@ impl ClinicalScorer {
         // Compute means.
         let mean_mincut = healthy_data.iter().map(|m| m.global_mincut).sum::<f64>() / n;
         let mean_mod = healthy_data.iter().map(|m| m.modularity).sum::<f64>() / n;
-        let mean_eff = healthy_data.iter().map(|m| m.global_efficiency).sum::<f64>() / n;
+        let mean_eff = healthy_data
+            .iter()
+            .map(|m| m.global_efficiency)
+            .sum::<f64>()
+            / n;
         let mean_loc = healthy_data.iter().map(|m| m.local_efficiency).sum::<f64>() / n;
         let mean_ent = healthy_data.iter().map(|m| m.graph_entropy).sum::<f64>() / n;
         let mean_fiedler = healthy_data.iter().map(|m| m.fiedler_value).sum::<f64>() / n;
@@ -56,19 +60,10 @@ impl ClinicalScorer {
         // Compute standard deviations.
         let std_mincut = std_dev(healthy_data.iter().map(|m| m.global_mincut), mean_mincut);
         let std_mod = std_dev(healthy_data.iter().map(|m| m.modularity), mean_mod);
-        let std_eff = std_dev(
-            healthy_data.iter().map(|m| m.global_efficiency),
-            mean_eff,
-        );
-        let std_loc = std_dev(
-            healthy_data.iter().map(|m| m.local_efficiency),
-            mean_loc,
-        );
+        let std_eff = std_dev(healthy_data.iter().map(|m| m.global_efficiency), mean_eff);
+        let std_loc = std_dev(healthy_data.iter().map(|m| m.local_efficiency), mean_loc);
         let std_ent = std_dev(healthy_data.iter().map(|m| m.graph_entropy), mean_ent);
-        let std_fiedler = std_dev(
-            healthy_data.iter().map(|m| m.fiedler_value),
-            mean_fiedler,
-        );
+        let std_fiedler = std_dev(healthy_data.iter().map(|m| m.fiedler_value), mean_fiedler);
 
         self.healthy_std = TopologyMetrics {
             global_mincut: std_mincut,
@@ -126,9 +121,7 @@ impl ClinicalScorer {
         let modularity_component = sigmoid(-z[1], 2.0);
         let local_eff_component = sigmoid(z[3], 2.0);
 
-        let risk = 0.4 * mincut_component
-            + 0.3 * modularity_component
-            + 0.3 * local_eff_component;
+        let risk = 0.4 * mincut_component + 0.3 * modularity_component + 0.3 * local_eff_component;
 
         risk.clamp(0.0, 1.0)
     }
@@ -146,9 +139,7 @@ impl ClinicalScorer {
         let fiedler_component = sigmoid(-z[5], 2.0);
         let entropy_component = sigmoid(z[4].abs(), 1.5);
 
-        let risk = 0.4 * efficiency_component
-            + 0.35 * fiedler_component
-            + 0.25 * entropy_component;
+        let risk = 0.4 * efficiency_component + 0.35 * fiedler_component + 0.25 * entropy_component;
 
         risk.clamp(0.0, 1.0)
     }
@@ -222,7 +213,11 @@ fn std_dev(values: impl Iterator<Item = f64>, mean: f64) -> f64 {
     let n = vals.len() as f64;
     let variance = vals.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / (n - 1.0);
     let s = variance.sqrt();
-    if s < 1e-10 { 1.0 } else { s }
+    if s < 1e-10 {
+        1.0
+    } else {
+        s
+    }
 }
 
 /// Sigmoid function mapping a z-score to `[0, 1]`.
@@ -318,9 +313,21 @@ mod tests {
         let epi = scorer.epilepsy_risk(&current);
         let dep = scorer.depression_risk(&current);
 
-        assert!(alz >= 0.0 && alz <= 1.0, "Alzheimer risk out of range: {}", alz);
-        assert!(epi >= 0.0 && epi <= 1.0, "Epilepsy risk out of range: {}", epi);
-        assert!(dep >= 0.0 && dep <= 1.0, "Depression risk out of range: {}", dep);
+        assert!(
+            (0.0..=1.0).contains(&alz),
+            "Alzheimer risk out of range: {}",
+            alz
+        );
+        assert!(
+            (0.0..=1.0).contains(&epi),
+            "Epilepsy risk out of range: {}",
+            epi
+        );
+        assert!(
+            (0.0..=1.0).contains(&dep),
+            "Depression risk out of range: {}",
+            dep
+        );
     }
 
     #[test]
@@ -339,7 +346,11 @@ mod tests {
 
         // After learning, healthy data should have low deviation.
         let deviation = scorer.deviation_score(&make_metrics(5.0, 0.4, 0.3, 2.0));
-        assert!(deviation < 1.0, "Post-learning deviation too high: {}", deviation);
+        assert!(
+            deviation < 1.0,
+            "Post-learning deviation too high: {}",
+            deviation
+        );
     }
 
     #[test]
@@ -350,7 +361,7 @@ mod tests {
             for mod_val in [0.0, 0.4, 1.0] {
                 let m = make_metrics(mincut, mod_val, 0.3, 2.0);
                 let h = scorer.brain_health_index(&m);
-                assert!(h >= 0.0 && h <= 1.0, "Health index out of range: {}", h);
+                assert!((0.0..=1.0).contains(&h), "Health index out of range: {}", h);
             }
         }
     }

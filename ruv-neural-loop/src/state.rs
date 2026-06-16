@@ -22,7 +22,11 @@ pub struct NeuralFeatures {
 impl NeuralFeatures {
     /// A neutral baseline (no entrainment, mid relaxation/connectivity).
     pub fn neutral() -> Self {
-        Self { gamma_index: 0.1, alpha_index: 0.4, connectivity: 0.4 }
+        Self {
+            gamma_index: 0.1,
+            alpha_index: 0.4,
+            connectivity: 0.4,
+        }
     }
 }
 
@@ -92,7 +96,11 @@ impl StateObservation {
     /// Construct from physiology only.
     pub fn from_physio(physio: PhysioMetrics) -> Self {
         let timestamp_s = physio.timestamp_s;
-        Self { timestamp_s, physio, neural: None }
+        Self {
+            timestamp_s,
+            physio,
+            neural: None,
+        }
     }
 
     /// Attach neural features.

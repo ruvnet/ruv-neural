@@ -93,9 +93,7 @@ impl NeuralDataPacket {
             RuvNeuralError::Serialization(format!("Failed to deserialize packet: {e}"))
         })?;
         if packet.header.magic != PACKET_MAGIC {
-            return Err(RuvNeuralError::Serialization(
-                "Invalid magic bytes".into(),
-            ));
+            return Err(RuvNeuralError::Serialization("Invalid magic bytes".into()));
         }
         Ok(packet)
     }
