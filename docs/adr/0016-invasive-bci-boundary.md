@@ -2,8 +2,11 @@
 
 ## Status
 
-Accepted — reinforces and extends ADR-0001. The interoperability targets
-(NWB / LSL / BIDS) are **Proposed** as a roadmap; the scope boundary is binding now.
+Accepted — reinforces and extends ADR-0001; the scope boundary is binding now.
+**BIDS-EEG** interop ships in `ruv-neural-viz/src/bids.rs` (`export_bids_eeg`
+writes a valid BIDS dataset via the BrainVision representation, openable in
+MNE-Python/EEGLAB/FieldTrip). **NWB** (HDF5) and **LSL** (a live network
+protocol) require external C runtimes and remain a **Proposed** roadmap.
 
 ## Context
 

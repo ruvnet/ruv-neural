@@ -359,6 +359,13 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             source_hash: "".into(),
             status: "verified".into(),
         },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-embed".into(),
+            capability: "Pluggable foundation-model embedding backend (method-tagged, inference-only)".into(),
+            evidence: "foundation::tests::reference_embedder_is_deterministic, ..::output_is_unit_norm_and_tagged".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
         // Memory
         CapabilityAttestation {
             crate_name: "ruv-neural-memory".into(),
@@ -371,6 +378,13 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             crate_name: "ruv-neural-memory".into(),
             capability: "Embedding store with capacity management".into(),
             evidence: "tests in store.rs".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-memory".into(),
+            capability: "RVF INDEX segment: pack HNSW ANN graph + vectors into one .rvf".into(),
+            evidence: "rvf_index::tests::index_survives_container_roundtrip, ..::indexed_container_has_all_segments".into(),
             source_hash: "".into(),
             status: "verified".into(),
         },
@@ -534,6 +548,20 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             crate_name: "ruv-neural-loop".into(),
             capability: "Portable evidence bundle (ruflo-evidence/1) with browser-recomputable hash chain".into(),
             evidence: "tests::evidence_bundle_builds_and_chain_verifies, ..._evidence_bundle_chain_detects_tampering".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-loop".into(),
+            capability: "Privacy-preserving federated personalization (FedAvg + differential privacy, FEDERATED_MANIFEST)".into(),
+            evidence: "federated::tests::fedavg_is_count_weighted_mean, ..::dp_reports_budget_and_perturbs, ..::dp_clipping_bounds_a_huge_update".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-viz".into(),
+            capability: "BIDS-EEG export (BrainVision) for cross-tool interoperability".into(),
+            evidence: "bids::tests::writes_a_valid_bids_layout, ..::round_trips_sample_values".into(),
             source_hash: "".into(),
             status: "verified".into(),
         },

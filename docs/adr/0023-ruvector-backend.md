@@ -2,10 +2,12 @@
 
 ## Status
 
-Accepted — partially implemented. The RVF container substrate (points 1–3
-below) ships in `ruv-neural-core`; remaining points (HNSW wiring, federation,
-ONNX inference) stay roadmap. Does **not** alter the ADR-0001 wellness scope —
-RuVector is infrastructure, not a new sensing or stimulation capability.
+Accepted — implemented. The RVF container substrate (points 1–3), HNSW `INDEX`
+packing (point 4), and the federated manifest (point 5) ship across
+`ruv-neural-core`, `ruv-neural-memory`, and `ruv-neural-loop`. Only ONNX
+inference hosting and cross-repo mincut consolidation (point 6) stay roadmap.
+Does **not** alter the ADR-0001 wellness scope — RuVector is infrastructure, not
+a new sensing or stimulation capability.
 
 ### Implemented
 
@@ -27,6 +29,11 @@ RuVector's **RVFS** container framing (verified against `ruvnet/ruvector`,
 - `ruv-neural-embed/src/rvf_export.rs` — `.rvf` files are now the binary
   container (was ad-hoc JSON), reconciling the two divergent formats (point 2);
   JSON remains only as an explicit debug string form.
+- `ruv-neural-memory/src/rvf_index.rs` — `build_indexed_container` /
+  `load_indexed_container` pack the existing HNSW ANN graph into an `INDEX`
+  segment so one `.rvf` carries vectors *and* a ready-to-query graph (point 4).
+- `ruv-neural-loop/src/federated.rs` — federated averaging + differential
+  privacy recorded in a `FEDERATED_MANIFEST` segment (point 5; see ADR-0021).
 
 Profile note: upstream uses SHAKE-256 for hashing; to stay dependency-free this
 profile substitutes SHA-256 (same 256-bit size, same byte layout) and records

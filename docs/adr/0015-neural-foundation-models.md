@@ -2,9 +2,14 @@
 
 ## Status
 
-Proposed — research direction. The default embedding path stays the lightweight,
-dependency-free methods already in `ruv-neural-embed`; foundation-model
-embeddings are an *opt-in* backend behind the existing `Embedder` interface.
+Proposed — research direction; backend **seam implemented**. The default
+embedding path stays the lightweight, dependency-free methods already in
+`ruv-neural-embed`; foundation-model embeddings are an *opt-in* backend behind
+the `FoundationEmbedder` trait (`ruv-neural-embed/src/foundation.rs`), which
+produces a standard method-tagged `NeuralEmbedding`. A dependency-free
+`ReferenceFoundationEmbedder` exercises the seam end-to-end; real model backends
+(LaBraM/REVE via ONNX, behind the `fm` feature) remain **Proposed** until they
+beat the lightweight baselines out-of-sample (point 4).
 
 ## Context
 
