@@ -2,8 +2,12 @@
 
 ## Status
 
-Proposed — design principles for any future personalization/learning path. The
-data-minimization stance is binding now; federated/DP mechanisms are a roadmap.
+Accepted — implemented. The data-minimization stance is binding now, and the
+federated/DP mechanisms it called for now ship in
+`ruv-neural-loop/src/federated.rs`: federated averaging over `PersonalBaseline`
+summary statistics (no raw signals leave the device), the Gaussian mechanism
+(L2 clipping + calibrated noise) with `(ε, δ)` budget reporting, and a
+`FEDERATED_MANIFEST` RVF segment recording each round's privacy parameters.
 
 ## Context
 
