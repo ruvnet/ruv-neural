@@ -9,10 +9,12 @@
 
 pub mod animation;
 pub mod ascii;
+pub mod bids;
 pub mod colormap;
 pub mod export;
 pub mod layout;
 
 pub use animation::{AnimatedEdge, AnimatedNode, AnimationFrame, AnimationFrames, LayoutType};
+pub use bids::{export_bids_eeg, BidsMetadata};
 pub use colormap::ColorMap;
 pub use layout::{AnatomicalLayout, ForceDirectedLayout};

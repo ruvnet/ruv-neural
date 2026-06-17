@@ -92,9 +92,7 @@ impl PreprocessingPipeline {
     /// channel independently. Artifact rejection operates on all channels.
     pub fn process(&self, data: &MultiChannelTimeSeries) -> Result<MultiChannelTimeSeries> {
         if data.num_channels == 0 || data.num_samples == 0 {
-            return Err(RuvNeuralError::Signal(
-                "Cannot process empty data".into(),
-            ));
+            return Err(RuvNeuralError::Signal("Cannot process empty data".into()));
         }
 
         let mut current = data.clone();
@@ -102,22 +100,16 @@ impl PreprocessingPipeline {
         for stage in &self.stages {
             current = match stage {
                 PipelineStage::Notch(filter) => {
-                    let new_data: Vec<Vec<f64>> = current
-                        .data
-                        .iter()
-                        .map(|ch| filter.process(ch))
-                        .collect();
+                    let new_data: Vec<Vec<f64>> =
+                        current.data.iter().map(|ch| filter.process(ch)).collect();
                     MultiChannelTimeSeries {
                         data: new_data,
                         ..current
                     }
                 }
                 PipelineStage::Bandpass(filter) => {
-                    let new_data: Vec<Vec<f64>> = current
-                        .data
-                        .iter()
-                        .map(|ch| filter.process(ch))
-                        .collect();
+                    let new_data: Vec<Vec<f64>> =
+                        current.data.iter().map(|ch| filter.process(ch)).collect();
                     MultiChannelTimeSeries {
                         data: new_data,
                         ..current

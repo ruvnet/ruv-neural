@@ -51,9 +51,9 @@ impl KnnDecoder {
         let mut distances: Vec<(f64, &CognitiveState)> = self
             .labeled_embeddings
             .iter()
-            .filter_map(|(stored, state)| {
+            .map(|(stored, state)| {
                 let dist = euclidean_distance(&embedding.vector, &stored.vector);
-                Some((dist, state))
+                (dist, state)
             })
             .collect();
 
@@ -104,10 +104,7 @@ impl StateDecoder for KnnDecoder {
         Ok(self.predict(embedding))
     }
 
-    fn decode_with_confidence(
-        &self,
-        embedding: &NeuralEmbedding,
-    ) -> Result<(CognitiveState, f64)> {
+    fn decode_with_confidence(&self, embedding: &NeuralEmbedding) -> Result<(CognitiveState, f64)> {
         if self.labeled_embeddings.is_empty() {
             return Err(RuvNeuralError::Decoder(
                 "KNN decoder has no training data".into(),
@@ -156,18 +153,9 @@ mod tests {
             (make_embedding(vec![1.0, 0.0, 0.0]), CognitiveState::Rest),
             (make_embedding(vec![1.1, 0.1, 0.0]), CognitiveState::Rest),
             (make_embedding(vec![0.9, 0.0, 0.1]), CognitiveState::Rest),
-            (
-                make_embedding(vec![0.0, 1.0, 0.0]),
-                CognitiveState::Focused,
-            ),
-            (
-                make_embedding(vec![0.1, 1.1, 0.0]),
-                CognitiveState::Focused,
-            ),
-            (
-                make_embedding(vec![0.0, 0.9, 0.1]),
-                CognitiveState::Focused,
-            ),
+            (make_embedding(vec![0.0, 1.0, 0.0]), CognitiveState::Focused),
+            (make_embedding(vec![0.1, 1.1, 0.0]), CognitiveState::Focused),
+            (make_embedding(vec![0.0, 0.9, 0.1]), CognitiveState::Focused),
         ]);
 
         // Query near the Rest cluster.
@@ -198,7 +186,7 @@ mod tests {
         ]);
         let query = make_embedding(vec![0.5, 0.5]);
         let (_, confidence) = decoder.predict_with_confidence(&query);
-        assert!(confidence >= 0.0 && confidence <= 1.0);
+        assert!((0.0..=1.0).contains(&confidence));
     }
 
     #[test]

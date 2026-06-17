@@ -23,7 +23,9 @@ impl RespirationMetrics {
     /// Compute respiration metrics from a waveform sampled at `fs` Hz.
     pub fn from_waveform(samples: &[f64], fs: f64) -> Result<Self, BiosenseError> {
         if !fs.is_finite() || fs <= 0.0 {
-            return Err(BiosenseError::Invalid("fs must be finite and positive".into()));
+            return Err(BiosenseError::Invalid(
+                "fs must be finite and positive".into(),
+            ));
         }
         if samples.len() < 4 {
             return Err(BiosenseError::InsufficientData {
@@ -53,7 +55,11 @@ impl RespirationMetrics {
                     }
                     j += 1;
                 }
-                if peak_idxs.last().map(|&p| peak - p >= refractory).unwrap_or(true) {
+                if peak_idxs
+                    .last()
+                    .map(|&p| peak - p >= refractory)
+                    .unwrap_or(true)
+                {
                     peak_idxs.push(peak);
                 }
                 i = j.max(i + 1);
@@ -77,9 +83,9 @@ impl RespirationMetrics {
                 .map(|w| (w[1] - w[0]) as f64 / fs)
                 .collect();
             let m = intervals.iter().sum::<f64>() / intervals.len() as f64;
-            let sd =
-                (intervals.iter().map(|x| (x - m).powi(2)).sum::<f64>() / intervals.len() as f64)
-                    .sqrt();
+            let sd = (intervals.iter().map(|x| (x - m).powi(2)).sum::<f64>()
+                / intervals.len() as f64)
+                .sqrt();
             if m > 1e-9 {
                 sd / m
             } else {

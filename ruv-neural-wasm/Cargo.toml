@@ -15,12 +15,18 @@ console_error_panic_hook = []
 
 [dependencies]
 ruv-neural-core = { workspace = true }
+ruv-neural-decoder = { workspace = true }
 wasm-bindgen = { workspace = true }
 js-sys = { workspace = true }
 web-sys = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = "0.6"
+
+# Enable getrandom's JS backend when targeting the browser, so the core
+# rand/ed25519 chain compiles for wasm32-unknown-unknown.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.2", features = ["js"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

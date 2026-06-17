@@ -32,11 +32,7 @@ impl NodeAggregator {
     }
 
     /// Buffer a packet from a specific node.
-    pub fn receive_packet(
-        &mut self,
-        node_id: usize,
-        packet: NeuralDataPacket,
-    ) -> Result<()> {
+    pub fn receive_packet(&mut self, node_id: usize, packet: NeuralDataPacket) -> Result<()> {
         if node_id >= self.node_count {
             return Err(RuvNeuralError::Sensor(format!(
                 "Node ID {node_id} out of range (max {})",
@@ -65,11 +61,7 @@ impl NodeAggregator {
         let mut indices: Vec<usize> = Vec::with_capacity(self.node_count);
         for buf in &self.buffers {
             let found = buf.iter().position(|p| {
-                let diff = if p.header.timestamp_us >= ref_ts {
-                    p.header.timestamp_us - ref_ts
-                } else {
-                    ref_ts - p.header.timestamp_us
-                };
+                let diff = p.header.timestamp_us.abs_diff(ref_ts);
                 diff <= self.sync_tolerance_us
             });
             match found {
@@ -123,7 +115,9 @@ impl NodeAggregator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::protocol::{ChannelData, NeuralDataPacket, PacketHeader, PACKET_MAGIC, PROTOCOL_VERSION};
+    use crate::protocol::{
+        ChannelData, NeuralDataPacket, PacketHeader, PACKET_MAGIC, PROTOCOL_VERSION,
+    };
 
     fn make_packet(num_channels: u8, timestamp_us: u64, samples: Vec<i16>) -> NeuralDataPacket {
         let channels = (0..num_channels)

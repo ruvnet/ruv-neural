@@ -23,3 +23,6 @@ num-traits = { workspace = true }
 ed25519-dalek = { workspace = true }
 sha2 = { workspace = true }
 rand = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

@@ -57,8 +57,7 @@ impl TopologyEmbedder {
         let adj = graph.adjacency_matrix();
         let degrees: Vec<f64> = (0..n).map(|i| graph.node_degree(i)).collect();
 
-        let mut sorted_degrees: Vec<(usize, f64)> =
-            degrees.iter().copied().enumerate().collect();
+        let mut sorted_degrees: Vec<(usize, f64)> = degrees.iter().copied().enumerate().collect();
         sorted_degrees.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
         let mid = n / 2;
 
@@ -341,8 +340,7 @@ impl TopologyEmbedder {
                 0.0
             };
             let std_deg = if n > 0 {
-                let var =
-                    degrees.iter().map(|d| (d - mean_deg).powi(2)).sum::<f64>() / n as f64;
+                let var = degrees.iter().map(|d| (d - mean_deg).powi(2)).sum::<f64>() / n as f64;
                 var.sqrt()
             } else {
                 0.0
@@ -452,9 +450,18 @@ mod tests {
 
         let dim = emb.dimension;
         // Last three values: density, clustering, components
-        assert!((emb.vector[dim - 3] - 1.0).abs() < 1e-10, "density should be 1.0");
-        assert!((emb.vector[dim - 2] - 1.0).abs() < 1e-10, "clustering should be 1.0");
-        assert!((emb.vector[dim - 1] - 1.0).abs() < 1e-10, "should be 1 component");
+        assert!(
+            (emb.vector[dim - 3] - 1.0).abs() < 1e-10,
+            "density should be 1.0"
+        );
+        assert!(
+            (emb.vector[dim - 2] - 1.0).abs() < 1e-10,
+            "clustering should be 1.0"
+        );
+        assert!(
+            (emb.vector[dim - 1] - 1.0).abs() < 1e-10,
+            "should be 1 component"
+        );
     }
 
     #[test]

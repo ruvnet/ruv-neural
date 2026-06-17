@@ -141,9 +141,7 @@ impl AdcReader {
 
         let num_channels = self.config.channels.len();
         if num_channels == 0 {
-            return Err(RuvNeuralError::Sensor(
-                "No ADC channels configured".into(),
-            ));
+            return Err(RuvNeuralError::Sensor("No ADC channels configured".into()));
         }
 
         let mut result = Vec::with_capacity(num_channels);
@@ -237,8 +235,8 @@ impl AdcReader {
             for i in 0..buf_len {
                 let t = i as f64 / sample_rate;
                 // Sine wave at ~90% of full scale to avoid clipping
-                let value = 0.9 * (max_raw as f64)
-                    * (2.0 * std::f64::consts::PI * frequency_hz * t).sin();
+                let value =
+                    0.9 * (max_raw as f64) * (2.0 * std::f64::consts::PI * frequency_hz * t).sin();
                 self.buffer[ch_idx][i] = value.round() as i16;
             }
         }
@@ -273,7 +271,10 @@ mod tests {
         // fT = 1650.4 * 2.0 + 10.0 = ~3310.8
         let ft = reader.to_femtotesla(2048, channel);
         let expected = (2048.0 / 4095.0) * 3300.0 * 2.0 + 10.0;
-        assert!((ft - expected).abs() < 1e-6, "got {ft}, expected {expected}");
+        assert!(
+            (ft - expected).abs() < 1e-6,
+            "got {ft}, expected {expected}"
+        );
     }
 
     #[test]

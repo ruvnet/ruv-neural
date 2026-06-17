@@ -291,8 +291,16 @@ mod tests {
         let g = complete_graph(6);
         let f = fiedler_value(&g);
         // For K_n, all non-zero eigenvalues of L are n. So fiedler = n = 6.
-        assert!(f > 0.0, "Connected graph should have fiedler > 0, got {}", f);
-        assert!((f - 6.0).abs() < 0.5, "K6 fiedler should be ~6.0, got {}", f);
+        assert!(
+            f > 0.0,
+            "Connected graph should have fiedler > 0, got {}",
+            f
+        );
+        assert!(
+            (f - 6.0).abs() < 0.5,
+            "K6 fiedler should be ~6.0, got {}",
+            f
+        );
     }
 
     #[test]
@@ -306,7 +314,11 @@ mod tests {
             atlas: Atlas::Custom(4),
         };
         let f = fiedler_value(&g);
-        assert!(f < 1e-6, "Disconnected graph should have fiedler ~0, got {}", f);
+        assert!(
+            f < 1e-6,
+            "Disconnected graph should have fiedler ~0, got {}",
+            f
+        );
     }
 
     #[test]

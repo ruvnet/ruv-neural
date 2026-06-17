@@ -64,12 +64,14 @@ pub fn run(
     println!("=== rUv Neural — Closed-Loop Neuromodulation (Ruflo) ===\n");
     println!("  Target:    {target}  ({:?})", controller.target().label);
     println!("  Protocol:  {protocol}");
-    println!(
-        "  Channels:  safe external sensory only (light / audio / haptic, 40 Hz)"
-    );
+    println!("  Channels:  safe external sensory only (light / audio / haptic, 40 Hz)");
     println!(
         "  Screen:    photosensitivity {}",
-        if screened { "CLEARED" } else { "not cleared (light disabled)" }
+        if screened {
+            "CLEARED"
+        } else {
+            "not cleared (light disabled)"
+        }
     );
     if let Some(p) = perturb {
         println!("  Perturb:   arousal spike injected at step {p}");
@@ -80,7 +82,11 @@ pub fn run(
 
     // Per-step trace.
     for (i, step) in trace.iter().enumerate() {
-        let breach = if step.envelope.is_breach() { "  [ENVELOPE BREACH]" } else { "" };
+        let breach = if step.envelope.is_breach() {
+            "  [ENVELOPE BREACH]"
+        } else {
+            ""
+        };
         println!(
             "  step {:>2} | {:<11} | dist {:.3} | intensity {:.2} | {} stim{}",
             i + 1,
@@ -105,7 +111,11 @@ pub fn run(
     println!(
         "  Receipts:           {} ({})",
         report.num_receipts,
-        if report.all_receipts_verified { "all verified" } else { "VERIFICATION FAILED" }
+        if report.all_receipts_verified {
+            "all verified"
+        } else {
+            "VERIFICATION FAILED"
+        }
     );
     if report.safe_stopped {
         println!("  Stop reasons:");
@@ -115,20 +125,32 @@ pub fn run(
     }
     println!(
         "  Audit chain:        {} ({} records, head {}...)",
-        if report.audit_chain_valid { "VALID" } else { "INVALID" },
+        if report.audit_chain_valid {
+            "VALID"
+        } else {
+            "INVALID"
+        },
         report.audit_records,
         &report.audit_head_hash[..16.min(report.audit_head_hash.len())]
     );
     println!(
         "  Acceptance test:    {}",
-        if report.passes_acceptance() { "PASS" } else { "FAIL" }
+        if report.passes_acceptance() {
+            "PASS"
+        } else {
+            "FAIL"
+        }
     );
 
     if sign {
         let signed = controller.sign_session();
         println!(
             "  Signed head:        {} (sig {}...)",
-            if signed.verify() { "Ed25519 OK" } else { "INVALID" },
+            if signed.verify() {
+                "Ed25519 OK"
+            } else {
+                "INVALID"
+            },
             &signed.signature[..16]
         );
     }
@@ -150,7 +172,11 @@ pub fn run(
         println!(
             "  Evidence bundle written to {} (chain {})",
             path.display(),
-            if bundle.verify_chain() { "VALID" } else { "INVALID" }
+            if bundle.verify_chain() {
+                "VALID"
+            } else {
+                "INVALID"
+            }
         );
     }
 
@@ -166,17 +192,53 @@ mod tests {
 
     #[test]
     fn neuromod_relaxed_session_passes() {
-        run("relaxed", "audio-haptic", 64, 7, None, false, None, None, None, false).unwrap();
+        run(
+            "relaxed",
+            "audio-haptic",
+            64,
+            7,
+            None,
+            false,
+            None,
+            None,
+            None,
+            false,
+        )
+        .unwrap();
     }
 
     #[test]
     fn neuromod_safe_stop_session() {
-        run("relaxed", "audio-haptic", 64, 7, Some(5), false, None, None, None, false).unwrap();
+        run(
+            "relaxed",
+            "audio-haptic",
+            64,
+            7,
+            Some(5),
+            false,
+            None,
+            None,
+            None,
+            false,
+        )
+        .unwrap();
     }
 
     #[test]
     fn neuromod_unknown_target_errors() {
-        assert!(run("nope", "audio-haptic", 64, 7, None, false, None, None, None, false).is_err());
+        assert!(run(
+            "nope",
+            "audio-haptic",
+            64,
+            7,
+            None,
+            false,
+            None,
+            None,
+            None,
+            false
+        )
+        .is_err());
     }
 
     #[test]

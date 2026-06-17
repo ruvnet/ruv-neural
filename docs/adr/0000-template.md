@@ -41,6 +41,23 @@ ADRs are immutable once accepted; revisions are new ADRs that supersede.
 | [0011](0011-acceptance-test.md) | Acceptance test definition |
 | [0012](0012-feedback-smoothing.md) | Feedback smoothing & divergence detection |
 | [0014](0014-web-console.md) | rUv Neural UI — web console for Ruflo (Demo + Replay) |
+| [0015](0015-neural-foundation-models.md) | Neural foundation-model embeddings (optional, pluggable backend) |
+| [0016](0016-invasive-bci-boundary.md) | Invasive BCI landscape & the non-invasive scope boundary (interop, not parity) |
+| [0017](0017-opm-meg-frontend.md) | Wearable OPM-MEG front-end (driver abstraction) |
+| [0018](0018-nv-diamond-roadmap.md) | NV-diamond quantum magnetometry: aspirational front-end, honest MEG gap |
+| [0019](0019-genus-evidence-base.md) | Clinical evidence base for 40 Hz GENUS & claims discipline |
+| [0020](0020-therapeutic-neuromod-out-of-scope.md) | Adaptive/closed-loop *therapeutic* neuromodulation is out of scope |
+| [0021](0021-privacy-preserving-personalization.md) | Privacy-preserving, on-device & federated personalization |
+| [0022](0022-neural-data-governance.md) | Neural-data governance & neurorights compliance |
+| [0023](0023-ruvector-backend.md) | RuVector as the embedding store, ANN retrieval & inference backend |
+
+> ADRs 0015–0023 form the **emerging-medical-breakthroughs research series**:
+> each records how rUv Neural relates to a 2024–2026 state-of-the-art frontier
+> (neural foundation models, invasive BCI, wearable OPM-MEG, NV-diamond
+> magnetometry, GENUS clinical evidence, therapeutic closed-loop neuromodulation,
+> privacy-preserving learning, and neural-data governance) while staying inside
+> the ADR-0001 wellness boundary. They carry a **References** section citing
+> primary SOTA literature.
 
 ## Consequences
 

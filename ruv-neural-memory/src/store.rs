@@ -58,10 +58,7 @@ impl NeuralMemoryStore {
         let idx = self.embeddings.len();
 
         if let Some(ref subject_id) = embedding.metadata.subject_id {
-            self.index
-                .entry(subject_id.clone())
-                .or_default()
-                .push(idx);
+            self.index.entry(subject_id.clone()).or_default().push(idx);
         }
 
         self.embeddings.push_back(embedding);
@@ -91,9 +88,7 @@ impl NeuralMemoryStore {
             .embeddings
             .iter()
             .enumerate()
-            .filter_map(|(i, emb)| {
-                emb.euclidean_distance(query).ok().map(|d| (i, d))
-            })
+            .filter_map(|(i, emb)| emb.euclidean_distance(query).ok().map(|d| (i, d)))
             .collect();
 
         distances.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
@@ -183,11 +178,7 @@ impl NeuralMemory for NeuralMemoryStore {
         Ok(())
     }
 
-    fn query_nearest(
-        &self,
-        embedding: &NeuralEmbedding,
-        k: usize,
-    ) -> Result<Vec<NeuralEmbedding>> {
+    fn query_nearest(&self, embedding: &NeuralEmbedding, k: usize) -> Result<Vec<NeuralEmbedding>> {
         let results = NeuralMemoryStore::query_nearest(self, embedding, k);
         Ok(results
             .into_iter()
@@ -334,15 +325,9 @@ mod tests {
     #[test]
     fn query_time_range() {
         let mut store = NeuralMemoryStore::new(100);
-        store
-            .store(make_embedding(vec![1.0], "a", 1.0))
-            .unwrap();
-        store
-            .store(make_embedding(vec![2.0], "a", 5.0))
-            .unwrap();
-        store
-            .store(make_embedding(vec![3.0], "a", 10.0))
-            .unwrap();
+        store.store(make_embedding(vec![1.0], "a", 1.0)).unwrap();
+        store.store(make_embedding(vec![2.0], "a", 5.0)).unwrap();
+        store.store(make_embedding(vec![3.0], "a", 10.0)).unwrap();
 
         let in_range = store.query_time_range(2.0, 8.0);
         assert_eq!(in_range.len(), 1);
@@ -355,18 +340,12 @@ mod tests {
     #[test]
     fn capacity_eviction() {
         let mut store = NeuralMemoryStore::new(2);
-        store
-            .store(make_embedding(vec![1.0], "a", 0.0))
-            .unwrap();
-        store
-            .store(make_embedding(vec![2.0], "b", 1.0))
-            .unwrap();
+        store.store(make_embedding(vec![1.0], "a", 0.0)).unwrap();
+        store.store(make_embedding(vec![2.0], "b", 1.0)).unwrap();
         assert_eq!(store.len(), 2);
 
         // This should evict the oldest
-        store
-            .store(make_embedding(vec![3.0], "c", 2.0))
-            .unwrap();
+        store.store(make_embedding(vec![3.0], "c", 2.0)).unwrap();
         assert_eq!(store.len(), 2);
         // First element should now be [2.0]
         assert_eq!(store.get(0).unwrap().vector, vec![2.0]);

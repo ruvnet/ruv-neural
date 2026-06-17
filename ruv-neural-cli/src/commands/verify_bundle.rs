@@ -21,11 +21,17 @@ pub fn run(path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     println!("=== rUv Neural — Evidence Bundle Verification ===\n");
     println!("  Schema:        {}", bundle.schema_version);
     println!("  Session:       {}", bundle.session_id);
-    println!("  Target:        {}  ({})", bundle.target_state, bundle.protocol);
+    println!(
+        "  Target:        {}  ({})",
+        bundle.target_state, bundle.protocol
+    );
     println!("  Steps:         {}", bundle.steps.len());
     println!("  Receipts:      {}", bundle.report.num_receipts);
     println!();
-    println!("  Hash chain:    {}", if chain_ok { "VALID" } else { "INVALID" });
+    println!(
+        "  Hash chain:    {}",
+        if chain_ok { "VALID" } else { "INVALID" }
+    );
     println!(
         "  Signature:     {}",
         match sig {

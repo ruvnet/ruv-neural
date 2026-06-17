@@ -148,8 +148,12 @@ mod tests {
         let path_str = path.to_str().unwrap();
 
         let mut store = NeuralMemoryStore::new(100);
-        store.store(make_embedding(vec![1.0, 2.0, 3.0], 1.0)).unwrap();
-        store.store(make_embedding(vec![4.0, 5.0, 6.0], 2.0)).unwrap();
+        store
+            .store(make_embedding(vec![1.0, 2.0, 3.0], 1.0))
+            .unwrap();
+        store
+            .store(make_embedding(vec![4.0, 5.0, 6.0], 2.0))
+            .unwrap();
 
         save_store(&store, path_str).unwrap();
         let loaded = load_store(path_str).unwrap();

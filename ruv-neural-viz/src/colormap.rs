@@ -21,9 +21,9 @@ impl ColorMap {
     pub fn cool_warm() -> Self {
         Self {
             stops: vec![
-                (0.0, [59, 76, 192]),    // blue
-                (0.5, [221, 221, 221]),   // near-white
-                (1.0, [180, 4, 38]),      // red
+                (0.0, [59, 76, 192]),   // blue
+                (0.5, [221, 221, 221]), // near-white
+                (1.0, [180, 4, 38]),    // red
             ],
         }
     }
@@ -32,11 +32,11 @@ impl ColorMap {
     pub fn viridis() -> Self {
         Self {
             stops: vec![
-                (0.0, [68, 1, 84]),       // dark purple
-                (0.25, [59, 82, 139]),     // blue-purple
-                (0.5, [33, 145, 140]),     // teal
-                (0.75, [94, 201, 98]),     // green
-                (1.0, [253, 231, 37]),     // yellow
+                (0.0, [68, 1, 84]),    // dark purple
+                (0.25, [59, 82, 139]), // blue-purple
+                (0.5, [33, 145, 140]), // teal
+                (0.75, [94, 201, 98]), // green
+                (1.0, [253, 231, 37]), // yellow
             ],
         }
     }

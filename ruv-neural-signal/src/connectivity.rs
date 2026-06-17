@@ -8,8 +8,8 @@
 //! - Full connectivity matrix computation
 
 use num_complex::Complex;
-use ruv_neural_core::signal::{FrequencyBand, MultiChannelTimeSeries};
 use rustfft::FftPlanner;
+use ruv_neural_core::signal::{FrequencyBand, MultiChannelTimeSeries};
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::f64::consts::PI;
@@ -106,11 +106,7 @@ pub fn phase_locking_value(
 ///
 /// # Returns
 /// Vector of (frequency, coherence) pairs.
-pub fn coherence(
-    signal_a: &[f64],
-    signal_b: &[f64],
-    sample_rate: f64,
-) -> Vec<(f64, f64)> {
+pub fn coherence(signal_a: &[f64], signal_b: &[f64], sample_rate: f64) -> Vec<(f64, f64)> {
     let n = signal_a.len().min(signal_b.len());
     if n == 0 {
         return Vec::new();

@@ -129,9 +129,7 @@ impl WitnessBundle {
     /// Full verification: digest integrity + Ed25519 signature.
     pub fn verify_full(&self) -> Result<bool, String> {
         if !self.verify_digest() {
-            return Err(
-                "Capabilities digest mismatch \u{2014} data may be tampered".to_string(),
-            );
+            return Err("Capabilities digest mismatch \u{2014} data may be tampered".to_string());
         }
         self.verify()
     }
@@ -152,6 +150,27 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             crate_name: "ruv-neural-core".into(),
             capability: "RVF binary format (read/write with magic, versioning, data types)".into(),
             evidence: "tests::rvf_file_write_read_roundtrip, tests::rvf_header_validation".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-core".into(),
+            capability: "RVF multi-segment container (RVFS magic, 64-byte segment headers, CRC32C, VEC/META/WITNESS/CRYPTO)".into(),
+            evidence: "rvf_container::tests::container_roundtrip_lossless_f64, ..::segment_type_codes_match_spec, ..::corrupted_payload_is_detected".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-core".into(),
+            capability: "Vector quantization codecs for RVF VEC (f16/int8/binary, f64 lossless)".into(),
+            evidence: "rvf_quant::tests::int8_roundtrip_error_bounded, ..::f16_roundtrip_error_bounded, ..::binary_preserves_sign".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-core".into(),
+            capability: "RVF WITNESS audit chain (73-byte entries) + Ed25519 CRYPTO segment signing".into(),
+            evidence: "rvf_witness::tests::witness_chain_links_and_verifies, ..::sign_and_verify_container, ..::tampered_vector_fails_signature".into(),
             source_hash: "".into(),
             status: "verified".into(),
         },
@@ -338,6 +357,13 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             source_hash: "".into(),
             status: "verified".into(),
         },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-embed".into(),
+            capability: "Pluggable foundation-model embedding backend (method-tagged, inference-only)".into(),
+            evidence: "foundation::tests::reference_embedder_is_deterministic, ..::output_is_unit_norm_and_tagged".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
         // Memory
         CapabilityAttestation {
             crate_name: "ruv-neural-memory".into(),
@@ -350,6 +376,13 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             crate_name: "ruv-neural-memory".into(),
             capability: "Embedding store with capacity management".into(),
             evidence: "tests in store.rs".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-memory".into(),
+            capability: "RVF INDEX segment: pack HNSW ANN graph + vectors into one .rvf".into(),
+            evidence: "rvf_index::tests::index_survives_container_roundtrip, ..::indexed_container_has_all_segments".into(),
             source_hash: "".into(),
             status: "verified".into(),
         },
@@ -379,6 +412,20 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             crate_name: "ruv-neural-decoder".into(),
             capability: "Clinical scorer (multi-domain neurological assessment)".into(),
             evidence: "ClinicalScorer tests".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-decoder".into(),
+            capability: "Trainable logistic-regression classifier (SGD, standardization, L2)".into(),
+            evidence: "logistic::tests::learns_separable_problem, ..::deterministic_training".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-decoder".into(),
+            capability: "Trained model persisted in a signed RVF MODEL segment (Ed25519, tamper-evident)".into(),
+            evidence: "rvf_model::tests::model_roundtrips_through_container, ..::signed_model_verifies_and_detects_tampering".into(),
             source_hash: "".into(),
             status: "verified".into(),
         },
@@ -516,6 +563,20 @@ pub fn attest_capabilities() -> Vec<CapabilityAttestation> {
             source_hash: "".into(),
             status: "verified".into(),
         },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-loop".into(),
+            capability: "Privacy-preserving federated personalization (FedAvg + differential privacy, FEDERATED_MANIFEST)".into(),
+            evidence: "federated::tests::fedavg_is_count_weighted_mean, ..::dp_reports_budget_and_perturbs, ..::dp_clipping_bounds_a_huge_update".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
+        CapabilityAttestation {
+            crate_name: "ruv-neural-viz".into(),
+            capability: "BIDS-EEG export (BrainVision) for cross-tool interoperability".into(),
+            evidence: "bids::tests::writes_a_valid_bids_layout, ..::round_trips_sample_values".into(),
+            source_hash: "".into(),
+            status: "verified".into(),
+        },
     ]
 }
 
@@ -526,7 +587,7 @@ fn hex_encode(bytes: &[u8]) -> String {
 
 /// Decode a hex string into bytes.
 fn hex_decode(hex: &str) -> std::result::Result<Vec<u8>, String> {
-    if hex.len() % 2 != 0 {
+    if !hex.len().is_multiple_of(2) {
         return Err("Odd-length hex string".into());
     }
     (0..hex.len())

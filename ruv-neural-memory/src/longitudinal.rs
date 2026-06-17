@@ -100,8 +100,7 @@ impl LongitudinalTracker {
                 .current_trajectory
                 .windows(2)
                 .map(|w| {
-                    self.min_distance_to_baseline(&w[1])
-                        - self.min_distance_to_baseline(&w[0])
+                    self.min_distance_to_baseline(&w[1]) - self.min_distance_to_baseline(&w[0])
                 })
                 .collect();
 
@@ -230,10 +229,7 @@ mod tests {
 
         // First half: far from baseline
         for i in 1..=5 {
-            tracker.add_observation(make_embedding(
-                vec![10.0 - i as f64 * 1.5, 0.0],
-                i as f64,
-            ));
+            tracker.add_observation(make_embedding(vec![10.0 - i as f64 * 1.5, 0.0], i as f64));
         }
         // Second half: close to baseline
         for i in 6..=10 {
@@ -255,8 +251,8 @@ mod tests {
         let score_far = tracker.anomaly_score(&far);
 
         assert!(score_near < score_far);
-        assert!(score_near >= 0.0 && score_near <= 1.0);
-        assert!(score_far >= 0.0 && score_far <= 1.0);
+        assert!((0.0..=1.0).contains(&score_near));
+        assert!((0.0..=1.0).contains(&score_far));
     }
 
     #[test]

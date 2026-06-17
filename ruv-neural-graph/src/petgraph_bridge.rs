@@ -39,11 +39,7 @@ pub fn to_petgraph(graph: &BrainGraph) -> UnGraph<usize, f64> {
 ///
 /// Node weights in the petgraph are assumed to be node indices.
 /// Requires the atlas and timestamp to be provided since petgraph does not store them.
-pub fn from_petgraph(
-    pg: &UnGraph<usize, f64>,
-    atlas: Atlas,
-    timestamp: f64,
-) -> BrainGraph {
+pub fn from_petgraph(pg: &UnGraph<usize, f64>, atlas: Atlas, timestamp: f64) -> BrainGraph {
     let num_nodes = pg.node_count();
     let mut edges = Vec::with_capacity(pg.edge_count());
 
