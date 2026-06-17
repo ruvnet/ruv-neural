@@ -51,6 +51,14 @@ The same trainer on a task with **real, separable signal** and a naturally
 - **Leakage control:** the 23 chunks of a recording are correlated, so every
   honest protocol is **grouped by source recording** (all chunks stay on one
   side). A random-row split is shown only for contrast.
+- **Scope of that control (be precise):** grouping is by *recording*, which
+  removes **temporal-autocorrelation** leakage (the kind that inflated the
+  eye-state benchmark). It is **not patient-independent** — the reshaped CSV
+  carries only segment IDs, not subject labels, so a leave-subjects-out split
+  isn't possible from this data. Clinical seizure detection's gold standard is
+  patient-independent; this benchmark demonstrates the trainer on a separable
+  public task with **autocorrelation controlled**, not generalization to unseen
+  patients.
 - **Reproduce:** `cargo run -p ruv-neural-decoder --example train_seizure -- <csv>`
 
 ## Results (seizure vs rest; majority baseline = 0.80)

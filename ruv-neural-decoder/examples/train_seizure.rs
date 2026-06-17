@@ -6,7 +6,11 @@
 //!
 //! Honest-evaluation notes (ADR-0015/0019): the 23 chunks of one recording are
 //! correlated, so a random *row* split leaks. Every protocol below is **grouped
-//! by source recording** (all 23 chunks stay on one side), which is leakage-free.
+//! by source recording** (all 23 chunks stay on one side), which removes
+//! temporal-autocorrelation leakage. NOTE: grouping is by *recording*, not by
+//! subject — the reshaped CSV has only segment IDs, so this is **not**
+//! patient-independent (the clinical gold standard); it shows the trainer on a
+//! separable public task, not generalization to unseen patients.
 //! A random-row split is also shown to quantify the inflation.
 //!
 //! Usage:
