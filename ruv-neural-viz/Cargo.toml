@@ -8,16 +8,26 @@ license.workspace = true
 
 [features]
 default = ["std"]
-std = []
+# `std` pulls the graph-bound modules (animation/ascii/export/layout) and their
+# deps. Without it the crate is `no_std` and exposes only `colormap` (ESP32).
+std = [
+    "dep:ruv-neural-core",
+    "dep:ruv-neural-graph",
+    "dep:ruv-neural-mincut",
+    "dep:serde",
+    "dep:serde_json",
+    "dep:tracing",
+]
 ascii = []  # ASCII art rendering for terminal
 
 [dependencies]
-ruv-neural-core = { workspace = true }
-ruv-neural-graph = { workspace = true }
-ruv-neural-mincut = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-tracing = { workspace = true }
+# All optional + gated behind `std`: the `no_std` colormap needs none of them.
+ruv-neural-core = { workspace = true, optional = true }
+ruv-neural-graph = { workspace = true, optional = true }
+ruv-neural-mincut = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+tracing = { workspace = true, optional = true }
 
 [dev-dependencies]
 approx = { workspace = true }

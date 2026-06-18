@@ -1,4 +1,31 @@
 //! Color mapping utilities for brain topology visualization.
+//!
+//! `no_std`: this module needs only `alloc` and does its float math without
+//! `std`/`libm` (see [`fabs`]/[`fround`]), so it runs on the ESP32.
+
+use alloc::{format, string::String, vec, vec::Vec};
+
+/// `f64::abs` without `std`/`libm` (both are unavailable in bare `no_std`).
+#[inline]
+fn fabs(x: f64) -> f64 {
+    if x < 0.0 {
+        -x
+    } else {
+        x
+    }
+}
+
+/// Round-half-away-from-zero without `std`/`libm`. `f64 as i64` truncates toward
+/// zero (a `core` cast), so `trunc(x + 0.5)` rounds non-negative inputs and the
+/// sign is restored for negatives.
+#[inline]
+fn fround(x: f64) -> f64 {
+    if x < 0.0 {
+        -((-x + 0.5) as i64 as f64)
+    } else {
+        (x + 0.5) as i64 as f64
+    }
+}
 
 /// Maps scalar values in [0, 1] to RGB colors via piecewise-linear interpolation.
 #[derive(Debug, Clone)]
@@ -76,7 +103,7 @@ impl ColorMap {
             let (p0, c0) = w[0];
             let (p1, c1) = w[1];
             if v >= p0 && v <= p1 {
-                let t = if (p1 - p0).abs() < 1e-12 {
+                let t = if fabs(p1 - p0) < 1e-12 {
                     0.0
                 } else {
                     (v - p0) / (p1 - p0)
@@ -103,14 +130,14 @@ impl ColorMap {
 /// Linearly interpolate between two u8 values.
 fn lerp_u8(a: u8, b: u8, t: f64) -> u8 {
     let result = (a as f64) * (1.0 - t) + (b as f64) * t;
-    result.round().clamp(0.0, 255.0) as u8
+    fround(result).clamp(0.0, 255.0) as u8
 }
 
 /// Convert HSV (h in [0,360], s in [0,1], v in [0,1]) to RGB.
 fn hsv_to_rgb(h: f64, s: f64, v: f64) -> [u8; 3] {
     let c = v * s;
     let hp = h / 60.0;
-    let x = c * (1.0 - ((hp % 2.0) - 1.0).abs());
+    let x = c * (1.0 - fabs((hp % 2.0) - 1.0));
     let m = v - c;
 
     let (r1, g1, b1) = if hp < 1.0 {
@@ -128,9 +155,9 @@ fn hsv_to_rgb(h: f64, s: f64, v: f64) -> [u8; 3] {
     };
 
     [
-        ((r1 + m) * 255.0).round() as u8,
-        ((g1 + m) * 255.0).round() as u8,
-        ((b1 + m) * 255.0).round() as u8,
+        fround((r1 + m) * 255.0) as u8,
+        fround((g1 + m) * 255.0) as u8,
+        fround((b1 + m) * 255.0) as u8,
     ]
 }
 
