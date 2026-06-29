@@ -1,0 +1,34 @@
+[package]
+name = "ruv-neural-brain2text"
+description = "rUv Neural — non-invasive brain-to-text decoding bridge (Brain2Qwerty / SpanishBCBL), with an in-crate evolutionary optimizer"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords = ["neural", "brain", "bci", "meg", "eeg"]
+categories = ["science", "algorithms"]
+
+[features]
+default = ["std"]
+std = []
+
+[dependencies]
+ruv-neural-core = { workspace = true }
+ruv-neural-signal = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+rand = { workspace = true }
+
+[dev-dependencies]
+approx = { workspace = true }
+criterion = { workspace = true }
+
+[[example]]
+name = "brain2text_demo"
+path = "examples/demo.rs"
+
+[[bench]]
+name = "decode"
+harness = false

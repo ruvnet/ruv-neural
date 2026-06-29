@@ -9,6 +9,7 @@ members = [
     "ruv-neural-embed",
     "ruv-neural-memory",
     "ruv-neural-decoder",
+    "ruv-neural-brain2text",
     "ruv-neural-stim",
     "ruv-neural-biosense",
     "ruv-neural-loop",
@@ -89,6 +90,7 @@ ruv-neural-mincut = { version = "0.1.0", path = "ruv-neural-mincut" }
 ruv-neural-embed = { version = "0.1.0", path = "ruv-neural-embed" }
 ruv-neural-memory = { version = "0.1.0", path = "ruv-neural-memory" }
 ruv-neural-decoder = { version = "0.1.0", path = "ruv-neural-decoder" }
+ruv-neural-brain2text = { version = "0.1.0", path = "ruv-neural-brain2text" }
 ruv-neural-stim = { version = "0.1.0", path = "ruv-neural-stim" }
 ruv-neural-biosense = { version = "0.1.0", path = "ruv-neural-biosense" }
 ruv-neural-loop = { version = "0.1.0", path = "ruv-neural-loop" }
