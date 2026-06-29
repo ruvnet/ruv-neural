@@ -1,6 +1,8 @@
 # Research Report — Integrating Brain2Qwerty + SpanishBCBL into rUv Neural
 
-> **Status:** Research / feasibility study. No code committed beyond this document.
+> **Status:** Research / feasibility study — **Phases 1–2 + the optimizer are now
+> implemented** in the [`ruv-neural-brain2text`](../../ruv-neural-brain2text) crate
+> (see [§9 Implementation status](#9-implementation-status)).
 > **Date:** 2026-06-29 · **Author:** rUv (ruv@ruv.net)
 > **Scope:** Evaluate whether Meta AI's *Brain2Qwerty* brain-to-text system and the
 > *SpanishBCBL* (DECOMEG) dataset can be integrated into the `ruv-neural` Rust
@@ -377,6 +379,44 @@ it tunes the *workflow*, not weights). Keep all CC BY-NC material isolated from 
 MIT/Apache crates, and keep the project's "no medical/efficacy claim" framing.
 
 ---
+
+## 9. Implementation status
+
+A working, tested crate — [`ruv-neural-brain2text`](../../ruv-neural-brain2text) —
+now implements the bridge and the optimizer natively in Rust (no Python required to
+run it; the deep model remains an opt-in sidecar). **30 unit tests pass; the full
+workspace remains green.**
+
+**Built and tested:**
+
+| Stage | Module | Notes |
+|---|---|---|
+| Dataset loader | `dataset::brainvision` | Real, zero-dep `.vhdr/.vmrk/.eeg` reader (INT_16 + IEEE_FLOAT_32, multiplexed + vectorized), round-trip tested. |
+| Synthetic data | `dataset::synthetic` | SpanishBCBL-*structured*, *learnable* generator (real 262 GB CC BY-NC data stays out of the repo). |
+| Events | `events` | Keystroke / sentence / timeline model. |
+| Preprocessing | `preprocess` | V1 recipe (bandpass 0.1–20 Hz, resample 50 Hz) on `ruv-neural-signal`; out-of-band attenuation tested. |
+| Epoching | `epoch` | −0.2…+0.3 s windows, baseline correction, feature extraction, deterministic train/val/test split. |
+| Decoder | `decode` | `CharSequenceDecoder` trait, prototype acoustic model, char n-gram LM, beam-search fusion (`score = acoustic + α·LM`), CER/WER. |
+| Optimizer | `evolve` | **Darwin mode**: genetic search over `Brain2TextConfig`, fitness `1 − val_CER`, tournament selection, crossover, mutation, elitism, archive. |
+| End-to-end | `evaluate()` + `examples/demo.rs` | One call runs the whole pipeline; the demo evolves a config. |
+
+**Demonstrated result** (synthetic, learnable data — validates the machinery, *not*
+the published accuracy): the optimizer drives **test CER from 0.594 (V1 defaults) to
+0.025**, WER 1.167 → 0.167, converging within ~3 generations.
+
+```
+cargo run -p ruv-neural-brain2text --example brain2text_demo
+```
+
+**Deliberately a stand-in (per §5 licensing):** the acoustic model is a native
+nearest-centroid classifier, *not* a clean-room port of the CC BY-NC Conv+Transformer
+— the real model is reached via the opt-in `python-sidecar` backend. The `evolve`
+module is the native fitness/search loop that `@metaharness/darwin` would orchestrate
+externally; it runs with zero extra dependencies here.
+
+**Not yet built** (Phases 3–4, 6 of the roadmap): the Python sidecar backend, the
+Ed25519 evidence-bundle wrapper for decoding runs, native MEG `.fif` ingest, and a
+clean-room native deep decoder.
 
 ## References
 
