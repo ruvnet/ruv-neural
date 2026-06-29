@@ -5,17 +5,20 @@
 //!
 //! `score = acoustic_logp + lm_weight * lm_logp(char | context)`
 //!
-//! The acoustic model here is the native [`PrototypeDecoder`]; swap in the
-//! Python sidecar for the real deep model without changing this code.
+//! The acoustic model is any [`crate::model::AcousticModel`] (prototype, linear
+//! softmax, or MLP), selected by [`Brain2TextConfig::model`]. The whole decoder
+//! is serializable, so a trained instance is a self-contained, distributable
+//! artifact.
 
 pub mod ngram;
-pub mod prototype;
 
 pub use ngram::CharNgram;
-pub use prototype::PrototypeDecoder;
+
+use serde::{Deserialize, Serialize};
 
 use crate::config::Brain2TextConfig;
 use crate::epoch::{Epoch, SentenceEpochs};
+use crate::model::{AcousticEnum, AcousticModel};
 
 /// A decoder that turns a sequence of keystroke epochs into text.
 pub trait CharSequenceDecoder {
@@ -23,10 +26,10 @@ pub trait CharSequenceDecoder {
     fn decode_sentence(&self, epochs: &[Epoch]) -> String;
 }
 
-/// The default native decoder: prototype acoustic model + char n-gram LM.
-#[derive(Debug, Clone)]
+/// The native decoder: a trainable acoustic model + char n-gram LM.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Brain2TextDecoder {
-    acoustic: PrototypeDecoder,
+    acoustic: AcousticEnum,
     lm: CharNgram,
     lm_weight: f64,
     beam_size: usize,
@@ -37,12 +40,17 @@ pub struct Brain2TextDecoder {
 impl Brain2TextDecoder {
     /// Train the decoder from training sentences and a pipeline config.
     pub fn train(train: &[&SentenceEpochs], config: &Brain2TextConfig) -> Self {
-        let acoustic = PrototypeDecoder::train(
-            train
-                .iter()
-                .flat_map(|s| s.epochs.iter())
-                .map(|e| (e.features.as_slice(), e.character)),
-        );
+        Self::train_seeded(train, config, 0xACED)
+    }
+
+    /// Train with an explicit RNG seed for the acoustic model.
+    pub fn train_seeded(train: &[&SentenceEpochs], config: &Brain2TextConfig, seed: u64) -> Self {
+        let samples: Vec<(Vec<f64>, char)> = train
+            .iter()
+            .flat_map(|s| s.epochs.iter())
+            .map(|e| (e.features.clone(), e.character))
+            .collect();
+        let acoustic = AcousticEnum::train(config.model, &samples, &config.train_params(seed));
         let lm = CharNgram::train(train.iter().map(|s| s.text.as_str()), config.ngram_order);
         Brain2TextDecoder {
             acoustic,
@@ -53,8 +61,8 @@ impl Brain2TextDecoder {
         }
     }
 
-    /// Access the acoustic model.
-    pub fn acoustic(&self) -> &PrototypeDecoder {
+    /// Access the trained acoustic model.
+    pub fn acoustic(&self) -> &AcousticEnum {
         &self.acoustic
     }
 
@@ -93,7 +101,6 @@ impl CharSequenceDecoder for Brain2TextDecoder {
 
             let mut next: Vec<Beam> = Vec::with_capacity(beams.len() * candidates.len());
             for beam in &beams {
-                // Context = last (order-1) chars of the hypothesis.
                 let ord = self.lm.order().saturating_sub(1);
                 let ctx: String = if ord == 0 {
                     String::new()
@@ -128,9 +135,11 @@ impl CharSequenceDecoder for Brain2TextDecoder {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::FeatureKind;
     use crate::dataset::{generate_synthetic, SyntheticParams};
     use crate::epoch::{extract, split};
     use crate::metrics::DecodeReport;
+    use crate::model::ModelKind;
     use crate::preprocess::preprocess;
 
     fn corpus() -> Vec<&'static str> {
@@ -159,8 +168,6 @@ mod tests {
         let train: Vec<&SentenceEpochs> = if train.is_empty() { epochs.iter().collect() } else { train };
 
         let dec = Brain2TextDecoder::train(&train, &cfg);
-        // Decode the training sentences — with learnable synthetic structure the
-        // CER should be well below 1.0 (chance).
         let pairs: Vec<(String, String)> = train
             .iter()
             .map(|s| (dec.decode_sentence(&s.epochs), s.text.clone()))
@@ -171,16 +178,23 @@ mod tests {
     }
 
     #[test]
-    fn greedy_and_beam_both_run() {
-        let rec = generate_synthetic(&["hola"], &SyntheticParams::default(), 1);
-        let cfg = Brain2TextConfig::default();
-        let pre = preprocess(&rec.series, &cfg).unwrap();
-        let epochs = extract(&pre, &rec.timeline, &cfg);
-        let train: Vec<&SentenceEpochs> = epochs.iter().collect();
-        let dec = Brain2TextDecoder::train(&train, &cfg);
-        let g = dec.decode_greedy(&epochs[0].epochs);
-        let b = dec.decode_sentence(&epochs[0].epochs);
-        assert_eq!(g.chars().count(), 4);
-        assert_eq!(b.chars().count(), 4);
+    fn all_model_kinds_decode_and_serialize() {
+        let rec = generate_synthetic(&corpus(), &SyntheticParams::default(), 7);
+        for kind in [ModelKind::Prototype, ModelKind::Linear, ModelKind::Mlp] {
+            let cfg = Brain2TextConfig {
+                model: kind,
+                feature: FeatureKind::Mean,
+                ..Default::default()
+            };
+            let pre = preprocess(&rec.series, &cfg).unwrap();
+            let epochs = extract(&pre, &rec.timeline, &cfg);
+            let train: Vec<&SentenceEpochs> = epochs.iter().collect();
+            let dec = Brain2TextDecoder::train(&train, &cfg);
+            // Serializable artifact round-trip.
+            let json = serde_json::to_string(&dec).unwrap();
+            let back: Brain2TextDecoder = serde_json::from_str(&json).unwrap();
+            let out = back.decode_sentence(&epochs[0].epochs);
+            assert_eq!(out.chars().count(), epochs[0].epochs.len());
+        }
     }
 }

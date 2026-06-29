@@ -7,8 +7,10 @@
 
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 /// A character n-gram model of order `n` (uses contexts up to `n-1` chars).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CharNgram {
     order: usize,
     /// counts[context_string][next_char] = count
@@ -108,6 +110,16 @@ mod tests {
         // Unseen long context backs off; should still return a finite logprob.
         let lp = lm.logprob("zzzz", 'h');
         assert!(lp.is_finite());
+    }
+
+    #[test]
+    fn serde_round_trip() {
+        let lm = CharNgram::train(["hola mundo", "buenos dias"], 4);
+        let json = serde_json::to_string(&lm).unwrap();
+        let back: CharNgram = serde_json::from_str(&json).unwrap();
+        assert_eq!(back.order(), lm.order());
+        // Probabilities preserved.
+        assert!((back.logprob("hol", 'a') - lm.logprob("hol", 'a')).abs() < 1e-12);
     }
 
     #[test]

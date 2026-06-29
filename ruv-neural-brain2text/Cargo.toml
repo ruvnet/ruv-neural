@@ -23,7 +23,12 @@ rand = { workspace = true }
 
 [dev-dependencies]
 approx = { workspace = true }
+criterion = { workspace = true }
 
 [[example]]
 name = "brain2text_demo"
 path = "examples/demo.rs"
+
+[[bench]]
+name = "decode"
+harness = false

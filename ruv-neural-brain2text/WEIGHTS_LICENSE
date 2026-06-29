@@ -1,0 +1,40 @@
+LICENSE FOR TRAINED MODEL WEIGHTS / ARTIFACTS
+==============================================
+
+IMPORTANT — this file governs *trained model artifacts*, NOT the source code.
+
+  - The SOURCE CODE in this crate (`ruv-neural-brain2text`) is licensed
+    MIT OR Apache-2.0, like the rest of the rUv Neural workspace. You may use,
+    modify, and distribute the code (including for commercial purposes) under
+    those terms.
+
+  - Any MODEL WEIGHTS / PIPELINE ARTIFACTS trained on the SpanishBCBL
+    (DECOMEG) dataset, or on Meta AI's Brain2Qwerty data/derived material, are
+    governed by the upstream data/model license:
+
+        Creative Commons Attribution-NonCommercial 4.0 International
+        (CC BY-NC 4.0)
+        https://creativecommons.org/licenses/by-nc/4.0/
+
+    This means weights trained on that data:
+      * may be shared and adapted,
+      * for NON-COMMERCIAL purposes only,
+      * WITH ATTRIBUTION (see MODEL_CARD.md for the required citations),
+      * and are NOT to be used to re-identify any individual.
+
+    The CC BY-NC 4.0 terms are NOT ShareAlike: they do not force a particular
+    downstream license, but the NonCommercial and Attribution conditions still
+    apply and travel with the artifact.
+
+Weights trained ONLY on data you own or that is licensed for commercial use are
+NOT covered by this restriction — license those artifacts however you wish.
+
+When in doubt about whether a trained artifact is commercially usable, treat it
+as CC BY-NC 4.0 (non-commercial) unless you can show every training input
+permitted commercial use.
+
+Required attribution for SpanishBCBL-derived artifacts:
+  - Lévy et al. (2026), Brain2Qwerty / SpanishBCBL.
+  - Zhang et al. (2025), SpanishBCBL dataset.
+  - Dataset: https://huggingface.co/datasets/bcbl190626/SpanishBCBL (CC BY-NC 4.0)
+  - Brain2Qwerty: https://github.com/facebookresearch/brain2qwerty (CC BY-NC 4.0)

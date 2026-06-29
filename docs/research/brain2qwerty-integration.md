@@ -400,19 +400,48 @@ workspace remains green.**
 | Optimizer | `evolve` | **Darwin mode**: genetic search over `Brain2TextConfig`, fitness `1 − val_CER`, tournament selection, crossover, mutation, elitism, archive. |
 | End-to-end | `evaluate()` + `examples/demo.rs` | One call runs the whole pipeline; the demo evolves a config. |
 
-**Demonstrated result** (synthetic, learnable data — validates the machinery, *not*
-the published accuracy): the optimizer drives **test CER from 0.594 (V1 defaults) to
-0.025**, WER 1.167 → 0.167, converging within ~3 generations.
+**Now also built — trainable models, a composable harness, and a benchmark:**
+
+| Capability | Module | Notes |
+|---|---|---|
+| Trainable acoustic models | `model::{prototype, linear, mlp}` | `Prototype` (nearest-centroid), `Linear` (multinomial logistic regression, SGD), `Mlp` (1 hidden layer, SGD/backprop). All **serializable** — the weights are the artifact. Training is numerically guarded (logit clamp + finite-sanitize) so any config stays serializable. |
+| Composable harness | `harness` | Fluent `Harness` builder → self-contained, serializable `TrainedPipeline` (config + weights + LM) with `to_json`/`from_json`. The optimizer drives the same code path. |
+| Optimize across models | `evolve` | Search space extended to the model family *and* training hyperparameters (lr, epochs, hidden size, L2). |
+| Benchmark | `examples/benchmark.rs`, `benches/decode.rs` | Per-model CER/WER/timing matrix, baseline-vs-evolved, decode throughput; criterion micro-benches. |
+| Distribution licensing | `WEIGHTS_LICENSE`, `MODEL_CARD.md` | Code is MIT/Apache; weights trained on SpanishBCBL are CC BY-NC 4.0 (see §5). |
+
+**Demonstrated result** (synthetic, learnable data — validates the machinery and the
+optimizer, *not* the published accuracy). The optimizer searches across model families
+and hyperparameters and selects `Linear`:
 
 ```
 cargo run -p ruv-neural-brain2text --example brain2text_demo
+cargo run --release -p ruv-neural-brain2text --example benchmark
 ```
 
-**Deliberately a stand-in (per §5 licensing):** the acoustic model is a native
-nearest-centroid classifier, *not* a clean-room port of the CC BY-NC Conv+Transformer
-— the real model is reached via the opt-in `python-sidecar` backend. The `evolve`
-module is the native fitness/search loop that `@metaharness/darwin` would orchestrate
-externally; it runs with zero extra dependencies here.
+| | test CER | test WER |
+|---|---|---|
+| Prototype (V1 defaults) | 0.596 | 1.167 |
+| Linear (V1 defaults) | 0.188 | 0.611 |
+| MLP (V1 defaults) | 0.921 | 1.222 (overfits tiny data; the optimizer avoids it) |
+| **Evolved best (Linear)** | **0.037** | **0.194** |
+
+~7,000 keystrokes/sec decoded; serialized pipeline artifact ~50 KB.
+
+**Can we train and distribute our own model on the data?** Yes — *non-commercially*.
+The dataset card is **CC BY-NC 4.0, not gated, no separate Data Use Agreement**, so
+training is permitted; the conservative, defensible posture is to treat the resulting
+**weights as CC BY-NC 4.0** too (release as a separate, research-licensed artifact —
+*not* inside the MIT/Apache crates — with the two required citations and a model card).
+Commercial distribution requires training on your own / commercially-licensed data.
+The crate's clean-room code stays MIT/Apache regardless; only weights trained on NC
+data inherit the restriction. See `WEIGHTS_LICENSE` and `MODEL_CARD.md`.
+
+**Deliberately a stand-in (per §5 licensing):** the native acoustic models are
+clean-room classifiers, *not* a port of the CC BY-NC Conv+Transformer — the real model
+is reached via the opt-in `python-sidecar` backend. The `evolve` module is the native
+fitness/search loop that `@metaharness/darwin` would orchestrate externally; it runs
+with zero extra dependencies here.
 
 **Not yet built** (Phases 3–4, 6 of the roadmap): the Python sidecar backend, the
 Ed25519 evidence-bundle wrapper for decoding runs, native MEG `.fif` ingest, and a

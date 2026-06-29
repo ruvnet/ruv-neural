@@ -17,6 +17,7 @@ use ruv_neural_core::error::Result;
 
 use crate::config::{Brain2TextConfig, FeatureKind};
 use crate::dataset::Recording;
+use crate::model::ModelKind;
 use crate::{evaluate, EvalSplit};
 
 /// Settings for the evolutionary search.
@@ -168,6 +169,11 @@ fn crossover(a: &Brain2TextConfig, b: &Brain2TextConfig, rng: &mut StdRng) -> Br
         epoch_pre_s: pick!(epoch_pre_s),
         epoch_post_s: pick!(epoch_post_s),
         feature: pick!(feature),
+        model: pick!(model),
+        learning_rate: pick!(learning_rate),
+        epochs: pick!(epochs),
+        hidden_size: pick!(hidden_size),
+        l2: pick!(l2),
         ngram_order: pick!(ngram_order),
         lm_weight: pick!(lm_weight),
         beam_size: pick!(beam_size),
@@ -204,6 +210,26 @@ fn mutate(base: &Brain2TextConfig, rate: f64, rng: &mut StdRng) -> Brain2TextCon
             1 => FeatureKind::Energy,
             _ => FeatureKind::MeanEnergy,
         };
+    }
+    if maybe(rng) {
+        c.model = match rng.gen_range(0..3) {
+            0 => ModelKind::Prototype,
+            1 => ModelKind::Linear,
+            _ => ModelKind::Mlp,
+        };
+    }
+    if maybe(rng) {
+        c.learning_rate *= jitter(rng, 0.6);
+    }
+    if maybe(rng) {
+        c.epochs = (c.epochs as i64 + rng.gen_range(-30..=30)).max(5) as usize;
+    }
+    if maybe(rng) {
+        let factor = if rng.gen::<bool>() { 2 } else { 1 };
+        c.hidden_size = (c.hidden_size as i64 * factor + rng.gen_range(-8..=8)).max(4) as usize;
+    }
+    if maybe(rng) {
+        c.l2 = (c.l2 + rng.gen_range(-0.005..=0.005)).max(0.0);
     }
     if maybe(rng) {
         c.ngram_order = (c.ngram_order as i64 + rng.gen_range(-2..=2)).max(1) as usize;

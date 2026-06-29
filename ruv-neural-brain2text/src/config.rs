@@ -6,6 +6,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::model::ModelKind;
+
 /// Feature extracted per channel within a keystroke epoch.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FeatureKind {
@@ -47,6 +49,16 @@ pub struct Brain2TextConfig {
     pub epoch_post_s: f64,
     /// Per-channel feature kind.
     pub feature: FeatureKind,
+    /// Acoustic model family.
+    pub model: ModelKind,
+    /// SGD learning rate (gradient models).
+    pub learning_rate: f64,
+    /// Training epochs (gradient models).
+    pub epochs: usize,
+    /// Hidden layer width (MLP only).
+    pub hidden_size: usize,
+    /// L2 regularization strength (gradient models).
+    pub l2: f64,
     /// Character n-gram order for the language model (V1: 9).
     pub ngram_order: usize,
     /// Language-model fusion weight (V1 alpha: 5.0).
@@ -66,6 +78,11 @@ impl Default for Brain2TextConfig {
             epoch_pre_s: -0.2,
             epoch_post_s: 0.3,
             feature: FeatureKind::MeanEnergy,
+            model: ModelKind::Linear,
+            learning_rate: 0.5,
+            epochs: 80,
+            hidden_size: 32,
+            l2: 1e-4,
             ngram_order: 9,
             lm_weight: 5.0,
             beam_size: 30,
@@ -79,6 +96,17 @@ impl Brain2TextConfig {
         (self.epoch_post_s - self.epoch_pre_s).max(0.0)
     }
 
+    /// Training hyperparameters for the gradient-trained acoustic models.
+    pub fn train_params(&self, seed: u64) -> crate::model::TrainParams {
+        crate::model::TrainParams {
+            learning_rate: self.learning_rate,
+            epochs: self.epochs,
+            l2: self.l2,
+            hidden_size: self.hidden_size,
+            seed,
+        }
+    }
+
     /// Clamp every field into a valid range, returning a self-consistent config.
     ///
     /// Used after random mutation so the optimizer can explore freely without
@@ -90,6 +118,10 @@ impl Brain2TextConfig {
         self.resample_hz = self.resample_hz.clamp(20.0, 250.0);
         self.epoch_pre_s = self.epoch_pre_s.clamp(-0.5, -0.02);
         self.epoch_post_s = self.epoch_post_s.clamp(0.05, 0.8);
+        self.learning_rate = self.learning_rate.clamp(1e-3, 3.0);
+        self.epochs = self.epochs.clamp(5, 300);
+        self.hidden_size = self.hidden_size.clamp(4, 256);
+        self.l2 = self.l2.clamp(0.0, 0.1);
         self.ngram_order = self.ngram_order.clamp(1, 12);
         self.lm_weight = self.lm_weight.clamp(0.0, 20.0);
         self.beam_size = self.beam_size.clamp(1, 128);
@@ -123,6 +155,11 @@ mod tests {
             epoch_pre_s: 5.0,
             epoch_post_s: -5.0,
             feature: FeatureKind::Mean,
+            model: ModelKind::Mlp,
+            learning_rate: 100.0,
+            epochs: 0,
+            hidden_size: 0,
+            l2: 10.0,
             ngram_order: 0,
             lm_weight: -3.0,
             beam_size: 0,
@@ -134,6 +171,10 @@ mod tests {
         assert!(bad.resample_hz >= 20.0);
         assert!(bad.epoch_pre_s < 0.0);
         assert!(bad.epoch_post_s > 0.0);
+        assert!(bad.learning_rate <= 3.0);
+        assert!(bad.epochs >= 5);
+        assert!(bad.hidden_size >= 4);
+        assert!(bad.l2 <= 0.1);
         assert!(bad.ngram_order >= 1);
         assert!(bad.lm_weight >= 0.0);
         assert!(bad.beam_size >= 1);

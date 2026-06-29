@@ -29,13 +29,17 @@ pub mod decode;
 pub mod epoch;
 pub mod evolve;
 pub mod events;
+pub mod harness;
 pub mod metrics;
+pub mod model;
 pub mod preprocess;
 
 pub use config::{Brain2TextConfig, FeatureKind};
 pub use dataset::{Modality, Recording};
 pub use decode::{Brain2TextDecoder, CharSequenceDecoder};
+pub use harness::{Harness, TrainedPipeline};
 pub use metrics::{character_error_rate, word_error_rate, DecodeReport};
+pub use model::{AcousticModel, ModelKind};
 
 use ruv_neural_core::error::Result;
 
