@@ -2,7 +2,7 @@
 
 mod commands;
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Parser)]
 #[command(name = "ruv-neural")]
@@ -57,6 +57,9 @@ enum Commands {
     },
     /// Run full pipeline: simulate -> process -> analyze -> decode
     Pipeline {
+        /// Data source: simulated or thinkgear
+        #[arg(long, value_enum, default_value_t = PipelineSource::Simulated)]
+        source: PipelineSource,
         /// Number of channels
         #[arg(short, long, default_value = "32")]
         channels: usize,
@@ -66,6 +69,27 @@ enum Commands {
         /// Show real-time ASCII dashboard
         #[arg(long)]
         dashboard: bool,
+        /// ThinkGear Connector host
+        #[arg(long, default_value = "127.0.0.1")]
+        tgc_host: String,
+        /// ThinkGear Connector TCP port
+        #[arg(long, default_value_t = 13854)]
+        tgc_port: u16,
+        /// ThinkGear application name for TGC authorization
+        #[arg(long, default_value = "ruv-neural")]
+        tgc_app_name: String,
+        /// ThinkGear application key: 40 hex chars
+        #[arg(long, env = "THINKGEAR_APP_KEY", default_value = "0000000000000000000000000000000000000000")]
+        tgc_app_key: String,
+        /// Serial/RFCOMM port for direct MindWave binary mode, e.g. COM5 or /dev/rfcomm0
+        #[arg(long, env = "MINDWAVE_PORT")]
+        mindwave_port: Option<String>,
+        /// Baud rate for direct MindWave binary serial mode
+        #[arg(long, default_value_t = 57600)]
+        mindwave_baud: u32,
+        /// Also index generated embeddings in the RuVector memory bridge
+        #[arg(long)]
+        ruvector_index: bool,
     },
     /// Export brain graph to visualization format
     Export {
@@ -131,6 +155,13 @@ enum Commands {
     },
 }
 
+#[derive(Debug, Clone, Copy, ValueEnum)]
+enum PipelineSource {
+    Simulated,
+    Thinkgear,
+    MindwaveBinary,
+}
+
 fn init_tracing(verbose: u8) {
     let level = match verbose {
         0 => tracing::Level::WARN,
@@ -159,10 +190,42 @@ async fn main() {
         Commands::Analyze { input, ascii, csv } => commands::analyze::run(&input, ascii, csv),
         Commands::Mincut { input, k } => commands::mincut::run(&input, k),
         Commands::Pipeline {
+            source,
             channels,
             duration,
             dashboard,
-        } => commands::pipeline::run(channels, duration, dashboard),
+            tgc_host,
+            tgc_port,
+            tgc_app_name,
+            tgc_app_key,
+            mindwave_port,
+            mindwave_baud,
+            ruvector_index,
+        } => commands::pipeline::run(commands::pipeline::PipelineOptions {
+            source: match source {
+                PipelineSource::Simulated => commands::pipeline::PipelineSource::Simulated,
+                PipelineSource::Thinkgear => commands::pipeline::PipelineSource::Thinkgear {
+                    host: tgc_host,
+                    port: tgc_port,
+                    app_name: tgc_app_name,
+                    app_key: tgc_app_key,
+                },
+                PipelineSource::MindwaveBinary => match mindwave_port {
+                    Some(port_name) => commands::pipeline::PipelineSource::MindwaveBinary {
+                        port_name,
+                        baud_rate: mindwave_baud,
+                    },
+                    None => {
+                        eprintln!("Error: missing --mindwave-port for --source mindwave-binary");
+                        std::process::exit(1);
+                    }
+                },
+            },
+            channels,
+            duration,
+            dashboard,
+            ruvector_index,
+        }),
         Commands::Export {
             input,
             format,
@@ -313,13 +376,71 @@ mod tests {
         .unwrap();
         match cli.command {
             Commands::Pipeline {
+                source,
                 channels,
                 duration,
                 dashboard,
+                ruvector_index,
+                ..
             } => {
+                assert!(matches!(source, PipelineSource::Simulated));
                 assert_eq!(channels, 16);
                 assert!((duration - 3.0).abs() < 1e-9);
                 assert!(dashboard);
+                assert!(!ruvector_index);
+            }
+            _ => panic!("Expected Pipeline command"),
+        }
+    }
+
+    #[test]
+    fn parse_pipeline_thinkgear() {
+        let cli = Cli::try_parse_from([
+            "ruv-neural",
+            "pipeline",
+            "--source",
+            "thinkgear",
+            "--tgc-port",
+            "13854",
+            "--ruvector-index",
+        ])
+        .unwrap();
+        match cli.command {
+            Commands::Pipeline {
+                source,
+                tgc_port,
+                ruvector_index,
+                ..
+            } => {
+                assert!(matches!(source, PipelineSource::Thinkgear));
+                assert_eq!(tgc_port, 13854);
+                assert!(ruvector_index);
+            }
+            _ => panic!("Expected Pipeline command"),
+        }
+    }
+
+    #[test]
+    fn parse_pipeline_mindwave_binary() {
+        let cli = Cli::try_parse_from([
+            "ruv-neural",
+            "pipeline",
+            "--source",
+            "mindwave-binary",
+            "--mindwave-port",
+            "COM5",
+        ])
+        .unwrap();
+        match cli.command {
+            Commands::Pipeline {
+                source,
+                mindwave_port,
+                mindwave_baud,
+                ..
+            } => {
+                assert!(matches!(source, PipelineSource::MindwaveBinary));
+                assert_eq!(mindwave_port.as_deref(), Some("COM5"));
+                assert_eq!(mindwave_baud, 57600);
             }
             _ => panic!("Expected Pipeline command"),
         }

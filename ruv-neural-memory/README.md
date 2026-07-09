@@ -25,6 +25,8 @@ distribution changes over time, and RVF/bincode persistence for durable storage.
   (stable, increasing, decreasing)
 - **Persistence** (`persistence`): `save_store` / `load_store` for bincode
   serialization, `save_rvf` / `load_rvf` for RuVector format I/O
+- **RuVector bridge** (`ruvector` feature): `RuvectorMemoryStore` backed by
+  `ruvector-core::VectorDB` for ruvnet-compatible vector search
 
 ## Usage
 
@@ -83,6 +85,7 @@ let loaded = load_store("memory.bin").unwrap();
 |---------|---------|------------------------------|
 | `std`   | Yes     | Standard library support     |
 | `wasm`  | No      | WASM-compatible storage      |
+| `ruvector` | No   | Optional RuVector VectorDB bridge |
 
 ## Integration
 

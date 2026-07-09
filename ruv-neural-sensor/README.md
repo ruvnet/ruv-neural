@@ -20,6 +20,10 @@ monitoring.
 - **OPM** (`opm` feature): Optically pumped magnetometer array with configurable
   geometry
 - **EEG** (`eeg` feature): Electroencephalography sensor interface
+- **ThinkGear** (`thinkgear` feature): NeuroSky ThinkGear Connector TCP source
+  for MindWave-compatible raw EEG streams
+- **MindWave binary** (`mindwave-binary` feature): Direct ThinkGear binary
+  parser over serial/RFCOMM ports, inspired by `python-mindwave`
 - **Calibration**: Gain/offset correction, noise floor estimation, and cross-calibration
   between reference and target channels
 - **Quality monitoring**: Real-time SNR estimation, artifact probability scoring,
@@ -81,6 +85,8 @@ let qualities = monitor.check_quality(&[&data.data[0], &data.data[1]]);
 | `nv_diamond`| No      | NV diamond magnetometer backend      |
 | `opm`       | No      | Optically pumped magnetometer backend|
 | `eeg`       | No      | EEG sensor backend                   |
+| `thinkgear` | No      | NeuroSky TGC socket backend          |
+| `mindwave-binary` | No | Direct ThinkGear binary serial backend |
 
 ## Integration
 

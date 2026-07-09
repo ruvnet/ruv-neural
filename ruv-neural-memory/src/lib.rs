@@ -8,11 +8,15 @@
 pub mod hnsw;
 pub mod longitudinal;
 pub mod persistence;
+#[cfg(feature = "ruvector")]
+pub mod ruvector_store;
 pub mod session;
 pub mod store;
 
 pub use hnsw::HnswIndex;
 pub use longitudinal::{LongitudinalTracker, TrendDirection};
 pub use persistence::{load_rvf, load_store, save_rvf, save_store};
+#[cfg(feature = "ruvector")]
+pub use ruvector_store::RuvectorMemoryStore;
 pub use session::{SessionMemory, SessionMetadata};
 pub use store::NeuralMemoryStore;

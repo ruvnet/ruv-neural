@@ -25,6 +25,12 @@ pub mod opm;
 #[cfg(feature = "eeg")]
 pub mod eeg;
 
+#[cfg(feature = "thinkgear")]
+pub mod thinkgear;
+
+#[cfg(feature = "mindwave-binary")]
+pub mod thinkgear_binary;
+
 pub mod calibration;
 pub mod quality;
 

@@ -12,12 +12,12 @@ path = "src/main.rs"
 
 [dependencies]
 ruv-neural-core = { workspace = true }
-ruv-neural-sensor = { workspace = true }
+ruv-neural-sensor = { workspace = true, features = ["thinkgear", "mindwave-binary"] }
 ruv-neural-signal = { workspace = true }
 ruv-neural-graph = { workspace = true }
 ruv-neural-mincut = { workspace = true }
 ruv-neural-embed = { workspace = true }
-ruv-neural-memory = { workspace = true }
+ruv-neural-memory = { workspace = true, features = ["ruvector"] }
 ruv-neural-decoder = { workspace = true }
 ruv-neural-stim = { workspace = true }
 ruv-neural-biosense = { workspace = true }
