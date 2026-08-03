@@ -959,7 +959,7 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
 name = "ruv-neural-biosense"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "ruv-neural-core",
@@ -970,7 +970,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-brain2text"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "criterion",
@@ -984,7 +984,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-cli"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "clap",
  "ruv-neural-biosense",
@@ -1008,7 +1008,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-core"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "ed25519-dalek",
  "num-traits",
@@ -1022,7 +1022,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-decoder"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "num-traits",
@@ -1035,7 +1035,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-embed"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "ndarray",
@@ -1049,7 +1049,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-esp32"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "num-traits",
@@ -1062,7 +1062,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-graph"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "ndarray",
@@ -1078,7 +1078,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-io"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "ruv-neural-brain2text",
  "serde",
@@ -1087,7 +1087,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-loop"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "ed25519-dalek",
@@ -1104,7 +1104,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-memory"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "bincode",
@@ -1118,7 +1118,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-mincut"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "criterion",
@@ -1134,7 +1134,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-neurosleep"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "criterion",
@@ -1146,7 +1146,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-sensor"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "num-traits",
@@ -1159,7 +1159,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-signal"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "criterion",
@@ -1176,7 +1176,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-stim"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "ruv-neural-core",
@@ -1188,7 +1188,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-viz"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "approx",
  "ruv-neural-core",
@@ -1201,7 +1201,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-neural-wasm"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "console_error_panic_hook",
  "getrandom",
