@@ -1,0 +1,22 @@
+[package]
+name = "ruv-neural-io-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+ruv-neural-io = { path = "..", default-features = false }
+
+[[bin]]
+name = "edf_stream"
+path = "fuzz_targets/edf_stream.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]
+members = ["."]

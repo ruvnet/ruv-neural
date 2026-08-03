@@ -1,0 +1,19 @@
+[package]
+name = "ruv-neural-io"
+description = "Bounded native EEG recording adapters for rUv Neural"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords = ["neural", "eeg", "edf", "streaming", "parser"]
+categories = ["science", "parser-implementations"]
+
+[features]
+default = ["brainvision-compat"]
+brainvision-compat = ["dep:ruv-neural-brain2text"]
+
+[dependencies]
+thiserror.workspace = true
+serde.workspace = true
+ruv-neural-brain2text = { workspace = true, optional = true }
