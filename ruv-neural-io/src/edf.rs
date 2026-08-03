@@ -253,12 +253,13 @@ impl<R: Read> EdfEpochSource<R> {
     }
 
     fn validate_chronology(&self, epoch: &Epoch) -> Result<(), IoError> {
-        if epoch.start_offset_seconds < 0.0 {
+        let epoch_end = epoch.start_offset_seconds + epoch.duration_seconds;
+        if epoch.start_offset_seconds < 0.0 || !epoch_end.is_finite() {
             return Err(IoError::Malformed(RejectionReason::InvalidChronology));
         }
         check_limit(
             LimitKind::Duration,
-            epoch.start_offset_seconds.ceil() as u64,
+            epoch_end.ceil() as u64,
             self.limits.max_duration_seconds,
         )?;
         let Some(previous) = self.last_epoch_start else {
@@ -349,7 +350,7 @@ fn parse_signal_headers(
         let is_annotation = label.eq_ignore_ascii_case("EDF Annotations");
         let physical_minimum = parse_f64(physical_minimums[index])?;
         let physical_maximum = parse_f64(physical_maximums[index])?;
-        if physical_maximum <= physical_minimum {
+        if physical_maximum == physical_minimum {
             return Err(IoError::Malformed(RejectionReason::InvalidPhysicalRange));
         }
         let digital_minimum = parse_i32(digital_minimums[index])?;
@@ -520,15 +521,12 @@ fn parse_annotations(
             .next()
             .ok_or(IoError::Malformed(RejectionReason::InvalidAnnotation))?;
         let mut timing = timing.split(|byte| *byte == 0x15);
-        let onset = parse_annotation_f64(timing.next().unwrap_or_default())?;
-        if onset < 0.0 {
-            return Err(IoError::Malformed(RejectionReason::InvalidAnnotation));
-        }
+        let onset = parse_annotation_onset(timing.next().unwrap_or_default())?;
         first_onset.get_or_insert(onset);
         let duration = timing
             .next()
             .filter(|field| !field.is_empty())
-            .map(parse_annotation_f64)
+            .map(parse_annotation_duration)
             .transpose()?;
         if duration.is_some_and(|duration| duration < 0.0) {
             return Err(IoError::Malformed(RejectionReason::InvalidAnnotation));
@@ -565,7 +563,42 @@ fn parse_annotations(
     Ok((annotations, first_onset))
 }
 
-fn parse_annotation_f64(bytes: &[u8]) -> Result<f64, IoError> {
+fn parse_annotation_onset(bytes: &[u8]) -> Result<f64, IoError> {
+    let Some(sign) = bytes.first() else {
+        return Err(IoError::Malformed(RejectionReason::InvalidAnnotation));
+    };
+    if !matches!(sign, b'+' | b'-') || !valid_unsigned_decimal(&bytes[1..]) {
+        return Err(IoError::Malformed(RejectionReason::InvalidAnnotation));
+    }
+    parse_annotation_number(bytes)
+}
+
+fn parse_annotation_duration(bytes: &[u8]) -> Result<f64, IoError> {
+    if !valid_unsigned_decimal(bytes) {
+        return Err(IoError::Malformed(RejectionReason::InvalidAnnotation));
+    }
+    parse_annotation_number(bytes)
+}
+
+fn valid_unsigned_decimal(bytes: &[u8]) -> bool {
+    if bytes.is_empty() || !bytes[0].is_ascii_digit() || !bytes[bytes.len() - 1].is_ascii_digit() {
+        return false;
+    }
+    let mut decimal_points = 0usize;
+    for byte in bytes {
+        if *byte == b'.' {
+            decimal_points += 1;
+            if decimal_points > 1 {
+                return false;
+            }
+        } else if !byte.is_ascii_digit() {
+            return false;
+        }
+    }
+    true
+}
+
+fn parse_annotation_number(bytes: &[u8]) -> Result<f64, IoError> {
     let value = latin1(bytes)
         .parse::<f64>()
         .map_err(|_| IoError::Malformed(RejectionReason::InvalidAnnotation))?;

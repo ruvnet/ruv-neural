@@ -198,6 +198,14 @@ fn rejects_negative_annotation_duration_and_invalid_record_chronology() {
         Err(IoError::Malformed(RejectionReason::InvalidAnnotation))
     ));
 
+    let event = annotation_data(b"+0\x14\x14\0-0.065\x14Stimulus\x14\0", 32);
+    let data = vec![i16_data(&[0, 1]), event];
+    let bytes = edf_bytes(&signals, "1", "0.03125", "EDF+C", &data);
+    let mut source = EdfEpochSource::new(Cursor::new(bytes), IoLimits::default()).unwrap();
+    let epoch = source.next_epoch().unwrap().unwrap();
+    assert_eq!(epoch.start_offset_seconds, 0.0);
+    assert_eq!(epoch.annotations[0].onset_seconds, -0.065);
+
     let data = vec![
         i16_data(&[0, 1]),
         annotation_data(b"+0\x14\x14\0", 32),
@@ -236,6 +244,60 @@ fn rejects_negative_annotation_duration_and_invalid_record_chronology() {
     assert!(matches!(
         source.next_epoch(),
         Err(IoError::Malformed(RejectionReason::InvalidChronology))
+    ));
+}
+
+#[test]
+fn accepts_negative_amplifier_gain_and_enforces_tal_lexical_grammar() {
+    let mut inverted = signal("F3", 2);
+    inverted.physical_minimum = "100";
+    inverted.physical_maximum = "-100";
+    let bytes = edf_bytes(
+        &[inverted],
+        "1",
+        "0.03125",
+        "",
+        &[i16_data(&[-32768, 32767])],
+    );
+    let mut source = EdfEpochSource::new(Cursor::new(bytes), IoLimits::default()).unwrap();
+    let epoch = source.next_epoch().unwrap().unwrap();
+    assert!((epoch.channels[0].samples[0] - 100.0).abs() < 1e-9);
+    assert!((epoch.channels[0].samples[1] + 100.0).abs() < 1e-9);
+
+    let signals = [signal("F3", 2), signal("EDF Annotations", 16)];
+    for malformed in [
+        b"0\x14\x14\0".as_slice(),
+        b"+1e3\x14\x14\0".as_slice(),
+        b"+.5\x14\x14\0".as_slice(),
+        b"+0\x15+1\x14N2\x14\0".as_slice(),
+        b"+0\x151e3\x14N2\x14\0".as_slice(),
+    ] {
+        let data = vec![i16_data(&[0, 1]), annotation_data(malformed, 32)];
+        let bytes = edf_bytes(&signals, "1", "0.03125", "EDF+C", &data);
+        let mut source = EdfEpochSource::new(Cursor::new(bytes), IoLimits::default()).unwrap();
+        assert!(matches!(
+            source.next_epoch(),
+            Err(IoError::Malformed(RejectionReason::InvalidAnnotation))
+        ));
+    }
+}
+
+#[test]
+fn discontinuous_epoch_end_must_fit_duration_limit() {
+    let signals = [signal("F3", 2), signal("EDF Annotations", 16)];
+    let data = vec![i16_data(&[0, 1]), annotation_data(b"+1\x14\x14\0", 32)];
+    let bytes = edf_bytes(&signals, "1", "0.03125", "EDF+D", &data);
+    let limits = IoLimits {
+        max_duration_seconds: 1,
+        ..IoLimits::default()
+    };
+    let mut source = EdfEpochSource::new(Cursor::new(bytes), limits).unwrap();
+    assert!(matches!(
+        source.next_epoch(),
+        Err(IoError::LimitExceeded {
+            limit: LimitKind::Duration,
+            ..
+        })
     ));
 }
 
