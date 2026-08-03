@@ -195,6 +195,20 @@ impl FeatureValue {
         }
         Ok(())
     }
+
+    fn validate_unit(
+        &self,
+        field: &'static str,
+        expected: &'static str,
+    ) -> Result<(), NeuroSleepContractError> {
+        self.validate(field)?;
+        if let Self::Observed { unit, .. } = self {
+            if unit != expected {
+                return Err(invalid(field, "unexpected unit"));
+            }
+        }
+        Ok(())
+    }
 }
 
 /// Quality facts for the complete night.
@@ -262,26 +276,29 @@ pub struct StateQeegFeatures {
 impl StateQeegFeatures {
     fn validate(&self) -> Result<(), NeuroSleepContractError> {
         self.delta_absolute_power
-            .validate("qeeg.delta_absolute_power")?;
+            .validate_unit("qeeg.delta_absolute_power", "uV2")?;
         self.delta_relative_power
-            .validate("qeeg.delta_relative_power")?;
+            .validate_unit("qeeg.delta_relative_power", "ratio")?;
         self.theta_absolute_power
-            .validate("qeeg.theta_absolute_power")?;
+            .validate_unit("qeeg.theta_absolute_power", "uV2")?;
         self.theta_relative_power
-            .validate("qeeg.theta_relative_power")?;
+            .validate_unit("qeeg.theta_relative_power", "ratio")?;
         self.alpha_absolute_power
-            .validate("qeeg.alpha_absolute_power")?;
+            .validate_unit("qeeg.alpha_absolute_power", "uV2")?;
         self.theta_peak_frequency
-            .validate("qeeg.theta_peak_frequency")?;
-        self.theta_peak_power.validate("qeeg.theta_peak_power")?;
+            .validate_unit("qeeg.theta_peak_frequency", "Hz")?;
+        self.theta_peak_power
+            .validate_unit("qeeg.theta_peak_power", "log10_uV2_per_hz")?;
         self.frontal_parietal_full_band_coherence
-            .validate("qeeg.frontal_parietal_full_band_coherence")?;
+            .validate_unit("qeeg.frontal_parietal_full_band_coherence", "ratio")?;
         self.frontal_parietal_theta_coherence
-            .validate("qeeg.frontal_parietal_theta_coherence")?;
+            .validate_unit("qeeg.frontal_parietal_theta_coherence", "ratio")?;
         self.aperiodic_exponent
-            .validate("qeeg.aperiodic_exponent")?;
-        self.aperiodic_offset.validate("qeeg.aperiodic_offset")?;
-        self.spectral_fit_error.validate("qeeg.spectral_fit_error")
+            .validate_unit("qeeg.aperiodic_exponent", "dimensionless")?;
+        self.aperiodic_offset
+            .validate_unit("qeeg.aperiodic_offset", "log10_uV2_per_hz")?;
+        self.spectral_fit_error
+            .validate_unit("qeeg.spectral_fit_error", "log10_power")
     }
 }
 
@@ -389,6 +406,14 @@ impl NeuroSleepPayloadV1 {
             ensure_nonempty(&channel.reference, "acquisition.channels.reference")?;
         }
         self.validate_algorithm()?;
+        if self.compatibility_fingerprint
+            != compatibility_fingerprint_v1(&self.acquisition, &self.algorithm)?
+        {
+            return Err(invalid(
+                "compatibility_fingerprint",
+                "does not match acquisition and algorithm manifest",
+            ));
+        }
         ensure_fraction(
             self.quality.valid_coverage_fraction,
             "quality.valid_coverage_fraction",
@@ -399,19 +424,19 @@ impl NeuroSleepPayloadV1 {
         }
         self.stage_summary
             .wake_duration
-            .validate("stage_summary.wake_duration")?;
+            .validate_unit("stage_summary.wake_duration", "s")?;
         self.stage_summary
             .nrem_duration
-            .validate("stage_summary.nrem_duration")?;
+            .validate_unit("stage_summary.nrem_duration", "s")?;
         self.stage_summary
             .nrem_mean_bout_duration
-            .validate("stage_summary.nrem_mean_bout_duration")?;
+            .validate_unit("stage_summary.nrem_mean_bout_duration", "s")?;
         self.stage_summary
             .rem_duration
-            .validate("stage_summary.rem_duration")?;
+            .validate_unit("stage_summary.rem_duration", "s")?;
         self.stage_summary
             .rem_bout_count
-            .validate("stage_summary.rem_bout_count")?;
+            .validate_unit("stage_summary.rem_bout_count", "count")?;
         if self.qeeg_by_stage.is_empty() {
             return Err(invalid("qeeg_by_stage", "must not be empty"));
         }
@@ -502,6 +527,30 @@ impl NeuroSleepPayloadV1 {
         let bytes = self.canonical_bytes()?;
         Ok(Sha256::digest(bytes).into())
     }
+}
+
+/// Recompute the method-compatibility fingerprint from the exact acquisition,
+/// algorithm manifest, and schema domain carried by the wire contract.
+pub fn compatibility_fingerprint_v1(
+    acquisition: &AcquisitionMetadata,
+    algorithm: &AlgorithmManifest,
+) -> Result<String, NeuroSleepContractError> {
+    #[derive(Serialize)]
+    struct Compatibility<'a> {
+        schema: &'static str,
+        acquisition: &'a AcquisitionMetadata,
+        algorithm: &'a AlgorithmManifest,
+    }
+    let bytes = serde_json_canonicalizer::to_vec(&Compatibility {
+        schema: NEUROSLEEP_SCHEMA_V1,
+        acquisition,
+        algorithm,
+    })
+    .map_err(|error| NeuroSleepContractError::CanonicalJson(error.to_string()))?;
+    Ok(Sha256::digest(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect())
 }
 
 fn invalid(field: &'static str, reason: &'static str) -> NeuroSleepContractError {

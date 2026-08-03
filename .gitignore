@@ -1,1 +1,8 @@
 /target/
+
+# Nested cargo-fuzz build output (the fuzz crate has its own target dir).
+**/fuzz/target/
+
+# Local agent-tooling scratch state; not project artifacts.
+/.claude-flow/
+/ruvector.db

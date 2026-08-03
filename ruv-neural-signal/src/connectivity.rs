@@ -8,8 +8,8 @@
 //! - Full connectivity matrix computation
 
 use num_complex::Complex;
-use ruv_neural_core::signal::{FrequencyBand, MultiChannelTimeSeries};
 use rustfft::FftPlanner;
+use ruv_neural_core::signal::{FrequencyBand, MultiChannelTimeSeries};
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::f64::consts::PI;
@@ -20,6 +20,9 @@ use crate::hilbert::hilbert_transform;
 thread_local! {
     static FFT_PLANNER: RefCell<FftPlanner<f64>> = RefCell::new(FftPlanner::new());
 }
+
+mod masked;
+pub use masked::{coherence_masked, CoherenceConfig};
 
 /// Type of connectivity metric to compute.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -106,11 +109,7 @@ pub fn phase_locking_value(
 ///
 /// # Returns
 /// Vector of (frequency, coherence) pairs.
-pub fn coherence(
-    signal_a: &[f64],
-    signal_b: &[f64],
-    sample_rate: f64,
-) -> Vec<(f64, f64)> {
+pub fn coherence(signal_a: &[f64], signal_b: &[f64], sample_rate: f64) -> Vec<(f64, f64)> {
     let n = signal_a.len().min(signal_b.len());
     if n == 0 {
         return Vec::new();
@@ -330,10 +329,11 @@ pub fn compute_all_pairs(
                         continue;
                     }
                     let mut sum = Complex::new(0.0, 0.0);
-                    for k in 0..len {
-                        let phase_a = analytic_signals[i][k].im.atan2(analytic_signals[i][k].re);
-                        let phase_b = analytic_signals[j][k].im.atan2(analytic_signals[j][k].re);
-                        let diff = phase_a - phase_b;
+                    for (a, b) in analytic_signals[i][..len]
+                        .iter()
+                        .zip(&analytic_signals[j][..len])
+                    {
+                        let diff = a.im.atan2(a.re) - b.im.atan2(b.re);
                         sum += Complex::new(diff.cos(), diff.sin());
                     }
                     let val = (sum / len as f64).norm();
@@ -509,14 +509,14 @@ mod tests {
         assert_eq!(matrix[0].len(), 3);
 
         // Diagonal should be 1.0
-        for i in 0..3 {
-            assert_abs_diff_eq!(matrix[i][i], 1.0, epsilon = 1e-10);
+        for (i, row) in matrix.iter().enumerate() {
+            assert_abs_diff_eq!(row[i], 1.0, epsilon = 1e-10);
         }
 
         // Should be symmetric
-        for i in 0..3 {
-            for j in 0..3 {
-                assert_abs_diff_eq!(matrix[i][j], matrix[j][i], epsilon = 1e-10);
+        for (i, row) in matrix.iter().enumerate() {
+            for (j, value) in row.iter().enumerate() {
+                assert_abs_diff_eq!(*value, matrix[j][i], epsilon = 1e-10);
             }
         }
     }

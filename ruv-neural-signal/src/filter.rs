@@ -300,7 +300,7 @@ impl NotchFilter {
 
     /// Apply the notch filter to a signal (zero-phase).
     pub fn apply(&self, signal: &[f64]) -> Vec<f64> {
-        apply_sos_filtfilt(&[self.section.clone()], signal)
+        apply_sos_filtfilt(std::slice::from_ref(&self.section), signal)
     }
 }
 
