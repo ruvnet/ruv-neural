@@ -21,9 +21,40 @@ jobs:
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
-      - run: rustfmt --edition 2021 --check ruv-neural-core/src/neurosleep.rs ruv-neural-core/src/attestation.rs
-      - run: cargo clippy -p ruv-neural-core --all-targets --all-features --locked -- -D warnings
+      # Formatting is enforced per-file on the NeuroSleep path only; the rest of
+      # the workspace still carries pre-existing rustfmt debt.
+      - run: >
+          rustfmt --edition 2021 --check
+          ruv-neural-core/src/neurosleep.rs
+          ruv-neural-core/src/attestation.rs
+          ruv-neural-signal/src/neurosleep.rs
+          ruv-neural-signal/src/neurosleep/tests.rs
+          ruv-neural-signal/src/aperiodic.rs
+          ruv-neural-signal/src/aperiodic/tests.rs
+          ruv-neural-signal/src/quality.rs
+          ruv-neural-signal/src/quality/tests.rs
+          ruv-neural-signal/src/connectivity/masked.rs
+          ruv-neural-neurosleep/src/aggregate.rs
+          ruv-neural-neurosleep/src/bundle.rs
+          ruv-neural-neurosleep/src/lib.rs
+          ruv-neural-neurosleep/src/profile.rs
+          ruv-neural-neurosleep/src/stage.rs
+          ruv-neural-neurosleep/src/tests.rs
+      - run: cargo clippy -p ruv-neural-core -p ruv-neural-signal -p ruv-neural-neurosleep --all-targets --all-features --locked -- -D warnings
       - run: cargo test --workspace --all-features --locked
+      # Static gate: NeuroSleep must not reach a closed-loop actuation crate and
+      # no raw-waveform-shaped field may enter the derived evidence contract.
+      # Fails closed — a missing tool or search error is a failure, not a pass.
+      - run: ./validation/neurosleep/check_safety_boundary.sh
+
+  supply-chain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo install cargo-deny --locked
+      - run: cargo deny check
 
   wasm:
     runs-on: ubuntu-latest

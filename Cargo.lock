@@ -1133,6 +1133,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ruv-neural-neurosleep"
+version = "0.1.0"
+dependencies = [
+ "approx",
+ "criterion",
+ "ruv-neural-core",
+ "ruv-neural-signal",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "ruv-neural-sensor"
 version = "0.1.0"
 dependencies = [
@@ -1158,6 +1170,7 @@ dependencies = [
  "rustfft",
  "ruv-neural-core",
  "serde",
+ "thiserror",
  "tracing",
 ]
 

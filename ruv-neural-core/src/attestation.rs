@@ -194,9 +194,9 @@ mod signature_bytes {
 mod tests {
     use super::*;
     use crate::neurosleep::{
-        AcquisitionChannel, AcquisitionMetadata, AcquisitionModality, AlgorithmManifest,
-        AlgorithmParameter, FeatureValue, NightQuality, NullReason, ResearchCitation, SourceFormat,
-        Species, StageSource, StageSummary, StateQeegFeatures,
+        compatibility_fingerprint_v1, AcquisitionChannel, AcquisitionMetadata, AcquisitionModality,
+        AlgorithmManifest, AlgorithmParameter, FeatureValue, NightQuality, NullReason,
+        ResearchCitation, SourceFormat, Species, StageSource, StageSummary, StateQeegFeatures,
     };
 
     type PayloadMutation = Box<dyn Fn(&mut NeuroSleepPayloadV1)>;
@@ -209,7 +209,7 @@ mod tests {
     }
 
     fn payload() -> NeuroSleepPayloadV1 {
-        NeuroSleepPayloadV1 {
+        let mut payload = NeuroSleepPayloadV1 {
             bundle_id: "bundle-001".into(),
             species: Species::Mouse,
             study_id: "constantino-method-fixture".into(),
@@ -269,11 +269,11 @@ mod tests {
             },
             qeeg_by_stage: vec![StateQeegFeatures {
                 state: crate::neurosleep::SleepState::Nrem,
-                delta_absolute_power: observed(2.5, "uV2_per_hz"),
+                delta_absolute_power: observed(2.5, "uV2"),
                 delta_relative_power: observed(0.4, "ratio"),
-                theta_absolute_power: observed(1.5, "uV2_per_hz"),
+                theta_absolute_power: observed(1.5, "uV2"),
                 theta_relative_power: observed(0.25, "ratio"),
-                alpha_absolute_power: observed(0.8, "uV2_per_hz"),
+                alpha_absolute_power: observed(0.8, "uV2"),
                 theta_peak_frequency: observed(6.2, "Hz"),
                 theta_peak_power: observed(0.3, "log10_uV2_per_hz"),
                 frontal_parietal_full_band_coherence: observed(0.6, "ratio"),
@@ -288,13 +288,16 @@ mod tests {
                     reason: NullReason::NotApplicable,
                 },
             }],
-            compatibility_fingerprint: "44".repeat(32),
+            compatibility_fingerprint: String::new(),
             literature_context: vec![ResearchCitation {
                 identifier: "PMID:42252510".into(),
                 title: "Mouse-model NeuroSleep fixture citation".into(),
                 evidence_maturity: "preclinical_mouse_model".into(),
             }],
-        }
+        };
+        payload.compatibility_fingerprint =
+            compatibility_fingerprint_v1(&payload.acquisition, &payload.algorithm).unwrap();
+        payload
     }
 
     fn signer() -> PersistentEd25519Signer {
@@ -306,7 +309,7 @@ mod tests {
         let digest = payload().payload_sha256().unwrap();
         assert_eq!(
             hex(&digest),
-            "707230a26db16a58bbb9b8184936e98e3c9c1da89e054db29bf7c8b7cc2bd495",
+            "171eaaaa654b5a16de4605d603aa5d7c97db6784c624354b6ee97ca2ac9b83b7",
             "intentional golden: update only with a reviewed schema change"
         );
     }
@@ -409,18 +412,48 @@ mod tests {
             Box::new(|p| p.source_artifact_sha256 = "55".repeat(32)),
             Box::new(|p| p.source_format = SourceFormat::Edf),
             Box::new(|p| p.source_byte_count += 1),
-            Box::new(|p| p.acquisition.device_model.push('x')),
-            Box::new(|p| p.algorithm.pipeline_commit.push('x')),
+            Box::new(|p| {
+                p.acquisition.device_model.push('x');
+                p.compatibility_fingerprint =
+                    compatibility_fingerprint_v1(&p.acquisition, &p.algorithm).unwrap();
+            }),
+            Box::new(|p| {
+                p.algorithm.pipeline_commit.push('x');
+                p.compatibility_fingerprint =
+                    compatibility_fingerprint_v1(&p.acquisition, &p.algorithm).unwrap();
+            }),
             Box::new(|p| p.quality.artifact_fraction = 0.06),
             Box::new(|p| p.stage_summary.nrem_duration = observed(18_001.0, "s")),
             Box::new(|p| p.qeeg_by_stage[0].theta_relative_power = observed(0.26, "ratio")),
-            Box::new(|p| p.compatibility_fingerprint = "66".repeat(32)),
             Box::new(|p| p.literature_context[0].identifier.push('x')),
         ];
         for mutate in mutations {
             let mut changed = original.clone();
             mutate(&mut changed);
             assert_ne!(changed.payload_sha256().unwrap(), original_digest);
+        }
+    }
+
+    #[test]
+    fn rejects_inconsistent_fingerprint_and_wrong_registry_units() {
+        let mut inconsistent = payload();
+        inconsistent.compatibility_fingerprint = "66".repeat(32);
+        assert!(inconsistent.validate().is_err());
+
+        let mutations: Vec<PayloadMutation> = vec![
+            Box::new(|p| p.stage_summary.wake_duration = observed(1.0, "ms")),
+            Box::new(|p| p.stage_summary.rem_bout_count = observed(1.0, "ratio")),
+            Box::new(|p| p.qeeg_by_stage[0].theta_peak_frequency = observed(6.0, "s")),
+            Box::new(|p| p.qeeg_by_stage[0].theta_peak_power = observed(1.0, "uV2")),
+            Box::new(|p| p.qeeg_by_stage[0].frontal_parietal_theta_coherence = observed(0.5, "Hz")),
+            Box::new(|p| p.qeeg_by_stage[0].aperiodic_exponent = observed(1.0, "ratio")),
+            Box::new(|p| p.qeeg_by_stage[0].aperiodic_offset = observed(1.0, "uV2")),
+            Box::new(|p| p.qeeg_by_stage[0].spectral_fit_error = observed(0.1, "ratio")),
+        ];
+        for mutate in mutations {
+            let mut changed = payload();
+            mutate(&mut changed);
+            assert!(changed.validate().is_err());
         }
     }
 

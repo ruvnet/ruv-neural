@@ -69,9 +69,7 @@ pub fn detect_eye_blinks(signal: &[f64], sample_rate: f64) -> Vec<(usize, usize)
 
     // Extend ranges by 50ms on each side (blink onset/offset)
     let pad = (sample_rate * 0.05) as usize;
-    let merged = merge_ranges_with_padding(&ranges, pad, signal.len());
-
-    merged
+    merge_ranges_with_padding(&ranges, pad, signal.len())
 }
 
 /// Detect muscle artifact in a single channel.
@@ -251,9 +249,9 @@ pub fn reject_artifacts(
             // Linear interpolation across the artifact
             // frac goes from 1/(span+1) to span/(span+1), excluding boundaries
             let intervals = span + 1.0;
-            for i in start..end {
-                let frac = (i - start + 1) as f64 / intervals;
-                channel[i] = val_before * (1.0 - frac) + val_after * frac;
+            for (offset, sample) in channel[start..end].iter_mut().enumerate() {
+                let frac = (offset + 1) as f64 / intervals;
+                *sample = val_before * (1.0 - frac) + val_after * frac;
             }
         }
     }
@@ -313,13 +311,13 @@ mod tests {
         // Create signal with a large slow deflection (simulated blink)
         let mut signal = vec![0.0; n];
         // Normal background: small random-like variation
-        for i in 0..n {
-            signal[i] = 0.01 * ((i as f64 * 0.1).sin());
+        for (i, sample) in signal.iter_mut().enumerate() {
+            *sample = 0.01 * ((i as f64 * 0.1).sin());
         }
         // Insert a blink: large Gaussian-like bump at sample 2500
-        for i in 2400..2600 {
+        for (i, sample) in signal.iter_mut().enumerate().take(2600).skip(2400) {
             let t = (i as f64 - 2500.0) / 30.0;
-            signal[i] += 5.0 * (-t * t / 2.0).exp();
+            *sample += 5.0 * (-t * t / 2.0).exp();
         }
 
         let blinks = detect_eye_blinks(&signal, sr);
@@ -373,9 +371,13 @@ mod tests {
             }
             // QRS complex: sharp spike ~10ms wide
             let half_width = (sr * 0.005) as usize;
-            for i in center.saturating_sub(half_width)..(center + half_width).min(n) {
+            let (first, last) = (
+                center.saturating_sub(half_width),
+                (center + half_width).min(n),
+            );
+            for (i, sample) in signal.iter_mut().enumerate().take(last).skip(first) {
                 let t = (i as f64 - center as f64) / (half_width as f64);
-                signal[i] = 10.0 * (-t * t * 5.0).exp();
+                *sample = 10.0 * (-t * t * 5.0).exp();
             }
         }
 
@@ -383,7 +385,7 @@ mod tests {
 
         // Should find roughly 3 peaks
         assert!(
-            peaks.len() >= 1,
+            !peaks.is_empty(),
             "Should detect at least one cardiac peak, found {}",
             peaks.len()
         );

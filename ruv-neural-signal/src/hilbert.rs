@@ -46,12 +46,12 @@ pub fn hilbert_transform(signal: &[f64]) -> Vec<Complex<f64>> {
     // - Negative frequencies (k=n/2+1..n-1): multiply by 0
     if n > 1 {
         let half = n / 2;
-        for k in 1..half {
-            spectrum[k] *= 2.0;
+        for bin in spectrum.iter_mut().take(half).skip(1) {
+            *bin *= 2.0;
         }
         // Nyquist bin stays at 1x if n is even (already correct)
-        for k in (half + 1)..n {
-            spectrum[k] = Complex::new(0.0, 0.0);
+        for bin in spectrum.iter_mut().skip(half + 1) {
+            *bin = Complex::new(0.0, 0.0);
         }
     }
 
@@ -111,10 +111,10 @@ mod tests {
 
         // Check imaginary part ≈ sin(2*pi*f*t) for interior samples
         // (edge effects make first/last few samples less accurate)
-        for i in 10..(n - 10) {
+        for (i, value) in analytic.iter().enumerate().take(n - 10).skip(10) {
             let t = i as f64 / n as f64;
             let expected_sin = (2.0 * PI * f * t).sin();
-            assert_abs_diff_eq!(analytic[i].im, expected_sin, epsilon = 0.05);
+            assert_abs_diff_eq!(value.im, expected_sin, epsilon = 0.05);
         }
     }
 

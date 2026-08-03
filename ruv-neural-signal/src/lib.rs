@@ -13,11 +13,14 @@
 //! - [`connectivity`] — PLV, coherence, imaginary coherence, amplitude envelope correlation
 //! - [`preprocessing`] — Configurable multi-stage preprocessing pipeline
 
+pub mod aperiodic;
 pub mod artifact;
 pub mod connectivity;
 pub mod filter;
 pub mod hilbert;
+pub mod neurosleep;
 pub mod preprocessing;
+pub mod quality;
 pub mod spectral;
 
 pub use artifact::{detect_cardiac, detect_eye_blinks, detect_muscle_artifact, reject_artifacts};
