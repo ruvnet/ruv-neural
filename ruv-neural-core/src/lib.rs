@@ -20,10 +20,12 @@
 //! | `rvf`       | RuVector File format header and I/O                |
 //! | `traits`    | Pipeline trait definitions for all crates          |
 
+pub mod attestation;
 pub mod brain;
 pub mod embedding;
 pub mod error;
 pub mod graph;
+pub mod neurosleep;
 pub mod rvf;
 pub mod sensor;
 pub mod signal;
@@ -627,6 +629,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::approx_constant)]
     fn topology_metrics_serialize_roundtrip() {
         let metrics = TopologyMetrics {
             global_mincut: 3.14,
