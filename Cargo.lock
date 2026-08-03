@@ -1077,6 +1077,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ruv-neural-io"
+version = "0.1.0"
+dependencies = [
+ "ruv-neural-brain2text",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "ruv-neural-loop"
 version = "0.1.0"
 dependencies = [
