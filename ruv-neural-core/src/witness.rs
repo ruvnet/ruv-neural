@@ -526,7 +526,7 @@ fn hex_encode(bytes: &[u8]) -> String {
 
 /// Decode a hex string into bytes.
 fn hex_decode(hex: &str) -> std::result::Result<Vec<u8>, String> {
-    if hex.len() % 2 != 0 {
+    if !hex.len().is_multiple_of(2) {
         return Err("Odd-length hex string".into());
     }
     (0..hex.len())

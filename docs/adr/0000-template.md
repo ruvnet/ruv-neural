@@ -41,6 +41,7 @@ ADRs are immutable once accepted; revisions are new ADRs that supersede.
 | [0011](0011-acceptance-test.md) | Acceptance test definition |
 | [0012](0012-feedback-smoothing.md) | Feedback smoothing & divergence detection |
 | [0014](0014-web-console.md) | rUv Neural UI — web console for Ruflo (Demo + Replay) |
+| [0015](0015-neurosleep-qeeg-export.md) | Signed NeuroSleep qEEG phenotype export |
 
 ## Consequences
 
