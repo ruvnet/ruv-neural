@@ -13,6 +13,11 @@ use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
 
 /// NV center gyromagnetic ratio in GHz/T.
+///
+/// Retained but not yet wired into the ODMR model. ADR-0019 keeps the
+/// NV-diamond front-end explicitly aspirational, so the physical constant is
+/// recorded here rather than deleted and rediscovered later.
+#[allow(dead_code)]
 const GAMMA_NV_GHZ_PER_T: f64 = 28.024;
 
 /// Configuration for an NV diamond magnetometer array.

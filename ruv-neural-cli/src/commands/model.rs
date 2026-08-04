@@ -146,7 +146,7 @@ pub fn train(
     println!(
         "  wrote signed model to {output} ({} features, self-signed key {})",
         model.num_features(),
-        &hex8(pubkey.as_bytes())
+        hex8(pubkey.as_bytes())
     );
     Ok(())
 }

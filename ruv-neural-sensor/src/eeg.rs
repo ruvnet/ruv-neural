@@ -93,7 +93,13 @@ pub struct EegArray {
 }
 
 /// Internal state for spatially coherent brain rhythm generation.
+///
+/// The per-band phase accumulators are initialised but not yet advanced by the
+/// generator, so the simulator is not spatially coherent across bands yet. They
+/// are kept because removing them would quietly discard the intended design;
+/// only `next_blink_time` is currently read.
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct BrainSources {
     /// Delta (1-4 Hz): deep sleep, ~50 uV
     delta_phase: f64,
@@ -130,6 +136,9 @@ fn box_muller_single(rng: &mut impl rand::Rng) -> f64 {
 }
 
 /// Compute Euclidean distance between two 3D points.
+///
+/// Unused until the spatial-coherence path above is finished.
+#[allow(dead_code)]
 fn distance(a: &[f64; 3], b: &[f64; 3]) -> f64 {
     ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2) + (a[2] - b[2]).powi(2)).sqrt()
 }
@@ -243,6 +252,9 @@ impl EegArray {
 
     /// Compute spatial correlation factor between two electrodes.
     /// Returns a value in [0, 1] where 1 = same location, decaying with distance.
+    ///
+    /// Unused until the spatial-coherence path is finished.
+    #[allow(dead_code)]
     fn spatial_correlation(&self, ch_a: usize, ch_b: usize) -> f64 {
         let pos_a = self.config.positions.get(ch_a).unwrap_or(&[0.0, 0.0, 0.0]);
         let pos_b = self.config.positions.get(ch_b).unwrap_or(&[0.0, 0.0, 0.0]);
