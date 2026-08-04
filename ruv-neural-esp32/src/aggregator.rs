@@ -64,10 +64,7 @@ impl NodeAggregator {
                 let diff = p.header.timestamp_us.abs_diff(ref_ts);
                 diff <= self.sync_tolerance_us
             });
-            match found {
-                Some(idx) => indices.push(idx),
-                None => return None,
-            }
+            indices.push(found?);
         }
 
         // Remove matched packets and merge channel data

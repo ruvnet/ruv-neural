@@ -8,7 +8,7 @@ use ruv_neural_core::{Result, RuvNeuralError};
 use serde::{Deserialize, Serialize};
 
 /// Magic bytes identifying a rUv Neural data packet.
-pub const PACKET_MAGIC: [u8; 4] = [b'r', b'U', b'v', b'N'];
+pub const PACKET_MAGIC: [u8; 4] = *b"rUvN";
 
 /// Current protocol version.
 pub const PROTOCOL_VERSION: u8 = 1;
