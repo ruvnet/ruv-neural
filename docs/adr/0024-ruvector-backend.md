@@ -1,4 +1,4 @@
-# ADR-0023 — RuVector as the embedding store, ANN retrieval & inference backend
+# ADR-0024 — RuVector as the embedding store, ANN retrieval & inference backend
 
 ## Status
 
@@ -33,7 +33,7 @@ RuVector's **RVFS** container framing (verified against `ruvnet/ruvector`,
   `load_indexed_container` pack the existing HNSW ANN graph into an `INDEX`
   segment so one `.rvf` carries vectors *and* a ready-to-query graph (point 4).
 - `ruv-neural-loop/src/federated.rs` — federated averaging + differential
-  privacy recorded in a `FEDERATED_MANIFEST` segment (point 5; see ADR-0021).
+  privacy recorded in a `FEDERATED_MANIFEST` segment (point 5; see ADR-0022).
 - `ruv-neural-decoder/src/rvf_model.rs` — a trained `LogisticRegression` decoder
   persists into a `MODEL` segment, signed with Ed25519 (`CRYPTO`), so a model
   ships as one self-describing `.rvf` that is integrity- and signature-checked
@@ -62,7 +62,7 @@ exactly what **`ruvnet/ruvector`** provides (MIT-licensed Rust + WASM):
   cosine, Euclidean, dot product, and (notably for connectivity work) hyperbolic
   / Poincaré and Wasserstein/Sinkhorn distances; sub-ms query latency.
 - **Quantization:** f16, PQ8/PQ4, binary, INT8 — directly relevant to the
-  edge-storage reality ADR-0015 leans on.
+  edge-storage reality ADR-0016 leans on.
 - **RVF as a binary substrate:** the upstream RVF is far richer than this repo's
   current JSON profile — a container with `VEC`, `INDEX`, `WASM`, `WITNESS`,
   `CRYPTO`, and `FEDERATED_MANIFEST` segments, **post-quantum + Ed25519
@@ -79,7 +79,7 @@ Adopt RuVector as the **optional downstream backend** for embeddings, behind a
 feature flag, mapping its capabilities onto existing ADRs:
 
 1. **Store & retrieve embeddings.** `NeuralEmbedding` / ruVector (ADR-0006) and
-   any foundation-model embeddings (ADR-0015) are stored in RuVector's `VEC`
+   any foundation-model embeddings (ADR-0016) are stored in RuVector's `VEC`
    segment and queried via HNSW ANN — enabling cross-session, cross-target
    similarity search ("right person, right time"). The hyperbolic/Wasserstein
    metrics suit connectivity/topology vectors specifically.
@@ -94,11 +94,11 @@ feature flag, mapping its capabilities onto existing ADRs:
    segments; prefer reusing that substrate (incl. post-quantum signatures) over
    maintaining a parallel mechanism.
 4. **Federation & edge reuse.** RuVector's `FEDERATED_MANIFEST` is the concrete
-   substrate for ADR-0021's federated-personalization roadmap; its WASM runtime
+   substrate for ADR-0022's federated-personalization roadmap; its WASM runtime
    complements ADR-0014's local-first web console.
 5. **Inference & interop.** RuVector's ONNX runtime is a candidate host for the
-   ADR-0015 foundation-model backend and an additional interop bridge alongside
-   NWB/LSL (ADR-0016).
+   ADR-0016 foundation-model backend and an additional interop bridge alongside
+   NWB/LSL (ADR-0017).
 6. **Investigate mincut consolidation.** Both projects implement mincut
    (`ruv-neural-mincut`; RuVector's mincut-gated transformer) — evaluate shared
    code rather than two implementations.
@@ -126,8 +126,8 @@ feature flag, mapping its capabilities onto existing ADRs:
 - `ruv-neural-embed/src/distance.rs` — cosine/euclidean/manhattan, the local
   analogue of RuVector's metric set.
 - `docs/adr/0006-personal-state-embedding.md`, `0009-audit-trail.md`,
-  `0014-web-console.md`, `0015-neural-foundation-models.md`,
-  `0021-privacy-preserving-personalization.md` — the decisions this backend
+  `0014-web-console.md`, `0016-neural-foundation-models.md`,
+  `0022-privacy-preserving-personalization.md` — the decisions this backend
   unifies.
 
 ## References

@@ -1,7 +1,7 @@
 //! Train and evaluate the logistic-regression decoder on the public UCI
 //! "EEG Eye State" dataset (14 Emotiv channels → eye open/closed).
 //!
-//! Honest-evaluation notes (ADR-0015/0019):
+//! Honest-evaluation notes (ADR-0016/0019):
 //! - The dataset is a **single continuous recording**, so a random shuffle leaks
 //!   information across adjacent (highly autocorrelated) samples and inflates
 //!   accuracy. The headline number here uses a **chronological** split (train on

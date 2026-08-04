@@ -1,4 +1,4 @@
-# ADR-0021 — Privacy-preserving, on-device & federated personalization
+# ADR-0022 — Privacy-preserving, on-device & federated personalization
 
 ## Status
 

@@ -1,4 +1,4 @@
-# ADR-0022 — Neural-data governance & neurorights compliance
+# ADR-0023 — Neural-data governance & neurorights compliance
 
 ## Status
 
@@ -28,19 +28,19 @@ Neurotechnology is now explicitly regulated, and the rules tightened sharply in
 
 The project already has the right instincts: scope as wellness (ADR-0001),
 consent-gated research flow (ADR-0014), tamper-evident audit (ADR-0009), and
-data minimization (ADR-0021). This ADR makes governance an explicit, citable
+data minimization (ADR-0022). This ADR makes governance an explicit, citable
 posture rather than an emergent property.
 
 ## Decision
 
 1. **Stay in the General Wellness / non-device lane, deliberately.** Non-invasive
    sensing + external sensory stimulation + **no diagnosis or treatment claim**
-   (ADR-0001, ADR-0019, ADR-0020). Invasiveness and disease claims are the lines
+   (ADR-0001, ADR-0020, ADR-0021). Invasiveness and disease claims are the lines
    the 2026 FDA guidance hardens — the project sits firmly on the safe side.
 2. **Treat neural data as sensitive/biometric by default**, regardless of which
    state law applies, satisfying the *strictest* enacted regime (CA SB 1223 /
    MT SB 163): explicit, revocable consent; purpose limitation; minimization and
-   short retention (ADR-0021); and access/deletion support.
+   short retention (ADR-0022); and access/deletion support.
 3. **Bake in transparency & auditability.** The hash-chained, optionally
    Ed25519-signed audit trail (ADR-0009) and the signed evidence export
    (ADR-0014) provide the record-keeping and user-facing transparency the GMLP
@@ -61,8 +61,8 @@ posture rather than an emergent property.
   whose neural-data law applies?" — it complies with the strictest by default.
 - Existing safety/consent/audit machinery is recognized as the compliance
   substrate, so governance reuses what's built rather than bolting on later.
-- The wellness boundary is now defended on *three* fronts: science (ADR-0019),
-  modality (ADR-0020), and law (this ADR).
+- The wellness boundary is now defended on *three* fronts: science (ADR-0020),
+  modality (ADR-0021), and law (this ADR).
 
 ## Evidence
 
@@ -70,7 +70,7 @@ posture rather than an emergent property.
 - `docs/adr/0009-audit-trail.md` — hash-chained, signable audit (transparency).
 - `docs/adr/0014-web-console.md` — consent → contraindication → signed evidence
   export Research workflow.
-- `docs/adr/0021-privacy-preserving-personalization.md` — minimization/retention
+- `docs/adr/0022-privacy-preserving-personalization.md` — minimization/retention
   controls this governance posture relies on.
 
 ## References

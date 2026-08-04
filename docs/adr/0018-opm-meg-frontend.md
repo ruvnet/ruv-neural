@@ -1,4 +1,4 @@
-# ADR-0017 — Wearable OPM-MEG front-end (driver abstraction, external shielding assumed)
+# ADR-0018 — Wearable OPM-MEG front-end (driver abstraction, external shielding assumed)
 
 ## Status
 

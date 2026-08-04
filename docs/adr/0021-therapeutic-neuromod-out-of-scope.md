@@ -1,4 +1,4 @@
-# ADR-0020 — Adaptive/closed-loop *therapeutic* neuromodulation is explicitly out of scope
+# ADR-0021 — Adaptive/closed-loop *therapeutic* neuromodulation is explicitly out of scope
 
 ## Status
 
@@ -44,7 +44,7 @@ FDA Class III / PMA regulation.
    else. Any PR adding a non-sensory actuator must be rejected as out of scope.
 4. **Wellness framing is non-negotiable.** No diagnosis, no treatment claim, no
    implant — keeping the project on the non-device side of the line that even
-   Cognito's *non-invasive therapeutic* program (ADR-0019) only crosses via a
+   Cognito's *non-invasive therapeutic* program (ADR-0020) only crosses via a
    Breakthrough designation plus a pivotal trial.
 
 ## Consequences

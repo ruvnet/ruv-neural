@@ -70,19 +70,18 @@ impl Recording {
         let mut current: Vec<KeystrokeEvent> = Vec::new();
         let mut sid = 0usize;
 
-        let flush = |sid: &mut usize,
-                     current: &mut Vec<KeystrokeEvent>,
-                     sentences: &mut Vec<Sentence>| {
-            if !current.is_empty() {
-                let text: String = current.iter().map(|k| k.character).collect();
-                sentences.push(Sentence {
-                    id: *sid,
-                    text,
-                    keystrokes: std::mem::take(current),
-                });
-                *sid += 1;
-            }
-        };
+        let flush =
+            |sid: &mut usize, current: &mut Vec<KeystrokeEvent>, sentences: &mut Vec<Sentence>| {
+                if !current.is_empty() {
+                    let text: String = current.iter().map(|k| k.character).collect();
+                    sentences.push(Sentence {
+                        id: *sid,
+                        text,
+                        keystrokes: std::mem::take(current),
+                    });
+                    *sid += 1;
+                }
+            };
 
         for m in &rec.markers {
             if is_sentence_break(m) {

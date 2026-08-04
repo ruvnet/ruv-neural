@@ -147,16 +147,14 @@ impl TrainedPipeline {
 
     /// Serialize the whole pipeline to JSON (the distributable artifact).
     pub fn to_json(&self) -> Result<String> {
-        serde_json::to_string(self).map_err(|e| {
-            ruv_neural_core::error::RuvNeuralError::Serialization(e.to_string())
-        })
+        serde_json::to_string(self)
+            .map_err(|e| ruv_neural_core::error::RuvNeuralError::Serialization(e.to_string()))
     }
 
     /// Deserialize a pipeline from JSON.
     pub fn from_json(json: &str) -> Result<Self> {
-        serde_json::from_str(json).map_err(|e| {
-            ruv_neural_core::error::RuvNeuralError::Serialization(e.to_string())
-        })
+        serde_json::from_str(json)
+            .map_err(|e| ruv_neural_core::error::RuvNeuralError::Serialization(e.to_string()))
     }
 }
 

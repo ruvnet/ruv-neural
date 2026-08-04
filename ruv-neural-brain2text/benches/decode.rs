@@ -31,7 +31,11 @@ fn bench_train(c: &mut Criterion) {
     let pre = preprocess(&rec.series, &cfg).unwrap();
     let epochs = extract(&pre, &rec.timeline, &cfg);
     let (train, _v, _t) = split(&epochs, 0.7, 0.15);
-    let train: Vec<&SentenceEpochs> = if train.is_empty() { epochs.iter().collect() } else { train };
+    let train: Vec<&SentenceEpochs> = if train.is_empty() {
+        epochs.iter().collect()
+    } else {
+        train
+    };
 
     let mut group = c.benchmark_group("train");
     for kind in [ModelKind::Prototype, ModelKind::Linear, ModelKind::Mlp] {
@@ -39,9 +43,13 @@ fn bench_train(c: &mut Criterion) {
             model: kind,
             ..Default::default()
         };
-        group.bench_with_input(BenchmarkId::from_parameter(format!("{kind:?}")), &cfg, |b, cfg| {
-            b.iter(|| Brain2TextDecoder::train(&train, cfg));
-        });
+        group.bench_with_input(
+            BenchmarkId::from_parameter(format!("{kind:?}")),
+            &cfg,
+            |b, cfg| {
+                b.iter(|| Brain2TextDecoder::train(&train, cfg));
+            },
+        );
     }
     group.finish();
 }

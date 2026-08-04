@@ -77,8 +77,7 @@ pub fn generate(sentences: &[&str], params: &SyntheticParams, seed: u64) -> Reco
         .collect();
     vocab.sort_unstable();
 
-    let mut templates: std::collections::HashMap<char, Vec<f64>> =
-        std::collections::HashMap::new();
+    let mut templates: std::collections::HashMap<char, Vec<f64>> = std::collections::HashMap::new();
     for &c in &vocab {
         let t: Vec<f64> = (0..params.num_channels)
             .map(|_| gauss(&mut rng) * params.signal_amplitude)

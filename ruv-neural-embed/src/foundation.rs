@@ -1,9 +1,9 @@
-//! Pluggable foundation-model embedding backend (ADR-0015).
+//! Pluggable foundation-model embedding backend (ADR-0016).
 //!
 //! Self-supervised EEG/biosignal foundation models (LaBraM, NeuroLM, REVE, …)
 //! produce rich representations, but they are heavy, often edge-infeasible, and —
 //! per the critical literature — **not a guaranteed win** over compact baselines.
-//! ADR-0015 therefore keeps the lightweight deterministic embeddings as the
+//! ADR-0016 therefore keeps the lightweight deterministic embeddings as the
 //! default and exposes FMs as an *optional, inference-only* backend behind this
 //! seam, producing a standard method-tagged [`NeuralEmbedding`] so downstream
 //! code (distance, RVF export, the controller) stays method-agnostic.
@@ -11,7 +11,7 @@
 //! Real model backends (e.g. an ONNX-exported LaBraM/REVE) are gated behind the
 //! `fm` Cargo feature so the core stays dependency-light. [`ReferenceFoundationEmbedder`]
 //! is a dependency-free, deterministic **reference scaffold** — it is *not* a
-//! trained model and makes no accuracy claim; per ADR-0015 point 4, any real FM
+//! trained model and makes no accuracy claim; per ADR-0016 point 4, any real FM
 //! backend must beat the lightweight baselines **out-of-sample** before it is
 //! promoted out of "Proposed".
 
@@ -31,7 +31,7 @@ pub trait FoundationEmbedder {
     /// Output embedding dimensionality.
     fn embedding_dim(&self) -> usize;
 
-    /// SPDX-style license identifier of the backing model (ADR-0015 point 5).
+    /// SPDX-style license identifier of the backing model (ADR-0016 point 5).
     fn license(&self) -> &str;
 
     /// Run inference over a windowed multichannel signal, returning the raw

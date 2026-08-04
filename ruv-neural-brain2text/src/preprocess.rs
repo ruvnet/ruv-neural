@@ -25,11 +25,7 @@ pub fn preprocess(
     let low = config.bandpass_low_hz.min(high - 0.5).max(0.001);
     let filter = BandpassFilter::new(config.filter_order, low, high, sr);
 
-    let filtered: Vec<Vec<f64>> = series
-        .data
-        .iter()
-        .map(|ch| filter.process(ch))
-        .collect();
+    let filtered: Vec<Vec<f64>> = series.data.iter().map(|ch| filter.process(ch)).collect();
 
     // Resample each channel to the target rate via linear interpolation.
     let resampled: Vec<Vec<f64>> = filtered

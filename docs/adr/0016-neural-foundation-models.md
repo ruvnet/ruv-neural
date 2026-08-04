@@ -1,4 +1,4 @@
-# ADR-0015 — Neural foundation-model embeddings as an optional, pluggable backend
+# ADR-0016 — Neural foundation-model embeddings as an optional, pluggable backend
 
 ## Status
 
@@ -61,7 +61,7 @@ edge-infeasible, and — per the evidence above — not a guaranteed win.
 4. **Benchmark honestly before promotion.** An FM backend graduates from
    Proposed only with **out-of-sample** evaluation against the lightweight
    baselines on the project's own pipeline — no in-sample or cherry-picked
-   numbers, consistent with ADR-0019 claims discipline.
+   numbers, consistent with ADR-0020 claims discipline.
 5. **Prefer compact, open-licensed models** with permissive licenses; record the
    license per backend.
 

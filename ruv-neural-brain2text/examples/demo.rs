@@ -41,7 +41,14 @@ fn main() {
     );
 
     // Baseline: Brain2Qwerty V1 default config.
-    let baseline = evaluate(&rec, &Brain2TextConfig::default(), EvalSplit::Test, 0.7, 0.15).unwrap();
+    let baseline = evaluate(
+        &rec,
+        &Brain2TextConfig::default(),
+        EvalSplit::Test,
+        0.7,
+        0.15,
+    )
+    .unwrap();
     println!(
         "baseline (V1 defaults):   test CER = {:.3}  WER = {:.3}",
         baseline.report.mean_cer, baseline.report.mean_wer

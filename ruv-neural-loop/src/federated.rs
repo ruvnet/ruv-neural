@@ -1,5 +1,5 @@
-//! Privacy-preserving federated personalization (ADR-0021) with an RVF
-//! `FEDERATED_MANIFEST` segment (ADR-0023 point 5).
+//! Privacy-preserving federated personalization (ADR-0022) with an RVF
+//! `FEDERATED_MANIFEST` segment (ADR-0024 point 5).
 //!
 //! Personalization never requires raw signals or even raw embeddings to leave a
 //! device: each participant contributes only the summary statistics of its local
@@ -11,7 +11,7 @@
 //! is recorded in a self-describing `FEDERATED_MANIFEST` RVF segment.
 //!
 //! This is a coordination/accounting primitive — it deliberately does **not**
-//! transport raw neural data, consistent with the ADR-0021/0022 data-minimization
+//! transport raw neural data, consistent with the ADR-0022/0022 data-minimization
 //! and neurorights posture.
 
 use rand::Rng;

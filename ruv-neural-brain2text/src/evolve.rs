@@ -117,7 +117,11 @@ pub fn evolve(recording: &Recording, ec: &EvolveConfig) -> Result<EvolveResult> 
         let gen_best = scored[0].clone();
         history.push(gen_best.fitness);
         archive.push(gen_best.clone());
-        if best.as_ref().map(|b| gen_best.fitness > b.fitness).unwrap_or(true) {
+        if best
+            .as_ref()
+            .map(|b| gen_best.fitness > b.fitness)
+            .unwrap_or(true)
+        {
             best = Some(gen_best);
         }
 
@@ -158,7 +162,11 @@ fn tournament<'a>(scored: &'a [Variant], rng: &mut StdRng) -> &'a Variant {
 fn crossover(a: &Brain2TextConfig, b: &Brain2TextConfig, rng: &mut StdRng) -> Brain2TextConfig {
     macro_rules! pick {
         ($f:ident) => {
-            if rng.gen::<bool>() { a.$f } else { b.$f }
+            if rng.gen::<bool>() {
+                a.$f
+            } else {
+                b.$f
+            }
         };
     }
     Brain2TextConfig {

@@ -1,6 +1,6 @@
 //! RVF `INDEX` segments: pack vectors and their HNSW ANN graph into one `.rvf`.
 //!
-//! Realizes ADR-0023 point 4 ("store & retrieve embeddings via HNSW") on top of
+//! Realizes ADR-0024 point 4 ("store & retrieve embeddings via HNSW") on top of
 //! the [`RvfContainer`] substrate: [`build_indexed_container`] writes a `META`
 //! directory, a `VEC` segment, and an `INDEX` segment holding the serialized
 //! HNSW topology, so a single self-describing file carries both the vectors and

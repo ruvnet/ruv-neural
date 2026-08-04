@@ -7,7 +7,7 @@
 //! so training is reproducible and the model serializes cleanly for RVF/JSON
 //! storage.
 //!
-//! Per ADR-0015/0019, any reported accuracy must be **out-of-sample**; see
+//! Per ADR-0016/0019, any reported accuracy must be **out-of-sample**; see
 //! `examples/train_eeg_eye_state.rs` for an honest chronological-split benchmark
 //! on the public UCI "EEG Eye State" dataset.
 

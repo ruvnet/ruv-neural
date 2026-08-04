@@ -140,8 +140,7 @@ impl AcousticModel for LinearSoftmax {
             return Vec::new();
         }
         let logp = log_softmax(&self.raw_logits(features));
-        let mut out: Vec<(char, f64)> =
-            self.classes.iter().cloned().zip(logp).collect();
+        let mut out: Vec<(char, f64)> = self.classes.iter().cloned().zip(logp).collect();
         out.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
         out
     }

@@ -1,6 +1,6 @@
-//! BIDS-EEG export for cross-tool interoperability (ADR-0016).
+//! BIDS-EEG export for cross-tool interoperability (ADR-0017).
 //!
-//! ADR-0016 keeps the platform non-invasive but commits to *interoperate* with
+//! ADR-0017 keeps the platform non-invasive but commits to *interoperate* with
 //! the wider neuroscience tool-chain ("interop, not parity"). This module writes
 //! a recording as a minimal, valid **BIDS** dataset using the BIDS-recommended
 //! **BrainVision** representation, so a session can be opened in MNE-Python,
@@ -19,7 +19,7 @@
 //! ```
 //!
 //! NWB (HDF5) and LSL (a live network protocol) need external C runtimes and are
-//! intentionally **not** implemented here; they remain ADR-0016 roadmap items.
+//! intentionally **not** implemented here; they remain ADR-0017 roadmap items.
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -151,7 +151,7 @@ pub fn export_bids_eeg(
         "Name": meta.dataset_name,
         "BIDSVersion": "1.9.0",
         "DatasetType": "raw",
-        "GeneratedBy": [{ "Name": "ruv-neural-viz", "Description": "BIDS-EEG export (ADR-0016)" }],
+        "GeneratedBy": [{ "Name": "ruv-neural-viz", "Description": "BIDS-EEG export (ADR-0017)" }],
     });
     write_file(
         &root.join("dataset_description.json"),
@@ -176,7 +176,7 @@ pub fn export_bids_eeg(
     let sampling_interval_us = 1.0e6 / signal.sample_rate_hz;
     let mut vhdr = String::new();
     vhdr.push_str("Brain Vision Data Exchange Header File Version 1.0\n");
-    vhdr.push_str("; Written by ruv-neural-viz (ADR-0016 BIDS-EEG export)\n\n");
+    vhdr.push_str("; Written by ruv-neural-viz (ADR-0017 BIDS-EEG export)\n\n");
     vhdr.push_str("[Common Infos]\n");
     vhdr.push_str("Codepage=UTF-8\n");
     vhdr.push_str(&format!("DataFile={data_name}\n"));

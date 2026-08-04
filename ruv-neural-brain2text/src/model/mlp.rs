@@ -44,7 +44,11 @@ impl Mlp {
         let scale1 = (2.0 / dim.max(1) as f64).sqrt();
         let scale2 = (2.0 / h as f64).sqrt();
         let mut w1: Vec<Vec<f64>> = (0..h)
-            .map(|_| (0..dim).map(|_| rng.gen_range(-1.0..1.0) * scale1).collect())
+            .map(|_| {
+                (0..dim)
+                    .map(|_| rng.gen_range(-1.0..1.0) * scale1)
+                    .collect()
+            })
             .collect();
         let mut b1 = vec![0.0; h];
         let mut w2: Vec<Vec<f64>> = (0..c)

@@ -1,8 +1,8 @@
 # Benchmark — UCI EEG Eye State (logistic-regression decoder)
 
 A trained-on-public-data benchmark for the `LogisticRegression` decoder
-(`ruv-neural-decoder`), run under the claims-discipline of ADR-0015 (honest,
-out-of-sample evaluation) and ADR-0019 (surface null/contested results).
+(`ruv-neural-decoder`), run under the claims-discipline of ADR-0016 (honest,
+out-of-sample evaluation) and ADR-0020 (surface null/contested results).
 
 - **Data:** UCI "EEG Eye State" — 14 Emotiv channels, eye open/closed,
   14,980 samples from a **single continuous recording**
@@ -30,7 +30,7 @@ majority-class baseline. The much higher accuracies commonly reported on this
 dataset come largely from **per-sample shuffling**, which places near-identical
 neighbouring samples in both train and test.
 
-This is a textbook illustration of the evaluation pitfalls ADR-0015 cites for
+This is a textbook illustration of the evaluation pitfalls ADR-0016 cites for
 EEG models (in-sample leakage; simple baselines competitive; unsolved
 distribution shift) — and exactly why this project keeps embeddings small,
 auditable, and benchmarked out-of-sample rather than chasing leaky headline
@@ -89,5 +89,5 @@ Ed25519 `CRYPTO` segment, and the bytes are written to disk. On reload, the
 container's CRC32C/content-hash **and** the signature are verified, and the
 reloaded model reproduces the held-out accuracy **exactly** (0.9727 == 0.9727)
 in an 832-byte file — closing the loop from training to a tamper-evident,
-self-describing artifact (ADR-0023).
+self-describing artifact (ADR-0024).
 

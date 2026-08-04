@@ -1,4 +1,4 @@
-# ADR-0018 — NV-diamond quantum magnetometry: aspirational front-end with an honest MEG gap
+# ADR-0019 — NV-diamond quantum magnetometry: aspirational front-end with an honest MEG gap
 
 ## Status
 
@@ -41,7 +41,7 @@ sensing capability:
    neural fields (fT) are out of reach for the foreseeable roadmap.
 3. The honest path for NV in this project is **education and method validation**
    (ODMR, calibration, demodulation) and, at most, **MCG-class** biomagnetism —
-   not MEG. EEG (today) and OPM-MEG (ADR-0017) are the real connectivity paths.
+   not MEG. EEG (today) and OPM-MEG (ADR-0018) are the real connectivity paths.
 4. No NV-based neural/clinical claim is made; the BOM and reality check in the
    README remain the canonical, non-marketing description.
 

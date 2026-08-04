@@ -4,7 +4,7 @@
 //! chunks → 11,500 rows, 5 classes. Binary task here: **seizure (class 1) vs
 //! the rest** (majority-class baseline ≈ 0.80).
 //!
-//! Honest-evaluation notes (ADR-0015/0019): the 23 chunks of one recording are
+//! Honest-evaluation notes (ADR-0016/0019): the 23 chunks of one recording are
 //! correlated, so a random *row* split leaks. Every protocol below is **grouped
 //! by source recording** (all 23 chunks stay on one side), which removes
 //! temporal-autocorrelation leakage. NOTE: grouping is by *recording*, not by

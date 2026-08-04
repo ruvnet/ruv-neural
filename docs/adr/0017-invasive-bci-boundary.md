@@ -1,4 +1,4 @@
-# ADR-0016 — Invasive BCI landscape & the non-invasive scope boundary (interop, not parity)
+# ADR-0017 — Invasive BCI landscape & the non-invasive scope boundary (interop, not parity)
 
 ## Status
 
@@ -38,7 +38,7 @@ squarely inside implanted-device regulation (ADR-0001 forbids exactly this).
 
 1. **Acquisition stays strictly non-invasive.** rUv Neural models only scalp/
    external sensing (EEG today; OPM-MEG and NV-diamond as research front-ends,
-   ADR-0017 / ADR-0018). No intracortical, ECoG, subdural, or endovascular
+   ADR-0018 / ADR-0019). No intracortical, ECoG, subdural, or endovascular
    acquisition path is implemented. The `SensorType` enum is deliberately
    restricted to non-invasive and external magnetometry modalities.
 2. **Interoperate by data format, never by signal parity.** Where the project
