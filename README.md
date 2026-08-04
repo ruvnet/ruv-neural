@@ -36,7 +36,8 @@ them entirely locally — no backend, no accounts, no data leaves the page.
 [Thesis](#the-thesis--the-wave-is-protocol-optimization) ·
 [Five primitives](#five-primitives) · [Who it's for](#who-its-for) ·
 [Why now](#why-now--the-research-wave) · [The wedge](#the-wedge--40-hz-protocol-workbench) ·
-[Ethics](#ethics--responsible-use) · [Closed loop (Ruflo)](#closed-loop-sensory-neuromodulation-ruflo) ·
+[Ethics](#ethics--responsible-use) · [NeuroSleep](#neurosleep--a-signed-qeeg-phenotype-not-a-diagnosis) ·
+[Closed loop (Ruflo)](#closed-loop-sensory-neuromodulation-ruflo) ·
 [Web console](#web-console--ruv-neural-ui) · [How it observes](#how-it-observes--brain-network-topology) ·
 [Architecture](#architecture) · [Crate map](#crate-map) ·
 [Hardware BOM](#hardware-parts-list) · [Witness verification](#cryptographic-witness-verification)
@@ -118,6 +119,41 @@ The first demo turns a protocol into reproducible evidence:
 > - This software is provided for **research and educational purposes**. The authors accept no liability for misuse
 >
 > See [IEEE Neuroethics Framework](https://standards.ieee.org/industry-connections/ec/neuroethics/) and the [Morningside Group Neurorights](https://nri.ntc.columbia.edu/content/neurorights) initiative for guidance.
+
+---
+
+## NeuroSleep — a signed qEEG *phenotype*, not a diagnosis
+
+`ruv-neural-neurosleep` turns an expert-scored night of EEG into a small set of
+derived features — NREM duration and bout structure, delta and theta band power,
+theta centre frequency, frontal-to-parietal coherence, and the aperiodic exponent
+— and signs them. It is annotation-first: sleep stages come from a human scorer,
+never from a model, so no staging error sits underneath every downstream number.
+
+The DSP lives in `ruv-neural-signal` and is deliberately fallible. Band power is
+integrated trapezoidally in explicit µV², coherence uses a single validity mask
+shared by both channels so an artefact drops the segment from *both* rather than
+being interpolated around, clipping is judged only against declared ADC rails,
+and an aperiodic fit that fails to converge returns a typed error rather than a
+number. A plausible-looking estimate is indistinguishable from a real
+physiological change once something downstream plots a trend.
+
+**What leaves this repository is numbers, not waveforms.** A consumer receives a
+signed bundle whose signature covers every analytic and method field, verifies it
+against a key it enrolled itself, and never sees raw EEG. A static gate fails the
+build if a raw-waveform-shaped field reaches the contract, or if a NeuroSleep
+identifier reaches the closed-loop actuation crates.
+
+**Not claimed.** These features are associated with an APP/PS1 mouse study; they
+are not a human clinical marker. Nothing here estimates disease, amyloid burden,
+or microglial activity, and the intervention in that study was CSF1R depletion,
+not gamma entrainment — so it is not evidence for the stimulation work elsewhere
+in this repository. Numeric parity against the reference implementation is
+unproven: no pinned SciPy or FOOOF fixtures exist yet, which is why the crates
+are released as `0.2.0-alpha.1`. The wire contract is stable enough to pin; the
+numbers are not yet validated.
+
+See [ADR-0015](docs/adr/0015-neurosleep-qeeg-export.md) for the full boundary.
 
 ---
 
@@ -434,6 +470,8 @@ All crates are published on [crates.io](https://crates.io/search?q=ruv-neural):
 | [`ruv-neural-memory`](https://crates.io/crates/ruv-neural-memory) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-memory.svg)](https://crates.io/crates/ruv-neural-memory) | Persistent neural state memory + HNSW | core |
 | [`ruv-neural-decoder`](https://crates.io/crates/ruv-neural-decoder) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-decoder.svg)](https://crates.io/crates/ruv-neural-decoder) | Cognitive state classification + BCI | core |
 | [`ruv-neural-brain2text`](ruv-neural-brain2text) | — | Non-invasive brain-to-text bridge (Brain2Qwerty / SpanishBCBL) + evolutionary optimizer | core, signal |
+| [`ruv-neural-io`](ruv-neural-io) | — | Bounded EDF / EDF+ / BrainVision reader with explicit allocation limits and typed rejections | core |
+| [`ruv-neural-neurosleep`](https://crates.io/crates/ruv-neural-neurosleep) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-neurosleep.svg)](https://crates.io/crates/ruv-neural-neurosleep) | Annotation-first NeuroSleep qEEG research profile; signs derived nightly features | core, signal |
 | [`ruv-neural-stim`](https://crates.io/crates/ruv-neural-stim) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-stim.svg)](https://crates.io/crates/ruv-neural-stim) | 40 Hz light/audio/haptic stimulus synthesis + verified delivery receipts | core |
 | [`ruv-neural-biosense`](https://crates.io/crates/ruv-neural-biosense) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-biosense.svg)](https://crates.io/crates/ruv-neural-biosense) | Physiological response sensing (HRV, respiration, motion, sleep) | core |
 | [`ruv-neural-loop`](https://crates.io/crates/ruv-neural-loop) | [![crates.io](https://img.shields.io/crates/v/ruv-neural-loop.svg)](https://crates.io/crates/ruv-neural-loop) | Ruflo closed-loop controller: safety envelope, dosing, audit trail | core, stim, biosense, embed |
