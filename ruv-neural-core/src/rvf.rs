@@ -219,7 +219,8 @@ impl RvfFile {
         if data.len() > MAX_PAYLOAD_LEN {
             return Err(RuvNeuralError::Serialization(format!(
                 "RVF payload length {} exceeds maximum {}",
-                data.len(), MAX_PAYLOAD_LEN
+                data.len(),
+                MAX_PAYLOAD_LEN
             )));
         }
 

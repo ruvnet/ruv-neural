@@ -113,7 +113,9 @@ impl Brain2TextConfig {
     /// ever constructing a degenerate pipeline.
     pub fn clamp(mut self) -> Self {
         self.bandpass_low_hz = self.bandpass_low_hz.clamp(0.01, 5.0);
-        self.bandpass_high_hz = self.bandpass_high_hz.clamp(self.bandpass_low_hz + 1.0, 100.0);
+        self.bandpass_high_hz = self
+            .bandpass_high_hz
+            .clamp(self.bandpass_low_hz + 1.0, 100.0);
         self.filter_order = self.filter_order.clamp(2, 8);
         self.resample_hz = self.resample_hz.clamp(20.0, 250.0);
         self.epoch_pre_s = self.epoch_pre_s.clamp(-0.5, -0.02);

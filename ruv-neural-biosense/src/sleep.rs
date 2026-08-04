@@ -45,7 +45,11 @@ pub fn estimate_stage(input: &SleepProxyInput) -> SleepStage {
 }
 
 /// Convenience: estimate from HRV/motion metric structs.
-pub fn estimate_from_metrics(mean_hr_bpm: f64, rmssd_ms: f64, motion: &MotionMetrics) -> SleepStage {
+pub fn estimate_from_metrics(
+    mean_hr_bpm: f64,
+    rmssd_ms: f64,
+    motion: &MotionMetrics,
+) -> SleepStage {
     estimate_stage(&SleepProxyInput {
         mean_hr_bpm,
         rmssd_ms,

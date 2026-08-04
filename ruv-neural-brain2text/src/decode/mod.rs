@@ -119,14 +119,22 @@ impl CharSequenceDecoder for Brain2TextDecoder {
                     });
                 }
             }
-            next.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(std::cmp::Ordering::Equal));
+            next.sort_by(|a, b| {
+                b.score
+                    .partial_cmp(&a.score)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            });
             next.truncate(self.beam_size);
             beams = next;
         }
 
         beams
             .into_iter()
-            .max_by(|a, b| a.score.partial_cmp(&b.score).unwrap_or(std::cmp::Ordering::Equal))
+            .max_by(|a, b| {
+                a.score
+                    .partial_cmp(&b.score)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
             .map(|b| b.text)
             .unwrap_or_default()
     }
@@ -165,15 +173,18 @@ mod tests {
         let pre = preprocess(&rec.series, &cfg).unwrap();
         let epochs = extract(&pre, &rec.timeline, &cfg);
         let (train, _val, _test) = split(&epochs, 0.7, 0.15);
-        let train: Vec<&SentenceEpochs> = if train.is_empty() { epochs.iter().collect() } else { train };
+        let train: Vec<&SentenceEpochs> = if train.is_empty() {
+            epochs.iter().collect()
+        } else {
+            train
+        };
 
         let dec = Brain2TextDecoder::train(&train, &cfg);
         let pairs: Vec<(String, String)> = train
             .iter()
             .map(|s| (dec.decode_sentence(&s.epochs), s.text.clone()))
             .collect();
-        let report =
-            DecodeReport::from_pairs(pairs.iter().map(|(p, t)| (p.as_str(), t.as_str())));
+        let report = DecodeReport::from_pairs(pairs.iter().map(|(p, t)| (p.as_str(), t.as_str())));
         assert!(report.mean_cer < 0.5, "CER too high: {}", report.mean_cer);
     }
 

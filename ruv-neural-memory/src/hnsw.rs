@@ -1,8 +1,27 @@
 //! Simplified HNSW (Hierarchical Navigable Small World) index for approximate
 //! nearest neighbor search on embedding vectors.
 
-use std::collections::{BinaryHeap, HashSet};
 use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashSet};
+
+use serde::{Deserialize, Serialize};
+
+/// Serializable topology of an [`HnswIndex`] (graph + parameters, without the
+/// stored vectors). This is what an RVF `INDEX` segment carries; the vectors
+/// themselves live in the companion `VEC` segment.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HnswGraph {
+    /// Maximum connections per node per layer.
+    pub m: usize,
+    /// Search width used during construction.
+    pub ef_construction: usize,
+    /// Entry-point node id.
+    pub entry_point: usize,
+    /// Highest populated layer index.
+    pub max_layer: usize,
+    /// Per-layer adjacency: `layers[layer][node] = [(neighbor, distance)]`.
+    pub layers: Vec<Vec<Vec<(usize, f64)>>>,
+}
 
 /// A scored neighbor for use in the priority queue.
 #[derive(Debug, Clone)]
@@ -143,12 +162,10 @@ impl HnswIndex {
 
         // Insert into layers from insert_layer down to 0
         for layer in (0..=insert_layer.min(self.max_layer)).rev() {
-            let neighbors =
-                self.search_layer(vector, current_entry, self.ef_construction, layer);
+            let neighbors = self.search_layer(vector, current_entry, self.ef_construction, layer);
 
             // Select up to m neighbors
-            let selected: Vec<(usize, f64)> =
-                neighbors.into_iter().take(self.m).collect();
+            let selected: Vec<(usize, f64)> = neighbors.into_iter().take(self.m).collect();
 
             // Ensure adjacency list exists for this node at this layer
             while self.layers[layer].len() <= id {
@@ -230,6 +247,33 @@ impl HnswIndex {
         self.embeddings.is_empty()
     }
 
+    /// Export the graph topology (adjacency + parameters) for serialization
+    /// into an RVF `INDEX` segment. Does not include the stored vectors.
+    pub fn export_graph(&self) -> HnswGraph {
+        HnswGraph {
+            m: self.m,
+            ef_construction: self.ef_construction,
+            entry_point: self.entry_point,
+            max_layer: self.max_layer,
+            layers: self.layers.clone(),
+        }
+    }
+
+    /// Rebuild an index from a serialized [`HnswGraph`] plus the vectors it
+    /// indexes (typically decoded from the companion `VEC` segment).
+    ///
+    /// The number of vectors must cover every node referenced by the graph.
+    pub fn from_graph(graph: HnswGraph, vectors: Vec<Vec<f64>>) -> Self {
+        Self {
+            layers: graph.layers,
+            entry_point: graph.entry_point,
+            max_layer: graph.max_layer,
+            ef_construction: graph.ef_construction,
+            m: graph.m,
+            embeddings: vectors,
+        }
+    }
+
     /// Euclidean distance between two vectors.
     fn distance(a: &[f64], b: &[f64]) -> f64 {
         a.iter()
@@ -287,7 +331,11 @@ impl HnswIndex {
 
         visited.insert(entry);
 
-        while let Some(ScoredNode { id: current, distance: current_dist }) = candidates.pop() {
+        while let Some(ScoredNode {
+            id: current,
+            distance: current_dist,
+        }) = candidates.pop()
+        {
             // If current candidate is further than the worst result and we have enough, stop
             if let Some(worst) = results.peek() {
                 if current_dist > worst.distance && results.len() >= ef {
@@ -302,10 +350,7 @@ impl HnswIndex {
                         let dist = Self::distance(query, &self.embeddings[neighbor]);
 
                         let should_add = results.len() < ef
-                            || results
-                                .peek()
-                                .map(|w| dist < w.distance)
-                                .unwrap_or(true);
+                            || results.peek().map(|w| dist < w.distance).unwrap_or(true);
 
                         if should_add {
                             candidates.push(ScoredNode {
@@ -400,8 +445,7 @@ mod tests {
                 .enumerate()
                 .map(|(i, v)| (i, HnswIndex::distance(&query, v)))
                 .collect();
-            bf_distances
-                .sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+            bf_distances.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
             let bf_top_k: Vec<usize> = bf_distances.iter().take(k).map(|(i, _)| *i).collect();
 
             // HNSW search
@@ -409,10 +453,7 @@ mod tests {
             let hnsw_top_k: Vec<usize> = hnsw_results.iter().map(|(i, _)| *i).collect();
 
             // Compute recall
-            let hits = hnsw_top_k
-                .iter()
-                .filter(|id| bf_top_k.contains(id))
-                .count();
+            let hits = hnsw_top_k.iter().filter(|id| bf_top_k.contains(id)).count();
             total_recall += hits as f64 / k as f64;
         }
 

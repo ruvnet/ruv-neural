@@ -19,6 +19,7 @@
 
 pub mod combined;
 pub mod distance;
+pub mod foundation;
 pub mod node2vec;
 pub mod rvf_export;
 pub mod spectral_embed;
@@ -26,15 +27,13 @@ pub mod temporal;
 pub mod topology_embed;
 
 // Re-export core types used throughout this crate.
+pub use foundation::{FoundationEmbedder, ReferenceFoundationEmbedder};
 pub use ruv_neural_core::embedding::{EmbeddingMetadata, EmbeddingTrajectory, NeuralEmbedding};
 pub use ruv_neural_core::graph::{BrainGraph, BrainGraphSequence};
 pub use ruv_neural_core::traits::EmbeddingGenerator;
 
 /// Helper to build an `EmbeddingMetadata` with just a method name and atlas.
-pub fn default_metadata(
-    method: &str,
-    atlas: ruv_neural_core::brain::Atlas,
-) -> EmbeddingMetadata {
+pub fn default_metadata(method: &str, atlas: ruv_neural_core::brain::Atlas) -> EmbeddingMetadata {
     EmbeddingMetadata {
         subject_id: None,
         session_id: None,

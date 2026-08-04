@@ -75,8 +75,7 @@ impl ThresholdDecoder {
 
             let mincut_range = compute_range(metrics_vec.iter().map(|m| m.global_mincut));
             let modularity_range = compute_range(metrics_vec.iter().map(|m| m.modularity));
-            let efficiency_range =
-                compute_range(metrics_vec.iter().map(|m| m.global_efficiency));
+            let efficiency_range = compute_range(metrics_vec.iter().map(|m| m.global_efficiency));
             let entropy_range = compute_range(metrics_vec.iter().map(|m| m.graph_entropy));
 
             self.thresholds.insert(
@@ -162,7 +161,12 @@ fn range_score(value: f64, (lo, hi): (f64, f64)) -> f64 {
 mod tests {
     use super::*;
 
-    fn make_metrics(mincut: f64, modularity: f64, efficiency: f64, entropy: f64) -> TopologyMetrics {
+    fn make_metrics(
+        mincut: f64,
+        modularity: f64,
+        efficiency: f64,
+        entropy: f64,
+    ) -> TopologyMetrics {
         TopologyMetrics {
             global_mincut: mincut,
             modularity,
@@ -235,6 +239,6 @@ mod tests {
         );
         // Query outside all ranges.
         let (_, confidence) = decoder.decode(&make_metrics(0.0, 0.0, 0.0, 0.0));
-        assert!(confidence >= 0.0 && confidence <= 1.0);
+        assert!((0.0..=1.0).contains(&confidence));
     }
 }

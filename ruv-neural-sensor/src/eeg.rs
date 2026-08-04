@@ -16,8 +16,8 @@ use std::f64::consts::PI;
 
 /// Standard 10-20 system electrode labels (21 channels).
 pub const STANDARD_10_20_LABELS: &[&str] = &[
-    "Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "T3", "C3", "Cz", "C4", "T4", "T5", "P3",
-    "Pz", "P4", "T6", "O1", "Oz", "O2", "A1",
+    "Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "T3", "C3", "Cz", "C4", "T4", "T5", "P3", "Pz",
+    "P4", "T6", "O1", "Oz", "O2", "A1",
 ];
 
 /// Standard 10-20 system approximate positions on a unit sphere (nasion-inion axis = Y).
@@ -58,7 +58,10 @@ pub struct EegConfig {
 
 impl Default for EegConfig {
     fn default() -> Self {
-        let labels: Vec<String> = STANDARD_10_20_LABELS.iter().map(|s| s.to_string()).collect();
+        let labels: Vec<String> = STANDARD_10_20_LABELS
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
         let num_channels = labels.len();
         let positions = standard_10_20_positions();
         Self {
@@ -90,7 +93,13 @@ pub struct EegArray {
 }
 
 /// Internal state for spatially coherent brain rhythm generation.
+///
+/// The per-band phase accumulators are initialised but not yet advanced by the
+/// generator, so the simulator is not spatially coherent across bands yet. They
+/// are kept because removing them would quietly discard the intended design;
+/// only `next_blink_time` is currently read.
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct BrainSources {
     /// Delta (1-4 Hz): deep sleep, ~50 uV
     delta_phase: f64,
@@ -127,6 +136,9 @@ fn box_muller_single(rng: &mut impl rand::Rng) -> f64 {
 }
 
 /// Compute Euclidean distance between two 3D points.
+///
+/// Unused until the spatial-coherence path above is finished.
+#[allow(dead_code)]
 fn distance(a: &[f64; 3], b: &[f64; 3]) -> f64 {
     ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2) + (a[2] - b[2]).powi(2)).sqrt()
 }
@@ -198,9 +210,10 @@ impl EegArray {
 
     /// Check if all channels have acceptable impedance (< 5 kOhm).
     pub fn impedance_ok(&self) -> bool {
-        self.config.impedances_kohm.iter().all(|imp| {
-            imp.map_or(false, |v| v < 5.0)
-        })
+        self.config
+            .impedances_kohm
+            .iter()
+            .all(|imp| imp.map_or(false, |v| v < 5.0))
     }
 
     /// Get channels with high impedance (> threshold kOhm).
@@ -239,6 +252,9 @@ impl EegArray {
 
     /// Compute spatial correlation factor between two electrodes.
     /// Returns a value in [0, 1] where 1 = same location, decaying with distance.
+    ///
+    /// Unused until the spatial-coherence path is finished.
+    #[allow(dead_code)]
     fn spatial_correlation(&self, ch_a: usize, ch_b: usize) -> f64 {
         let pos_a = self.config.positions.get(ch_a).unwrap_or(&[0.0, 0.0, 0.0]);
         let pos_b = self.config.positions.get(ch_b).unwrap_or(&[0.0, 0.0, 0.0]);
@@ -282,13 +298,7 @@ impl SensorSource for EegArray {
 
         // Pre-compute channel properties.
         let labels: Vec<String> = (0..self.config.num_channels)
-            .map(|i| {
-                self.config
-                    .labels
-                    .get(i)
-                    .cloned()
-                    .unwrap_or_default()
-            })
+            .map(|i| self.config.labels.get(i).cloned().unwrap_or_default())
             .collect();
 
         // Generate per-sample shared source oscillations first, then mix

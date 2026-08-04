@@ -56,7 +56,10 @@ fn main() {
     );
 
     println!("1) Per-model, Brain2Qwerty V1 default config (test split)");
-    println!("   {:<11} {:>8} {:>8} {:>12}", "model", "CER", "WER", "train(ms)");
+    println!(
+        "   {:<11} {:>8} {:>8} {:>12}",
+        "model", "CER", "WER", "train(ms)"
+    );
     println!("   {}", "-".repeat(41));
     for kind in [ModelKind::Prototype, ModelKind::Linear, ModelKind::Mlp] {
         let cfg = Brain2TextConfig {
@@ -87,7 +90,11 @@ fn main() {
     let tuned = evaluate(&rec, &result.best.config, EvalSplit::Test, 0.7, 0.15).unwrap();
     println!(
         "   model={:?} val_fitness={:.3}  ->  test CER={:.3} WER={:.3}  (search {:.0} ms)",
-        result.best.config.model, result.best.fitness, tuned.report.mean_cer, tuned.report.mean_wer, evolve_ms
+        result.best.config.model,
+        result.best.fitness,
+        tuned.report.mean_cer,
+        tuned.report.mean_wer,
+        evolve_ms
     );
     println!(
         "   tuned: lr={:.3} epochs={} ngram={} lm_weight={:.2} beam={} feature={:?}",
@@ -101,7 +108,12 @@ fn main() {
 
     println!("\n   improvement curve (best val fitness per generation):");
     for (g, f) in result.history.iter().enumerate() {
-        println!("     gen {:>2}: {:.3} {}", g, f, "#".repeat((f * 40.0) as usize));
+        println!(
+            "     gen {:>2}: {:.3} {}",
+            g,
+            f,
+            "#".repeat((f * 40.0) as usize)
+        );
     }
 
     println!("\n3) Decode throughput (winning pipeline)");

@@ -103,10 +103,7 @@ pub fn trajectory_distance(a: &EmbeddingTrajectory, b: &EmbeddingTrajectory) -> 
     for i in 1..=n {
         for j in 1..=m {
             let cost = euclidean_distance(&a.embeddings[i - 1], &b.embeddings[j - 1]);
-            dtw[i][j] = cost
-                + dtw[i - 1][j]
-                    .min(dtw[i][j - 1])
-                    .min(dtw[i - 1][j - 1]);
+            dtw[i][j] = cost + dtw[i - 1][j].min(dtw[i][j - 1]).min(dtw[i - 1][j - 1]);
         }
     }
 

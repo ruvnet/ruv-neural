@@ -93,7 +93,9 @@ pub struct AuditTrail {
 impl AuditTrail {
     /// A new, empty trail.
     pub fn new() -> Self {
-        Self { records: Vec::new() }
+        Self {
+            records: Vec::new(),
+        }
     }
 
     /// Number of records.
@@ -118,7 +120,11 @@ impl AuditTrail {
     pub fn append(&mut self, event: AuditEvent) -> &AuditRecord {
         let prev_hash = self.head_hash();
         let hash = record_hash(&prev_hash, &event);
-        self.records.push(AuditRecord { event, prev_hash, hash });
+        self.records.push(AuditRecord {
+            event,
+            prev_hash,
+            hash,
+        });
         self.records.last().unwrap()
     }
 
@@ -140,7 +146,10 @@ impl AuditTrail {
 
     /// Count records of a given kind.
     pub fn count_kind(&self, kind: &AuditKind) -> usize {
-        self.records.iter().filter(|r| &r.event.kind == kind).count()
+        self.records
+            .iter()
+            .filter(|r| &r.event.kind == kind)
+            .count()
     }
 
     /// Sign the chain head with a freshly generated Ed25519 key, returning a
@@ -212,7 +221,7 @@ fn hex(bytes: &[u8]) -> String {
 }
 
 fn unhex(s: &str) -> Result<Vec<u8>, ()> {
-    if s.len() % 2 != 0 {
+    if !s.len().is_multiple_of(2) {
         return Err(());
     }
     (0..s.len())

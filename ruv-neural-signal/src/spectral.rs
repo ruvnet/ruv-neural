@@ -7,8 +7,8 @@
 //! All transforms use a Hann window for spectral leakage reduction.
 
 use num_complex::Complex;
-use ruv_neural_core::signal::{FrequencyBand, TimeFrequencyMap};
 use rustfft::FftPlanner;
+use ruv_neural_core::signal::{FrequencyBand, TimeFrequencyMap};
 use std::cell::RefCell;
 use std::f64::consts::PI;
 
@@ -64,7 +64,11 @@ pub fn compute_psd(signal: &[f64], sample_rate: f64, window_size: usize) -> (Vec
 
         for k in 0..num_freqs {
             let power = windowed[k].norm_sqr();
-            let scale = if k == 0 || k == win_size / 2 { 1.0 } else { 2.0 };
+            let scale = if k == 0 || k == win_size / 2 {
+                1.0
+            } else {
+                2.0
+            };
             psd_accum[k] += power * scale;
         }
         num_segments += 1;

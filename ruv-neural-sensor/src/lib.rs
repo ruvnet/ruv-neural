@@ -73,8 +73,7 @@ mod tests {
             let mut re = 0.0_f64;
             let mut im = 0.0_f64;
             for (t, &val) in ch.iter().enumerate() {
-                let angle =
-                    -2.0 * std::f64::consts::PI * freq_bin as f64 * t as f64 / n as f64;
+                let angle = -2.0 * std::f64::consts::PI * freq_bin as f64 * t as f64 / n as f64;
                 re += val * angle.cos();
                 im += val * angle.sin();
             }
@@ -96,8 +95,8 @@ mod tests {
     fn simulator_noise_floor() {
         let noise_density = 15.0; // fT/sqrt(Hz)
         let sample_rate = 1000.0;
-        let mut sim = simulator::SimulatedSensorArray::new(1, sample_rate)
-            .with_noise(noise_density);
+        let mut sim =
+            simulator::SimulatedSensorArray::new(1, sample_rate).with_noise(noise_density);
         let data = sim.read_chunk(10000).expect("read_chunk failed");
         let ch = &data.data[0];
         let rms = (ch.iter().map(|x| x * x).sum::<f64>() / ch.len() as f64).sqrt();

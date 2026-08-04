@@ -17,7 +17,10 @@
 //! | `graph`     | `BrainGraph`, `BrainEdge`, `ConnectivityMetric`    |
 //! | `topology`  | `MincutResult`, `CognitiveState`, `TopologyMetrics`|
 //! | `embedding` | `NeuralEmbedding`, `EmbeddingTrajectory`           |
-//! | `rvf`       | RuVector File format header and I/O                |
+//! | `rvf`       | Legacy single-blob RuVector File header and I/O     |
+//! | `rvf_container` | RVF multi-segment container (RuVector-compatible) |
+//! | `rvf_quant` | Vector quantization codecs (f16/int8/binary)       |
+//! | `rvf_witness`   | RVF `WITNESS` audit chain + `CRYPTO` signatures |
 //! | `traits`    | Pipeline trait definitions for all crates          |
 
 pub mod attestation;
@@ -27,6 +30,9 @@ pub mod error;
 pub mod graph;
 pub mod neurosleep;
 pub mod rvf;
+pub mod rvf_container;
+pub mod rvf_quant;
+pub mod rvf_witness;
 pub mod sensor;
 pub mod signal;
 pub mod topology;
@@ -39,11 +45,18 @@ pub use embedding::{EmbeddingMetadata, EmbeddingTrajectory, NeuralEmbedding};
 pub use error::{Result, RuvNeuralError};
 pub use graph::{BrainEdge, BrainGraph, BrainGraphSequence, ConnectivityMetric};
 pub use rvf::{RvfDataType, RvfFile, RvfHeader};
+pub use rvf_container::{
+    container_to_embeddings, embeddings_to_container, RvfContainer, Segment, SegmentHeader,
+    SegmentType,
+};
+pub use rvf_quant::VecDType;
+pub use rvf_witness::{
+    attach_witness, read_witness, sign_container, sign_container_ephemeral,
+    verify_container_signature, WitnessChain, WitnessEntry, WitnessType,
+};
 pub use sensor::{SensorArray, SensorChannel, SensorType};
 pub use signal::{FrequencyBand, MultiChannelTimeSeries, SpectralFeatures, TimeFrequencyMap};
-pub use topology::{
-    CognitiveState, MincutResult, MultiPartition, SleepStage, TopologyMetrics,
-};
+pub use topology::{CognitiveState, MincutResult, MultiPartition, SleepStage, TopologyMetrics};
 pub use traits::{
     EmbeddingGenerator, GraphConstructor, NeuralMemory, RvfSerializable, SensorSource,
     SignalProcessor, StateDecoder, TopologyAnalyzer,
@@ -68,10 +81,7 @@ mod tests {
         assert!(err.to_string().contains("68"));
         assert!(err.to_string().contains("100"));
 
-        let err = RuvNeuralError::ChannelOutOfRange {
-            channel: 5,
-            max: 3,
-        };
+        let err = RuvNeuralError::ChannelOutOfRange { channel: 5, max: 3 };
         assert!(err.to_string().contains("5"));
         assert!(err.to_string().contains("3"));
 
@@ -632,7 +642,7 @@ mod tests {
     #[allow(clippy::approx_constant)]
     fn topology_metrics_serialize_roundtrip() {
         let metrics = TopologyMetrics {
-            global_mincut: 3.14,
+            global_mincut: 3.2,
             modularity: 0.55,
             global_efficiency: 0.72,
             local_efficiency: 0.68,
@@ -643,7 +653,7 @@ mod tests {
         };
         let json = serde_json::to_string(&metrics).unwrap();
         let m2: TopologyMetrics = serde_json::from_str(&json).unwrap();
-        assert!((m2.global_mincut - 3.14).abs() < 1e-10);
+        assert!((m2.global_mincut - 3.2).abs() < 1e-10);
         assert_eq!(m2.num_modules, 4);
     }
 }

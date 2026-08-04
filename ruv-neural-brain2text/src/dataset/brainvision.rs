@@ -159,7 +159,10 @@ fn parse_header(text: &str) -> Result<VHeader> {
                         .and_then(|s| s.trim().parse::<f64>().ok())
                         .filter(|r| *r != 0.0)
                         .unwrap_or(1.0);
-                    channels.push(ChannelInfo { name, resolution_uv });
+                    channels.push(ChannelInfo {
+                        name,
+                        resolution_uv,
+                    });
                 }
             }
             _ => {}
@@ -224,16 +227,13 @@ fn parse_markers(text: &str) -> Vec<Marker> {
     markers
 }
 
-fn decode_binary(
-    bytes: &[u8],
-    header: &VHeader,
-) -> Result<Vec<Vec<f64>>> {
+fn decode_binary(bytes: &[u8], header: &VHeader) -> Result<Vec<Vec<f64>>> {
     let nch = header.num_channels;
     let sample_bytes = match header.binary_format {
         BinaryFormat::Int16 => 2,
         BinaryFormat::Float32 => 4,
     };
-    if bytes.len() % (sample_bytes * nch) != 0 {
+    if !bytes.len().is_multiple_of(sample_bytes * nch) {
         return Err(err("binary data length not a multiple of frame size"));
     }
     let total_samples = bytes.len() / sample_bytes;
@@ -242,15 +242,11 @@ fn decode_binary(
     let read_value = |i: usize| -> f64 {
         let off = i * sample_bytes;
         match header.binary_format {
-            BinaryFormat::Int16 => {
-                i16::from_le_bytes([bytes[off], bytes[off + 1]]) as f64
+            BinaryFormat::Int16 => i16::from_le_bytes([bytes[off], bytes[off + 1]]) as f64,
+            BinaryFormat::Float32 => {
+                f32::from_le_bytes([bytes[off], bytes[off + 1], bytes[off + 2], bytes[off + 3]])
+                    as f64
             }
-            BinaryFormat::Float32 => f32::from_le_bytes([
-                bytes[off],
-                bytes[off + 1],
-                bytes[off + 2],
-                bytes[off + 3],
-            ]) as f64,
         }
     };
 
@@ -284,8 +280,7 @@ pub fn read_vhdr(vhdr_path: impl AsRef<Path>) -> Result<BrainVisionRecording> {
     let vhdr_path = vhdr_path.as_ref();
     let dir = vhdr_path.parent().unwrap_or_else(|| Path::new("."));
 
-    let header_text = fs::read_to_string(vhdr_path)
-        .map_err(|e| err(format!("read vhdr: {e}")))?;
+    let header_text = fs::read_to_string(vhdr_path).map_err(|e| err(format!("read vhdr: {e}")))?;
     let header = parse_header(&header_text)?;
 
     let data_path: PathBuf = dir.join(&header.data_file);
@@ -362,12 +357,16 @@ Mk2=Response,a,3,1,0
         assert_eq!(rec.series.num_channels, 2);
         assert_eq!(rec.series.num_samples, 3);
         assert_eq!(rec.series.sample_rate_hz, 1000.0); // 1e6 / 1000us
-        // resolution scaling: 10 * 0.5 = 5.0 on channel 0, sample 0
+                                                       // resolution scaling: 10 * 0.5 = 5.0 on channel 0, sample 0
         assert!((rec.series.data[0][0] - 5.0).abs() < 1e-9);
         assert!((rec.series.data[1][0] - 10.0).abs() < 1e-9);
         assert!((rec.series.data[0][2] - 25.0).abs() < 1e-9);
         // markers: response 'a' at position 3 (1-based) -> 2 (0-based)
-        let resp: Vec<&Marker> = rec.markers.iter().filter(|m| m.kind == "Response").collect();
+        let resp: Vec<&Marker> = rec
+            .markers
+            .iter()
+            .filter(|m| m.kind == "Response")
+            .collect();
         assert_eq!(resp.len(), 1);
         assert_eq!(resp[0].description, "a");
         assert_eq!(resp[0].position, 2);

@@ -11,7 +11,7 @@ use ruv_neural_core::graph::{BrainEdge, BrainGraph, BrainGraphSequence, Connecti
 use ruv_neural_core::signal::{FrequencyBand, MultiChannelTimeSeries};
 use ruv_neural_core::traits::GraphConstructor;
 
-use crate::atlas::{AtlasType, load_atlas};
+use crate::atlas::{load_atlas, AtlasType};
 
 /// Constructs brain connectivity graphs from matrices or time series data.
 pub struct BrainGraphConstructor {
@@ -61,11 +61,7 @@ impl BrainGraphConstructor {
     ///
     /// The matrix should be `n x n` where `n` matches the number of atlas regions.
     /// The matrix is treated as symmetric; only the upper triangle is read.
-    pub fn construct_from_matrix(
-        &self,
-        connectivity: &[Vec<f64>],
-        timestamp: f64,
-    ) -> BrainGraph {
+    pub fn construct_from_matrix(&self, connectivity: &[Vec<f64>], timestamp: f64) -> BrainGraph {
         let n = self.parcellation.num_regions();
         let mut edges = Vec::new();
 
@@ -98,10 +94,7 @@ impl BrainGraphConstructor {
     ///
     /// For each window, computes pairwise Pearson correlation as connectivity,
     /// then builds a graph with thresholding applied.
-    pub fn construct_sequence(
-        &self,
-        data: &MultiChannelTimeSeries,
-    ) -> BrainGraphSequence {
+    pub fn construct_sequence(&self, data: &MultiChannelTimeSeries) -> BrainGraphSequence {
         let n_samples = data.num_samples;
         let sr = data.sample_rate_hz;
 
@@ -238,7 +231,11 @@ mod tests {
 
         let graph = ctor.construct_from_matrix(&identity, 0.0);
         assert_eq!(graph.num_nodes, 68);
-        assert_eq!(graph.edges.len(), 0, "Identity matrix should produce no edges");
+        assert_eq!(
+            graph.edges.len(),
+            0,
+            "Identity matrix should produce no edges"
+        );
     }
 
     #[test]
@@ -265,7 +262,11 @@ mod tests {
         matrix[3][2] = 0.3;
 
         let graph = ctor.construct_from_matrix(&matrix, 0.0);
-        assert_eq!(graph.edges.len(), 1, "Only edge above threshold should survive");
+        assert_eq!(
+            graph.edges.len(),
+            1,
+            "Only edge above threshold should survive"
+        );
         assert_eq!(graph.edges[0].source, 0);
         assert_eq!(graph.edges[0].target, 1);
     }
@@ -295,6 +296,10 @@ mod tests {
         let seq = ctor.construct_sequence(&ts);
 
         // 1.0s data, 0.5s window, 0.25s step => 3 windows: [0,0.5], [0.25,0.75], [0.5,1.0]
-        assert!(seq.len() >= 2, "Should produce at least 2 graphs, got {}", seq.len());
+        assert!(
+            seq.len() >= 2,
+            "Should produce at least 2 graphs, got {}",
+            seq.len()
+        );
     }
 }

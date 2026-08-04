@@ -21,7 +21,9 @@ impl PrototypeModel {
         use std::collections::BTreeMap;
         let mut sums: BTreeMap<char, (Vec<f64>, usize)> = BTreeMap::new();
         for (feats, ch) in samples {
-            let entry = sums.entry(ch).or_insert_with(|| (vec![0.0; feats.len()], 0));
+            let entry = sums
+                .entry(ch)
+                .or_insert_with(|| (vec![0.0; feats.len()], 0));
             if entry.0.len() < feats.len() {
                 entry.0.resize(feats.len(), 0.0);
             }
@@ -74,7 +76,10 @@ impl AcousticModel for PrototypeModel {
             .iter()
             .map(|(c, cen)| (*c, -sq_dist(features, cen) / self.scale))
             .collect();
-        let max = logits.iter().map(|(_, l)| *l).fold(f64::NEG_INFINITY, f64::max);
+        let max = logits
+            .iter()
+            .map(|(_, l)| *l)
+            .fold(f64::NEG_INFINITY, f64::max);
         let denom: f64 = logits.iter().map(|(_, l)| (l - max).exp()).sum();
         let log_denom = denom.ln();
         let mut out: Vec<(char, f64)> = logits

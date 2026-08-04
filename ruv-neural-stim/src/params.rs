@@ -139,7 +139,10 @@ impl StimulusParams {
             ));
         }
         // Nyquist: the envelope (and any carrier) must be representable.
-        let max_freq = self.carrier_hz.unwrap_or(self.envelope_hz).max(self.envelope_hz);
+        let max_freq = self
+            .carrier_hz
+            .unwrap_or(self.envelope_hz)
+            .max(self.envelope_hz);
         if max_freq * 2.0 > self.sample_rate_hz {
             return Err(crate::StimError::Params(format!(
                 "sample_rate_hz {} too low for {} Hz content (Nyquist)",
@@ -147,10 +150,14 @@ impl StimulusParams {
             )));
         }
         if !(0.0..=1.0).contains(&self.duty_cycle) {
-            return Err(crate::StimError::Params("duty_cycle must be in [0,1]".into()));
+            return Err(crate::StimError::Params(
+                "duty_cycle must be in [0,1]".into(),
+            ));
         }
         if !(0.0..=1.0).contains(&self.intensity) {
-            return Err(crate::StimError::Params("intensity must be in [0,1]".into()));
+            return Err(crate::StimError::Params(
+                "intensity must be in [0,1]".into(),
+            ));
         }
         if !self.duration_s.is_finite() || self.duration_s <= 0.0 {
             return Err(crate::StimError::Params(

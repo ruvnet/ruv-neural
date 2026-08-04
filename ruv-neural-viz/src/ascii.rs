@@ -16,8 +16,16 @@ pub fn render_ascii_graph(graph: &BrainGraph, width: usize, height: usize) -> St
 
     // Place nodes in a grid
     let cols = (n as f64).sqrt().ceil() as usize;
-    let row_spacing = if cols > 0 { height.saturating_sub(1).max(1) / cols.max(1) } else { 1 };
-    let col_spacing = if cols > 0 { width.saturating_sub(1).max(1) / cols.max(1) } else { 1 };
+    let row_spacing = if cols > 0 {
+        height.saturating_sub(1).max(1) / cols.max(1)
+    } else {
+        1
+    };
+    let col_spacing = if cols > 0 {
+        width.saturating_sub(1).max(1) / cols.max(1)
+    } else {
+        1
+    };
 
     let mut node_positions = Vec::new();
     for i in 0..n {
@@ -142,10 +150,7 @@ pub fn render_ascii_mincut(result: &MincutResult, graph: &BrainGraph) -> String 
         out.push_str(&format!("  {} --({:.4})--> {}\n", s, w, t));
     }
 
-    out.push_str(&format!(
-        "\nBalance ratio: {:.4}\n",
-        result.balance_ratio()
-    ));
+    out.push_str(&format!("\nBalance ratio: {:.4}\n", result.balance_ratio()));
 
     out
 }
@@ -156,8 +161,10 @@ pub fn render_sparkline(values: &[f64], width: usize) -> String {
         return String::new();
     }
 
-    let blocks = ['\u{2581}', '\u{2582}', '\u{2583}', '\u{2584}',
-                  '\u{2585}', '\u{2586}', '\u{2587}', '\u{2588}'];
+    let blocks = [
+        '\u{2581}', '\u{2582}', '\u{2583}', '\u{2584}', '\u{2585}', '\u{2586}', '\u{2587}',
+        '\u{2588}',
+    ];
 
     let min = values.iter().cloned().fold(f64::INFINITY, f64::min);
     let max = values.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
@@ -208,10 +215,7 @@ pub fn render_dashboard(metrics: &TopologyMetrics, state: &CognitiveState) -> St
     };
 
     out.push_str("+--------------------------------------+\n");
-    out.push_str(&format!(
-        "| State: {:<29}|\n",
-        state_label
-    ));
+    out.push_str(&format!("| State: {:<29}|\n", state_label));
     out.push_str("|--------------------------------------|\n");
     out.push_str(&format!(
         "| Mincut:     {:<7.4} {}|\n",
@@ -228,10 +232,7 @@ pub fn render_dashboard(metrics: &TopologyMetrics, state: &CognitiveState) -> St
         metrics.global_efficiency,
         bar(metrics.global_efficiency, 1.0, 16)
     ));
-    out.push_str(&format!(
-        "| Modules:    {:<25}|\n",
-        metrics.num_modules
-    ));
+    out.push_str(&format!("| Modules:    {:<25}|\n", metrics.num_modules));
     out.push_str("+--------------------------------------+\n");
 
     out

@@ -118,6 +118,54 @@ enum Commands {
         #[arg(short, long)]
         input: String,
     },
+    /// Train a logistic-regression classifier and save it as a signed .rvf model
+    Train {
+        /// Input dataset (CSV or ARFF); last numeric column is the label
+        #[arg(short, long)]
+        input: String,
+        /// Output path for the signed .rvf model
+        #[arg(short, long)]
+        output: String,
+        /// Number of leading columns to skip (e.g. an id column)
+        #[arg(long, default_value = "0")]
+        skip_cols: usize,
+        /// Label value mapped to the positive class (1)
+        #[arg(long, default_value = "1")]
+        positive: i64,
+        /// Fraction of rows held out for the test report
+        #[arg(long, default_value = "0.2")]
+        test_frac: f64,
+        /// Shuffle rows before the holdout split (else chronological)
+        #[arg(long)]
+        shuffle: bool,
+        /// RNG seed for shuffling
+        #[arg(long, default_value = "42")]
+        seed: u64,
+        /// Gradient-descent epochs
+        #[arg(long, default_value = "400")]
+        epochs: usize,
+    },
+    /// Inspect and verify a signed .rvf model
+    ModelInfo {
+        /// Path to a .rvf model
+        #[arg(short, long)]
+        input: String,
+    },
+    /// Score feature rows with a signed .rvf model
+    Predict {
+        /// Path to a .rvf model
+        #[arg(short, long)]
+        model: String,
+        /// CSV of feature rows (no label column)
+        #[arg(short, long)]
+        input: String,
+        /// Number of leading columns to skip
+        #[arg(long, default_value = "0")]
+        skip_cols: usize,
+        /// Emit probabilities instead of 0/1 labels
+        #[arg(long)]
+        proba: bool,
+    },
     /// Show system info and capabilities
     Info,
     /// Generate or verify Ed25519-signed capability witness bundles
@@ -194,16 +242,33 @@ async fn main() {
         Commands::VerifyBundle { input } => {
             commands::verify_bundle::run(std::path::PathBuf::from(input))
         }
+        Commands::Train {
+            input,
+            output,
+            skip_cols,
+            positive,
+            test_frac,
+            shuffle,
+            seed,
+            epochs,
+        } => commands::model::train(
+            &input, &output, skip_cols, positive, test_frac, shuffle, seed, epochs,
+        ),
+        Commands::ModelInfo { input } => commands::model::info(&input),
+        Commands::Predict {
+            model,
+            input,
+            skip_cols,
+            proba,
+        } => commands::model::predict(&model, &input, skip_cols, proba),
         Commands::Info => {
             commands::info::run();
             Ok(())
         }
-        Commands::Witness { output, verify } => {
-            commands::witness::run(
-                output.map(std::path::PathBuf::from),
-                verify.map(std::path::PathBuf::from),
-            )
-        }
+        Commands::Witness { output, verify } => commands::witness::run(
+            output.map(std::path::PathBuf::from),
+            verify.map(std::path::PathBuf::from),
+        ),
     };
 
     if let Err(e) = result {
@@ -288,8 +353,8 @@ mod tests {
 
     #[test]
     fn parse_mincut() {
-        let cli = Cli::try_parse_from(["ruv-neural", "mincut", "-i", "graph.json", "-k", "4"])
-            .unwrap();
+        let cli =
+            Cli::try_parse_from(["ruv-neural", "mincut", "-i", "graph.json", "-k", "4"]).unwrap();
         match cli.command {
             Commands::Mincut { input, k } => {
                 assert_eq!(input, "graph.json");
@@ -362,5 +427,62 @@ mod tests {
     fn parse_verbose() {
         let cli = Cli::try_parse_from(["ruv-neural", "-vvv", "info"]).unwrap();
         assert_eq!(cli.verbose, 3);
+    }
+
+    #[test]
+    fn parse_train() {
+        let cli = Cli::try_parse_from([
+            "ruv-neural",
+            "train",
+            "-i",
+            "d.csv",
+            "-o",
+            "m.rvf",
+            "--skip-cols",
+            "1",
+            "--shuffle",
+        ])
+        .unwrap();
+        match cli.command {
+            Commands::Train {
+                input,
+                output,
+                skip_cols,
+                positive,
+                shuffle,
+                ..
+            } => {
+                assert_eq!(input, "d.csv");
+                assert_eq!(output, "m.rvf");
+                assert_eq!(skip_cols, 1);
+                assert_eq!(positive, 1);
+                assert!(shuffle);
+            }
+            _ => panic!("Expected Train command"),
+        }
+    }
+
+    #[test]
+    fn parse_predict_and_model_info() {
+        let cli = Cli::try_parse_from([
+            "ruv-neural",
+            "predict",
+            "-m",
+            "m.rvf",
+            "-i",
+            "f.csv",
+            "--proba",
+        ])
+        .unwrap();
+        match cli.command {
+            Commands::Predict { model, proba, .. } => {
+                assert_eq!(model, "m.rvf");
+                assert!(proba);
+            }
+            _ => panic!("Expected Predict command"),
+        }
+
+        let cli = Cli::try_parse_from(["ruv-neural", "model-info", "-i", "m.rvf"]).unwrap();
+        assert!(matches!(cli.command, Commands::ModelInfo { .. }));
     }
 }

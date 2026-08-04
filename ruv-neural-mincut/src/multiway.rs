@@ -123,9 +123,8 @@ pub fn detect_modules(graph: &BrainGraph) -> Result<MultiPartition> {
         }
     }
 
-    best_partition.ok_or_else(|| {
-        RuvNeuralError::Mincut("Could not find any valid partitioning".into())
-    })
+    best_partition
+        .ok_or_else(|| RuvNeuralError::Mincut("Could not find any valid partitioning".into()))
 }
 
 /// Build a subgraph from a subset of nodes.
@@ -217,11 +216,7 @@ fn compute_total_cut(graph: &BrainGraph, partitions: &[Vec<usize>]) -> f64 {
     graph
         .edges
         .iter()
-        .filter(|e| {
-            e.source < n
-                && e.target < n
-                && community[e.source] != community[e.target]
-        })
+        .filter(|e| e.source < n && e.target < n && community[e.source] != community[e.target])
         .map(|e| e.weight)
         .sum()
 }
@@ -297,7 +292,10 @@ mod tests {
         let result = multiway_cut(&graph, 3).unwrap();
         assert_eq!(result.num_partitions(), 3);
         assert_eq!(result.num_nodes(), 9);
-        assert!(result.modularity > 0.0, "Modularity should be positive for clustered graph");
+        assert!(
+            result.modularity > 0.0,
+            "Modularity should be positive for clustered graph"
+        );
     }
 
     /// detect_modules should find a good partition automatically.
@@ -365,6 +363,10 @@ mod tests {
         };
 
         let q = compute_modularity(&graph, &[vec![0, 1], vec![2, 3]]);
-        assert!(q > 0.0, "Good partition should have positive modularity, got {}", q);
+        assert!(
+            q > 0.0,
+            "Good partition should have positive modularity, got {}",
+            q
+        );
     }
 }

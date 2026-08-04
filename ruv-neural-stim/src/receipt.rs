@@ -50,8 +50,8 @@ impl DeliveryReceipt {
         let duration = waveform.len() as f64 / params.sample_rate_hz;
         let digest = hash_samples(&waveform.samples);
 
-        let envelope_ok =
-            (measured - params.envelope_hz).abs() <= ENVELOPE_TOLERANCE_HZ || params.intensity == 0.0;
+        let envelope_ok = (measured - params.envelope_hz).abs() <= ENVELOPE_TOLERANCE_HZ
+            || params.intensity == 0.0;
         let amplitude_ok = waveform.peak() <= 1.0 + 1e-9;
         // A zero-intensity (disabled) stimulus is a legitimate, verified
         // "no-op" delivery — important for safe-stop receipts.

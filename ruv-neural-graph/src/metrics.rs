@@ -5,7 +5,6 @@
 
 use ruv_neural_core::graph::BrainGraph;
 
-
 /// Compute global efficiency of a brain graph.
 ///
 /// Global efficiency is the average inverse shortest path length between all
@@ -45,9 +44,7 @@ pub fn local_efficiency(graph: &BrainGraph) -> f64 {
     let mut total = 0.0;
 
     for i in 0..n {
-        let neighbors: Vec<usize> = (0..n)
-            .filter(|&j| j != i && adj[i][j] > 0.0)
-            .collect();
+        let neighbors: Vec<usize> = (0..n).filter(|&j| j != i && adj[i][j] > 0.0).collect();
 
         let k = neighbors.len();
         if k < 2 {
@@ -86,9 +83,7 @@ pub fn clustering_coefficient(graph: &BrainGraph) -> f64 {
     let mut triples = 0.0;
 
     for i in 0..n {
-        let neighbors_i: Vec<usize> = (0..n)
-            .filter(|&j| j != i && adj[i][j] > 0.0)
-            .collect();
+        let neighbors_i: Vec<usize> = (0..n).filter(|&j| j != i && adj[i][j] > 0.0).collect();
         let k = neighbors_i.len();
         if k < 2 {
             continue;
@@ -123,9 +118,7 @@ pub fn node_degree(graph: &BrainGraph, node: usize) -> f64 {
 
 /// Degree distribution: weighted degree for every node.
 pub fn degree_distribution(graph: &BrainGraph) -> Vec<f64> {
-    (0..graph.num_nodes)
-        .map(|i| graph.node_degree(i))
-        .collect()
+    (0..graph.num_nodes).map(|i| graph.node_degree(i)).collect()
 }
 
 /// Betweenness centrality for each node.
@@ -293,9 +286,7 @@ pub fn modularity(graph: &BrainGraph, partition: &[Vec<usize>]) -> f64 {
     }
 
     // Weighted degree
-    let degrees: Vec<f64> = (0..n)
-        .map(|i| adj[i].iter().sum::<f64>())
-        .collect();
+    let degrees: Vec<f64> = (0..n).map(|i| adj[i].iter().sum::<f64>()).collect();
 
     let mut q = 0.0;
     for i in 0..n {
@@ -418,7 +409,11 @@ mod tests {
     fn clustering_coefficient_complete_graph() {
         let g = complete_graph(8);
         let cc = clustering_coefficient(&g);
-        assert!(cc > 0.9, "Complete graph should have clustering ~1.0, got {}", cc);
+        assert!(
+            cc > 0.9,
+            "Complete graph should have clustering ~1.0, got {}",
+            cc
+        );
     }
 
     #[test]
@@ -433,7 +428,11 @@ mod tests {
     fn density_complete_graph() {
         let g = complete_graph(10);
         let d = graph_density(&g);
-        assert!((d - 1.0).abs() < 1e-10, "Complete graph density should be 1.0, got {}", d);
+        assert!(
+            (d - 1.0).abs() < 1e-10,
+            "Complete graph density should be 1.0, got {}",
+            d
+        );
     }
 
     #[test]
@@ -452,8 +451,14 @@ mod tests {
         let g = path_graph(5);
         let bc = betweenness_centrality(&g);
         // Node 2 (center) should have highest betweenness
-        assert!(bc[2] >= bc[0], "Center node should have >= betweenness than endpoints");
-        assert!(bc[2] >= bc[4], "Center node should have >= betweenness than endpoints");
+        assert!(
+            bc[2] >= bc[0],
+            "Center node should have >= betweenness than endpoints"
+        );
+        assert!(
+            bc[2] >= bc[4],
+            "Center node should have >= betweenness than endpoints"
+        );
     }
 
     #[test]
@@ -462,7 +467,11 @@ mod tests {
         let all_in_one = vec![vec![0, 1, 2, 3, 4, 5]];
         let q = modularity(&g, &all_in_one);
         // All in one community, modularity should be 0
-        assert!(q.abs() < 1e-10, "Single community Q should be ~0, got {}", q);
+        assert!(
+            q.abs() < 1e-10,
+            "Single community Q should be ~0, got {}",
+            q
+        );
     }
 
     #[test]
@@ -512,6 +521,10 @@ mod tests {
 
         let good = vec![vec![0, 1, 2], vec![3, 4, 5]];
         let q = modularity(&g, &good);
-        assert!(q > 0.0, "Good partition should have positive modularity, got {}", q);
+        assert!(
+            q > 0.0,
+            "Good partition should have positive modularity, got {}",
+            q
+        );
     }
 }

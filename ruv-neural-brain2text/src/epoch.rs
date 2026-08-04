@@ -125,14 +125,14 @@ fn window_features(
 /// Sentences are assigned round-robin-by-modulo so the split is stable and
 /// independent of ordering; `train_frac + val_frac` must be < 1.0 (the rest is
 /// test).
-pub fn split<'a>(
-    sentences: &'a [SentenceEpochs],
+pub fn split(
+    sentences: &[SentenceEpochs],
     train_frac: f64,
     val_frac: f64,
 ) -> (
-    Vec<&'a SentenceEpochs>,
-    Vec<&'a SentenceEpochs>,
-    Vec<&'a SentenceEpochs>,
+    Vec<&SentenceEpochs>,
+    Vec<&SentenceEpochs>,
+    Vec<&SentenceEpochs>,
 ) {
     let mut train = Vec::new();
     let mut val = Vec::new();
@@ -166,7 +166,7 @@ mod tests {
         assert_eq!(epochs.len(), 2);
         assert_eq!(epochs[0].epochs.len(), 4); // "hola"
         assert_eq!(epochs[1].epochs.len(), 5); // "mundo"
-        // Feature width = channels * 2 for MeanEnergy.
+                                               // Feature width = channels * 2 for MeanEnergy.
         let width = SyntheticParams::default().num_channels * 2;
         assert_eq!(epochs[0].epochs[0].features.len(), width);
     }
