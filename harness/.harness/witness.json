@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "harness": "ruv-neural-harness",
+  "version": "0.1.0",
+  "entries": [
+    {
+      "id": ".claude/commands/doctor.md",
+      "desc": "Generated file: .claude/commands/doctor.md",
+      "marker": ".claude/commands/doctor.md",
+      "sha256": "2f1475fa0ed34729cb2ed9d6cecf29e99781da0a56afef133361e3ff0a17bb52"
+    },
+    {
+      "id": ".claude/commands/review-diff.md",
+      "desc": "Generated file: .claude/commands/review-diff.md",
+      "marker": ".claude/commands/review-diff.md",
+      "sha256": "2ab52f01487bfe67335f4de5193d7a6fb0f72f646411114613d8fa5da071ef2b"
+    },
+    {
+      "id": ".claude/settings.json",
+      "desc": "Generated file: .claude/settings.json",
+      "marker": ".claude/settings.json",
+      "sha256": "3b55d8dd82763e185731e689ee7f68abcd6367d2d0b92b65bae8b3979e1e634f"
+    },
+    {
+      "id": ".claude/skills/plan-change/SKILL.md",
+      "desc": "Generated file: .claude/skills/plan-change/SKILL.md",
+      "marker": ".claude/skills/plan-change/SKILL.md",
+      "sha256": "84e1c44ca264b999ebf80cd8fa0e5ebf554275bbd8023b1530ad053a44482e30"
+    },
+    {
+      "id": ".claude-plugin/plugin.json",
+      "desc": "Generated file: .claude-plugin/plugin.json",
+      "marker": ".claude-plugin/plugin.json",
+      "sha256": "b890175ad7931d3ee1987d739c6c00efd41756231d1d2dc023ce78eb566881a8"
+    },
+    {
+      "id": "CLAUDE.md",
+      "desc": "Generated file: CLAUDE.md",
+      "marker": "CLAUDE.md",
+      "sha256": "33e62a4128b953a90c8042266f6a2fa24b4a483488c06c974c1b1034cf2abca2"
+    },
+    {
+      "id": "README.md",
+      "desc": "Generated file: README.md",
+      "marker": "README.md",
+      "sha256": "0cd4d1b7507888ac882357fbe3765bf579b135fd9a767347562f89aee911c1f9"
+    },
+    {
+      "id": "__tests__/smoke.test.ts",
+      "desc": "Generated file: __tests__/smoke.test.ts",
+      "marker": "__tests__/smoke.test.ts",
+      "sha256": "7c164ad19e3286f511f269841444abcca51ccd4e5cc055690deac255bff6e89a"
+    },
+    {
+      "id": "bin/cli.js",
+      "desc": "Generated file: bin/cli.js",
+      "marker": "bin/cli.js",
+      "sha256": "5ec420f0ed5d7d445d5a9221d1577160cfc05b3483533f51875f380e7aa6e0e4"
+    },
+    {
+      "id": "package.json",
+      "desc": "Generated file: package.json",
+      "marker": "package.json",
+      "sha256": "49195d11ebea704de45f0394a7a5c4a52874a41f7dfc0e867938df47bb4ae052"
+    },
+    {
+      "id": "src/agents/architect.ts",
+      "desc": "Generated file: src/agents/architect.ts",
+      "marker": "src/agents/architect.ts",
+      "sha256": "38925f33b222699d78aa4b66582ca7b571ec300311a63a2e00243f1621948528"
+    },
+    {
+      "id": "src/agents/implementer.ts",
+      "desc": "Generated file: src/agents/implementer.ts",
+      "marker": "src/agents/implementer.ts",
+      "sha256": "f17e2106728abab09356b31960b3d8fb267d80b1037f9cffb662f9d0c6b41386"
+    },
+    {
+      "id": "src/agents/reviewer.ts",
+      "desc": "Generated file: src/agents/reviewer.ts",
+      "marker": "src/agents/reviewer.ts",
+      "sha256": "050b8deb4b49cc73f6238c2879c16760c7c915196cc13e2ffd0b186e673b1eca"
+    },
+    {
+      "id": "src/agents/test-writer.ts",
+      "desc": "Generated file: src/agents/test-writer.ts",
+      "marker": "src/agents/test-writer.ts",
+      "sha256": "fe4bd7a2e95794d8ce17da5ff650615c647e414bfc739a2231b99a400ba7f12c"
+    },
+    {
+      "id": "src/init.ts",
+      "desc": "Generated file: src/init.ts",
+      "marker": "src/init.ts",
+      "sha256": "f1d1d90a5b00d496adec5d283c8bbc18a0c30770f5d56b98913a92e7a5ed5e0d"
+    },
+    {
+      "id": "tsconfig.json",
+      "desc": "Generated file: tsconfig.json",
+      "marker": "tsconfig.json",
+      "sha256": "8b4e730a1aa39162ac574455d7a98e1881f5313ca80ffe503b9652dcf0c76b9d"
+    },
+    {
+      "id": "vitest.config.ts",
+      "desc": "Generated file: vitest.config.ts",
+      "marker": "vitest.config.ts",
+      "sha256": "e9e94875611ab1cd602c1f6923902c2dab7953a75ac022962973639d1937587a"
+    },
+    {
+      "id": "LICENSE",
+      "desc": "Generated file: LICENSE",
+      "marker": "LICENSE",
+      "sha256": "9e3c4d0f8eec5074bf17353d2fad5531c2860fd94636514edb4660737e3abfd2"
+    },
+    {
+      "id": ".claude/skills/evolve/SKILL.md",
+      "desc": "Generated file: .claude/skills/evolve/SKILL.md",
+      "marker": ".claude/skills/evolve/SKILL.md",
+      "sha256": "f8c8a8a5a3ad216d754d0d2793008a407aca6753d47cb11e0ac21c9647165c22"
+    }
+  ],
+  "public_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "signature": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}

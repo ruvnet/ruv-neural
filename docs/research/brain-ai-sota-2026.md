@@ -334,6 +334,32 @@ the right substrate for group evolution.
 
 ## 10. Flywheel playbook (metaharness + Darwin + flywheel + agenticow)
 
+> **Status: steps 1–2 executed against this repo on 2026-08-08** with
+> `metaharness` 0.4.3 / `@metaharness/darwin` 0.8.2 (see [`harness/`](../../harness)):
+>
+> - `npx metaharness score .` → harnessFit 67, compileConfidence 100,
+>   toolSafety 100, est. $0.048/run, archetype `rust-crate-harness`,
+>   scaffoldReady true. `npx metaharness genome .` → verdict **READY**
+>   (risk 21%, test confidence 80%, publish readiness 75%).
+> - Scaffolded `harness/` with the tool-recommended `vertical:coding`
+>   template targeting the `claude-code` host: 4 agents
+>   (architect/implementer/reviewer/test-writer), `/plan-change` + `evolve`
+>   skills, `doctor`/`review-diff` commands, default-deny permission posture
+>   (no `git push`, no `rm -rf`, no `.env` reads). Smoke tests 4/4 green;
+>   `harness doctor` → **HEALTHY**.
+> - `harness sign` + `verify` → 19-entry SHA-256 witness manifest at
+>   `harness/.harness/witness.json`, verdict VALID. *Caveat:* the Ed25519
+>   signature is degraded in this environment (kernel `witnessVerify`
+>   unavailable, placeholder public key) — the manifest is content-hash
+>   witness only until CI signs with a real key per the package's GCP
+>   Secret Manager flow.
+> - Darwin Mode dry-run (`npm run evolve:dry`, mock sandbox, 2 generations ×
+>   3 children): winner `g2_v5` mutated the `contextBuilder` surface,
+>   **+0.110 over baseline** (0.875 vs 0.765), lineage
+>   `baseline → g1_v0 → g2_v5` committed in
+>   `harness/.metaharness/{archive,lineage}.json` as audit-trail evidence.
+>   A real (non-mock) evolve run against cargo-test fitness is the next step.
+
 How to run this research-and-optimization loop continuously, on a
 monthly-or-faster cadence:
 

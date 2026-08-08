@@ -1,0 +1,8 @@
+node_modules/
+dist/
+# Darwin Mode run artifacts: keep the promotion lineage (archive.json,
+# lineage.json) in git as audit-trail evidence; the generated variant
+# working trees and per-run scratch are reproducible and stay local.
+.metaharness/variants/
+.metaharness/runs/
+.metaharness/reports/
