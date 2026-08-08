@@ -1,6 +1,12 @@
 # Research Report — Brain-AI State of the Art, 2025–2026
 
-> **Status:** Deep-research sweep — agent-swarm workflow output.
+> **Status:** Deep-research sweep — agent-swarm workflow output. **Two of the
+> §9 "adopt now" actions are implemented** (Rust + WASM + TypeScript, tested,
+> validated, and benchmarked): DFA/Hurst LRTC features (§9 row 2 —
+> `ruv-neural-signal/src/lrtc.rs`, `ruv-neural-wasm::compute_dfa`,
+> `apps/ruv-neural-ui/src/lrtc/dfa.ts`) and the decode-armed/decode-locked
+> mental-privacy gate (§9 row 6 — `ruv-neural-core/src/gate.rs`,
+> `ruv-neural-wasm::WasmDecodeGate`, `apps/ruv-neural-ui/src/safety/decodeGate.ts`).
 > **Date:** 2026-08-08 · **Author:** rUv (ruv@ruv.net)
 > **Method:** 7 parallel web-research agents (one per SOTA dimension, ≥5–8 sourced
 > queries each) + 1 synthesis agent, orchestrated as a deterministic agent-swarm

@@ -11,6 +11,7 @@
 //! - [`hilbert`] — FFT-based Hilbert transform for instantaneous phase and amplitude
 //! - [`artifact`] — Eye blink, muscle artifact, and cardiac artifact detection/rejection
 //! - [`connectivity`] — PLV, coherence, imaginary coherence, amplitude envelope correlation
+//! - [`lrtc`] — Long-range temporal correlations via detrended fluctuation analysis (DFA/Hurst)
 //! - [`preprocessing`] — Configurable multi-stage preprocessing pipeline
 
 pub mod aperiodic;
@@ -18,6 +19,7 @@ pub mod artifact;
 pub mod connectivity;
 pub mod filter;
 pub mod hilbert;
+pub mod lrtc;
 pub mod neurosleep;
 pub mod preprocessing;
 pub mod quality;
@@ -30,5 +32,6 @@ pub use connectivity::{
 };
 pub use filter::{BandpassFilter, HighpassFilter, LowpassFilter, NotchFilter, SignalProcessor};
 pub use hilbert::{hilbert_transform, instantaneous_amplitude, instantaneous_phase};
+pub use lrtc::{band_envelope_dfa, dfa, DfaConfig, DfaResult};
 pub use preprocessing::PreprocessingPipeline;
 pub use spectral::{band_power, compute_psd, compute_stft, peak_frequency, spectral_entropy};

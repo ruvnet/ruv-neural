@@ -27,6 +27,7 @@ pub mod attestation;
 pub mod brain;
 pub mod embedding;
 pub mod error;
+pub mod gate;
 pub mod graph;
 pub mod neurosleep;
 pub mod rvf;

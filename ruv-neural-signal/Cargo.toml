@@ -33,3 +33,7 @@ harness = false
 [[bench]]
 name = "neurosleep"
 harness = false
+
+[[bench]]
+name = "lrtc"
+harness = false

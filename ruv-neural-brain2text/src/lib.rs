@@ -40,6 +40,10 @@ pub use decode::{Brain2TextDecoder, CharSequenceDecoder};
 pub use harness::{Harness, TrainedPipeline};
 pub use metrics::{character_error_rate, word_error_rate, DecodeReport};
 pub use model::{AcousticModel, ModelKind};
+// Mental-privacy decode gate (thought-password pattern, Kunz et al., Cell
+// 2025): wrap all decoder output in `DecodeGate::release` so decoding is
+// opt-in per use, never ambient. Defined in `ruv_neural_core::gate`.
+pub use ruv_neural_core::gate::{DecodeGate, DecodeGateConfig, GateState};
 
 use ruv_neural_core::error::Result;
 

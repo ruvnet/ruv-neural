@@ -12,6 +12,8 @@
 //! - Generate topology metrics (density, efficiency, modularity, Fiedler value)
 //! - Spectral embedding via power iteration (no LAPACK dependency)
 //! - Decode cognitive state from topology metrics
+//! - DFA/Hurst long-range temporal correlation analysis and the
+//!   decode-armed/decode-locked mental-privacy gate (see [`lrtc_wasm`])
 //! - RVF file format load/export
 //! - Browser-side RVF verification (CRC32C + content-hash + Ed25519) and
 //!   on-device model inference from a signed `.rvf` (see [`rvf_wasm`])
@@ -19,6 +21,7 @@
 //! - Visualization data structures for D3.js / Three.js
 
 pub mod graph_wasm;
+pub mod lrtc_wasm;
 pub mod rvf_wasm;
 pub mod streaming;
 pub mod viz_data;
