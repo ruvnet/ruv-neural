@@ -360,6 +360,42 @@ the right substrate for group evolution.
 >   `harness/.metaharness/{archive,lineage}.json` as audit-trail evidence.
 >   A real (non-mock) evolve run against cargo-test fitness is the next step.
 
+> **Increment 2 shipped (2026-08-09), grounded in a follow-up deep-research
+> sweep** (105 agents, 23 primary sources fetched, 115 claims extracted,
+> 3-vote adversarial verification → 25 verified, 2 killed). All three planned
+> items are implemented:
+>
+> - **§9 row 5 — streaming decoder** (`ruv-neural-brain2text/src/stream.rs`):
+>   causal fixed-hop decoder with incremental state, gated by `DecodeGate`,
+>   plus the LibriBrain event-referenced keyword-spotting formulation
+>   (0.1 s pre / 0.3 s post windows, AUPRC vs base-rate null, FA/h). Default
+>   hop 80 ms — a *validated cadence, not a floor*: the 80-ms budget is met in
+>   99.3% of steps in the published system, and UC Davis runs causal at 10 ms,
+>   so overruns are **reported** (`StreamStats`) rather than assumed away.
+>   Two claims were **refuted** in verification and are deliberately not
+>   implemented: the widely repeated RNN-T attribution (0-3) and an EEG-to-mel
+>   SNR-ceiling figure (0-3).
+> - **§9 row 1 — FM promotion gates** (`ruv-neural-embed/src/promotion.rs`):
+>   the mid-2026 negative-control protocol made executable — random-init
+>   comparator capped at 100K params (the published bar is a 16K EEGNet at
+>   61.3% beating LaBraM's 57.3%), subject-disjoint LOSO folds, chance-margin
+>   check (catching the 0.189–0.202-at-0.20-chance failure), pretraining
+>   leakage check, exact Wilcoxon signed-rank test, and AUPRC-lift gating.
+>   The **dataset-identity probe is ruv-neural's own design** — no verified
+>   source specifies one — and is labelled as such rather than cited.
+> - **§9 row 17 — CoW branch store** (`ruv-neural-memory/src/branch.rs`):
+>   base + per-branch overlay deltas, tombstones, read-through resolution at
+>   arbitrary depth, checkpoint/rollback/drop. The sweep found **zero
+>   independently verified sources** for CoW vector stores (the only material
+>   is vendor self-published with a single shared author), so this is our own
+>   design with semantics defined and tested here, citing no external numbers.
+>
+> Benchmarks: streaming decode costs **66.9 µs/frame at 306 channels**
+> (1,196× margin against the 80-ms budget) and 29.4 µs at the 10-ms cadence
+> (340× margin). A gate-design bug surfaced during implementation: with the
+> exact Wilcoxon test the minimum two-sided p is `2/2ⁿ`, so 5 folds can never
+> reach p<0.05 — `min_folds` is 6.
+
 > **Review round (2026-08-09):** a harness-style swarm (3 reviewers →
 > adversarial verifiers → architect; 12 agents) audited the DFA/gate
 > implementation. **8/8 findings survived adversarial verification** — all in

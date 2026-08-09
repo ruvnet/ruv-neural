@@ -33,6 +33,7 @@ pub mod harness;
 pub mod metrics;
 pub mod model;
 pub mod preprocess;
+pub mod stream;
 
 pub use config::{Brain2TextConfig, FeatureKind};
 pub use dataset::{Modality, Recording};
@@ -44,6 +45,7 @@ pub use model::{AcousticModel, ModelKind};
 // 2025): wrap all decoder output in `DecodeGate::release` so decoding is
 // opt-in per use, never ambient. Defined in `ruv_neural_core::gate`.
 pub use ruv_neural_core::gate::{DecodeGate, DecodeGateConfig, GateState};
+pub use stream::{StreamConfig, StreamEmission, StreamStats, StreamingDecoder};
 
 use ruv_neural_core::error::Result;
 
