@@ -5,6 +5,7 @@
 //! supporting brute-force and HNSW-based nearest neighbor search, session-based
 //! memory management, and longitudinal drift detection.
 
+pub mod branch;
 pub mod hnsw;
 pub mod longitudinal;
 pub mod persistence;
@@ -12,6 +13,7 @@ pub mod rvf_index;
 pub mod session;
 pub mod store;
 
+pub use branch::{BranchId, BranchStore};
 pub use hnsw::{HnswGraph, HnswIndex};
 pub use longitudinal::{LongitudinalTracker, TrendDirection};
 pub use persistence::{load_rvf, load_store, save_rvf, save_store};

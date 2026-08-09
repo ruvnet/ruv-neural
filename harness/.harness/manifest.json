@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "generator": "0.1.0",
+  "template": "vertical:coding",
+  "template_version": "0.0.0",
+  "vars": {
+    "name": "ruv-neural-harness",
+    "description": "Governed agent harness for the ruv-neural Rust workspace: edge-first neural signal processing (EEG/MEG DSP, embeddings, closed-loop stimulation with safety envelope, brain-to-text, NeuroSleep qEEG)",
+    "host": "claude-code"
+  },
+  "hosts": [
+    "claude-code"
+  ],
+  "files": {
+    ".claude/commands/doctor.md": "2f1475fa0ed34729cb2ed9d6cecf29e99781da0a56afef133361e3ff0a17bb52",
+    ".claude/commands/review-diff.md": "2ab52f01487bfe67335f4de5193d7a6fb0f72f646411114613d8fa5da071ef2b",
+    ".claude/settings.json": "3b55d8dd82763e185731e689ee7f68abcd6367d2d0b92b65bae8b3979e1e634f",
+    ".claude/skills/plan-change/SKILL.md": "84e1c44ca264b999ebf80cd8fa0e5ebf554275bbd8023b1530ad053a44482e30",
+    ".claude-plugin/plugin.json": "b890175ad7931d3ee1987d739c6c00efd41756231d1d2dc023ce78eb566881a8",
+    "CLAUDE.md": "33e62a4128b953a90c8042266f6a2fa24b4a483488c06c974c1b1034cf2abca2",
+    "README.md": "0cd4d1b7507888ac882357fbe3765bf579b135fd9a767347562f89aee911c1f9",
+    "__tests__/smoke.test.ts": "7c164ad19e3286f511f269841444abcca51ccd4e5cc055690deac255bff6e89a",
+    "bin/cli.js": "5ec420f0ed5d7d445d5a9221d1577160cfc05b3483533f51875f380e7aa6e0e4",
+    "package.json": "49195d11ebea704de45f0394a7a5c4a52874a41f7dfc0e867938df47bb4ae052",
+    "src/agents/architect.ts": "38925f33b222699d78aa4b66582ca7b571ec300311a63a2e00243f1621948528",
+    "src/agents/implementer.ts": "f17e2106728abab09356b31960b3d8fb267d80b1037f9cffb662f9d0c6b41386",
+    "src/agents/reviewer.ts": "050b8deb4b49cc73f6238c2879c16760c7c915196cc13e2ffd0b186e673b1eca",
+    "src/agents/test-writer.ts": "fe4bd7a2e95794d8ce17da5ff650615c647e414bfc739a2231b99a400ba7f12c",
+    "src/init.ts": "f1d1d90a5b00d496adec5d283c8bbc18a0c30770f5d56b98913a92e7a5ed5e0d",
+    "tsconfig.json": "8b4e730a1aa39162ac574455d7a98e1881f5313ca80ffe503b9652dcf0c76b9d",
+    "vitest.config.ts": "e9e94875611ab1cd602c1f6923902c2dab7953a75ac022962973639d1937587a",
+    "LICENSE": "9e3c4d0f8eec5074bf17353d2fad5531c2860fd94636514edb4660737e3abfd2",
+    ".claude/skills/evolve/SKILL.md": "f8c8a8a5a3ad216d754d0d2793008a407aca6753d47cb11e0ac21c9647165c22"
+  },
+  "generated_at": "2026-08-08T23:34:11.078Z",
+  "meta": {
+    "surface": "cli"
+  }
+}

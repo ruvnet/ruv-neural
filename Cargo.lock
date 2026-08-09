@@ -1367,6 +1367,7 @@ dependencies = [
  "js-sys",
  "ruv-neural-core",
  "ruv-neural-decoder",
+ "ruv-neural-signal",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

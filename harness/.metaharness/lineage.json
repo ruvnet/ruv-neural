@@ -1,0 +1,122 @@
+{
+  "nodes": [
+    {
+      "id": "baseline",
+      "parentId": null,
+      "generation": 0,
+      "mutationSurface": "planner",
+      "finalScore": 0.765,
+      "promoted": true
+    },
+    {
+      "id": "g1_v0",
+      "parentId": "baseline",
+      "generation": 1,
+      "mutationSurface": "planner",
+      "finalScore": 0.765,
+      "promoted": false
+    },
+    {
+      "id": "g1_v1",
+      "parentId": "baseline",
+      "generation": 1,
+      "mutationSurface": "toolPolicy",
+      "finalScore": 0.765,
+      "promoted": false
+    },
+    {
+      "id": "g1_v2",
+      "parentId": "baseline",
+      "generation": 1,
+      "mutationSurface": "reviewer",
+      "finalScore": 0.765,
+      "promoted": false
+    },
+    {
+      "id": "g2_v0",
+      "parentId": "baseline",
+      "generation": 2,
+      "mutationSurface": "reviewer",
+      "finalScore": 0.765,
+      "promoted": false
+    },
+    {
+      "id": "g2_v1",
+      "parentId": "baseline",
+      "generation": 2,
+      "mutationSurface": "planner",
+      "finalScore": 0.765,
+      "promoted": false
+    },
+    {
+      "id": "g2_v2",
+      "parentId": "baseline",
+      "generation": 2,
+      "mutationSurface": "contextBuilder",
+      "finalScore": 0.545,
+      "promoted": false
+    },
+    {
+      "id": "g2_v3",
+      "parentId": "g1_v0",
+      "generation": 2,
+      "mutationSurface": "toolPolicy",
+      "finalScore": 0.765,
+      "promoted": false
+    },
+    {
+      "id": "g2_v4",
+      "parentId": "g1_v0",
+      "generation": 2,
+      "mutationSurface": "scorePolicy",
+      "finalScore": 0.765,
+      "promoted": false
+    },
+    {
+      "id": "g2_v5",
+      "parentId": "g1_v0",
+      "generation": 2,
+      "mutationSurface": "contextBuilder",
+      "finalScore": 0.875,
+      "promoted": true
+    }
+  ],
+  "edges": [
+    {
+      "from": "baseline",
+      "to": "g1_v0"
+    },
+    {
+      "from": "baseline",
+      "to": "g1_v1"
+    },
+    {
+      "from": "baseline",
+      "to": "g1_v2"
+    },
+    {
+      "from": "baseline",
+      "to": "g2_v0"
+    },
+    {
+      "from": "baseline",
+      "to": "g2_v1"
+    },
+    {
+      "from": "baseline",
+      "to": "g2_v2"
+    },
+    {
+      "from": "g1_v0",
+      "to": "g2_v3"
+    },
+    {
+      "from": "g1_v0",
+      "to": "g2_v4"
+    },
+    {
+      "from": "g1_v0",
+      "to": "g2_v5"
+    }
+  ]
+}
