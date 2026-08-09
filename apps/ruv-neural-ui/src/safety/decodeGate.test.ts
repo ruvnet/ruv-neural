@@ -53,21 +53,67 @@ describe("DecodeGate", () => {
     expect(gate.release("hello")).toBeNull();
   });
 
-  it("treats non-finite confidence as zero (fail-locked)", () => {
+  it("treats out-of-domain confidence as zero (fail-locked)", () => {
     const gate = new DecodeGate();
     expect(gate.update(Number.NaN, 0.0)).toEqual({ state: "locked" });
     expect(gate.update(Number.POSITIVE_INFINITY, 0.1)).toEqual({ state: "locked" });
-    expect(gate.update(0.99, 0.2)).toEqual({ state: "arming", consecutive: 1 });
+    // Finite but out-of-domain values (percent-scaled detectors) must not arm.
+    expect(gate.update(50, 0.2)).toEqual({ state: "locked" });
+    expect(gate.update(2, 0.3)).toEqual({ state: "locked" });
+    expect(gate.update(-0.5, 0.4)).toEqual({ state: "locked" });
+    expect(gate.update(0.99, 0.5)).toEqual({ state: "arming", consecutive: 1 });
   });
 
-  it("clamps a regressing clock so it cannot extend the armed window", () => {
+  it("locks on a non-finite clock and never arms under one", () => {
+    const gate = new DecodeGate();
+    for (let i = 0; i < 10; i++) {
+      expect(gate.update(0.99, Number.NaN)).toEqual({ state: "locked" });
+    }
+    for (let i = 0; i < 3; i++) {
+      gate.update(0.99, i * 0.1);
+    }
+    expect(gate.isArmed).toBe(true);
+    expect(gate.update(0, Number.NaN)).toEqual({ state: "locked" });
+    expect(gate.transitions.at(-1)?.reason).toBe("clock_anomaly");
+    expect(gate.release("secret")).toBeNull();
+  });
+
+  it("locks on clock regression while armed and adopts the new timeline", () => {
     const gate = new DecodeGate({ ...DEFAULT_GATE_CONFIG, armedTimeoutS: 10 });
     for (let i = 0; i < 3; i++) {
       gate.update(0.99, 100 + i);
     }
     expect(gate.isArmed).toBe(true);
-    expect(gate.update(0.0, 0.0).state).toBe("armed");
-    expect(gate.update(0.0, 112.5)).toEqual({ state: "locked" });
+    // Regression is a safety event: fail locked instead of freezing the
+    // armed countdown at zero elapsed time.
+    expect(gate.update(0.0, 0.0)).toEqual({ state: "locked" });
+    expect(gate.transitions.at(-1)?.reason).toBe("clock_anomaly");
+    // Re-arming and the bounded timeout both work on the new timeline.
+    for (let i = 0; i < 3; i++) {
+      gate.update(0.99, 1 + i * 0.1);
+    }
+    expect(gate.isArmed).toBe(true);
+    expect(gate.update(0, 20)).toEqual({ state: "locked" });
+    expect(gate.transitions.at(-1)?.reason).toBe("timeout");
+  });
+
+  it("returns defensive copies so callers cannot corrupt the gate", () => {
+    const gate = new DecodeGate({ ...DEFAULT_GATE_CONFIG, armedTimeoutS: 10 });
+    for (let i = 0; i < 3; i++) {
+      gate.update(0.99, i * 0.1);
+    }
+    expect(gate.isArmed).toBe(true);
+    // Mutating the returned state must not disable the timeout.
+    const s = gate.state as { state: string; armedAtS: number };
+    s.armedAtS = Number.POSITIVE_INFINITY;
+    expect(gate.update(0, 10.3)).toEqual({ state: "locked" });
+    // Mutating a transition-log entry must not affect the gate either.
+    for (let i = 0; i < 3; i++) {
+      gate.update(0.99, 11 + i * 0.1);
+    }
+    const entry = gate.transitions.at(-1) as { to: { state: string; armedAtS: number } };
+    entry.to.armedAtS = Number.POSITIVE_INFINITY;
+    expect(gate.update(0, 30)).toEqual({ state: "locked" });
   });
 
   it("records transitions in the audit log", () => {

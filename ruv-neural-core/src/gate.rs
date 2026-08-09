@@ -97,6 +97,7 @@ pub enum GateState {
         consecutive: u32,
     },
     /// Decoding output is released until timeout or explicit lock.
+    #[serde(rename_all = "camelCase")]
     Armed {
         /// Timestamp (seconds) at which the gate armed.
         armed_at_s: f64,
@@ -127,10 +128,20 @@ pub enum GateTransitionReason {
     Timeout,
     /// `lock()` was called.
     ExplicitLock,
+    /// The clock went non-finite or regressed while the gate was not locked;
+    /// the gate fails locked rather than trusting the anomalous clock.
+    ClockAnomaly,
+    /// The gate was restored from persisted state; arming is opt-in per use
+    /// and never survives persistence, so restore always re-locks.
+    Restored,
 }
 
 /// One audited state transition.
+///
+/// Serializes with camelCase field names (`atS`) so the wire shape matches
+/// the TypeScript mirror (`apps/ruv-neural-ui/src/safety/decodeGate.ts`).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GateTransition {
     /// Timestamp (seconds) at which the transition occurred.
     pub at_s: f64,
@@ -146,14 +157,62 @@ pub struct GateTransition {
 ///
 /// Drive it with [`DecodeGate::update`] once per decode frame and wrap all
 /// decoder output in [`DecodeGate::release`]. The gate starts — and fails —
-/// locked: invalid input, regressing clocks, and timeout all resolve to
+/// locked: out-of-domain confidence, a non-finite or regressing clock, the
+/// armed-window timeout, and restore-from-persistence all resolve to
 /// suppressed output.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct DecodeGate {
     config: DecodeGateConfig,
     state: GateState,
     last_now_s: f64,
     transitions: Vec<GateTransition>,
+}
+
+// Restoring a gate must never resurrect an armed window (the opt-in is per
+// use, not per process lifetime) and must never bypass config validation, so
+// Deserialize is implemented manually instead of derived: the persisted
+// config and audit log are kept, but the state always resumes Locked.
+impl<'de> Deserialize<'de> for DecodeGate {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct Repr {
+            config: DecodeGateConfig,
+            state: GateState,
+            // serde_json writes non-finite floats as null; a fresh gate's
+            // last_now_s is -inf, so tolerate null here.
+            last_now_s: Option<f64>,
+            transitions: Vec<GateTransition>,
+        }
+        let repr = Repr::deserialize(deserializer)?;
+        repr.config.validate().map_err(serde::de::Error::custom)?;
+        let mut transitions = repr.transitions;
+        if transitions.len() > MAX_AUDIT_TRANSITIONS {
+            let excess = transitions.len() - MAX_AUDIT_TRANSITIONS;
+            transitions.drain(..excess);
+        }
+        let mut gate = DecodeGate {
+            config: repr.config,
+            state: GateState::Locked,
+            last_now_s: f64::NEG_INFINITY,
+            transitions,
+        };
+        if repr.state != GateState::Locked {
+            let at_s = repr.last_now_s.filter(|t| t.is_finite()).unwrap_or(0.0);
+            if gate.transitions.len() >= MAX_AUDIT_TRANSITIONS {
+                gate.transitions.remove(0);
+            }
+            gate.transitions.push(GateTransition {
+                at_s,
+                from: repr.state,
+                to: GateState::Locked,
+                reason: GateTransitionReason::Restored,
+            });
+        }
+        Ok(gate)
+    }
 }
 
 impl DecodeGate {
@@ -193,22 +252,39 @@ impl DecodeGate {
     ///
     /// * `password_confidence` — detector confidence in `[0, 1]` that the
     ///   unlock signal (e.g. the imagined password phrase) is present in this
-    ///   frame. Non-finite values are treated as `0.0` (fail-locked).
-    /// * `now_s` — monotonic timestamp in seconds. A regressing clock is
-    ///   clamped to the last seen timestamp rather than trusted.
+    ///   frame. Any value outside that domain — NaN, ±inf, or a finite value
+    ///   below 0 or above 1 (e.g. a percent-scaled detector) — is treated as
+    ///   `0.0` (fail-locked).
+    /// * `now_s` — monotonic timestamp in seconds. A non-finite or regressing
+    ///   clock is a safety event: any in-progress arming or armed window
+    ///   fails locked (audited as [`GateTransitionReason::ClockAnomaly`]) and
+    ///   the anomalous frame is dropped. After a regression the gate adopts
+    ///   the new (earlier) timeline, so a stepped-back clock can never freeze
+    ///   an armed countdown at zero elapsed time.
     ///
     /// Returns the state after the frame.
     pub fn update(&mut self, password_confidence: f64, now_s: f64) -> GateState {
-        let confidence = if password_confidence.is_finite() {
-            password_confidence.clamp(0.0, 1.0)
-        } else {
-            0.0
-        };
-        let now_s = if now_s.is_finite() {
-            now_s.max(self.last_now_s)
-        } else {
-            self.last_now_s
-        };
+        let confidence =
+            if password_confidence.is_finite() && (0.0..=1.0).contains(&password_confidence) {
+                password_confidence
+            } else {
+                0.0
+            };
+        if !now_s.is_finite() {
+            if self.state != GateState::Locked {
+                let at_s = self.last_now_s;
+                self.transition(GateState::Locked, GateTransitionReason::ClockAnomaly, at_s);
+            }
+            return self.state;
+        }
+        if now_s < self.last_now_s {
+            if self.state != GateState::Locked {
+                let at_s = self.last_now_s;
+                self.transition(GateState::Locked, GateTransitionReason::ClockAnomaly, at_s);
+            }
+            self.last_now_s = now_s;
+            return self.state;
+        }
         self.last_now_s = now_s;
 
         let above = confidence >= self.config.arm_threshold;
@@ -358,16 +434,46 @@ mod tests {
     }
 
     #[test]
-    fn non_finite_confidence_fails_locked() {
+    fn out_of_domain_confidence_fails_locked() {
         let mut g = gate();
         assert_eq!(g.update(f64::NAN, 0.0), GateState::Locked);
         // +inf is non-finite too: treated as 0.0, not as "very confident".
         assert_eq!(g.update(f64::INFINITY, 0.1), GateState::Locked);
-        assert_eq!(g.update(0.99, 0.2), GateState::Arming { consecutive: 1 });
+        // Finite but out-of-domain values (percent-scaled or corrupted
+        // detectors) must not arm either.
+        assert_eq!(g.update(50.0, 0.2), GateState::Locked);
+        assert_eq!(g.update(2.0, 0.3), GateState::Locked);
+        assert_eq!(g.update(1e308, 0.4), GateState::Locked);
+        assert_eq!(g.update(-0.5, 0.5), GateState::Locked);
+        assert_eq!(g.update(0.99, 0.6), GateState::Arming { consecutive: 1 });
     }
 
     #[test]
-    fn regressing_clock_is_clamped() {
+    fn non_finite_clock_locks_and_never_arms() {
+        let mut g = gate();
+        // A NaN clock can never make arming progress...
+        for _ in 0..10 {
+            assert_eq!(g.update(0.99, f64::NAN), GateState::Locked);
+        }
+        // ...and locks an armed gate instead of freezing its timeout.
+        for i in 0..3 {
+            g.update(0.99, i as f64 * 0.1);
+        }
+        assert!(g.is_armed());
+        assert_eq!(g.update(0.0, f64::NAN), GateState::Locked);
+        assert_eq!(
+            g.transitions().last().unwrap().reason,
+            GateTransitionReason::ClockAnomaly
+        );
+        assert_eq!(g.release("secret"), None);
+        // Continued NaN clocks keep it locked.
+        for _ in 0..100 {
+            assert_eq!(g.update(0.99, f64::NAN), GateState::Locked);
+        }
+    }
+
+    #[test]
+    fn clock_regression_while_armed_locks() {
         let mut g = DecodeGate::new(DecodeGateConfig {
             armed_timeout_s: 10.0,
             ..DecodeGateConfig::default()
@@ -377,9 +483,24 @@ mod tests {
             g.update(0.99, 100.0 + i as f64);
         }
         assert!(g.is_armed());
-        // A clock that jumps backwards cannot extend the armed window.
-        assert!(matches!(g.update(0.0, 0.0), GateState::Armed { .. }));
-        assert_eq!(g.update(0.0, 112.5), GateState::Locked);
+        // A clock that jumps backwards is a safety event: fail locked rather
+        // than freezing the armed countdown at zero elapsed time.
+        assert_eq!(g.update(0.0, 0.0), GateState::Locked);
+        assert_eq!(
+            g.transitions().last().unwrap().reason,
+            GateTransitionReason::ClockAnomaly
+        );
+        // The gate adopts the new timeline: re-arming and the bounded
+        // timeout both work on the regressed clock.
+        for i in 0..3 {
+            g.update(0.99, 1.0 + i as f64 * 0.1);
+        }
+        assert!(g.is_armed());
+        assert_eq!(g.update(0.0, 20.0), GateState::Locked);
+        assert_eq!(
+            g.transitions().last().unwrap().reason,
+            GateTransitionReason::Timeout
+        );
     }
 
     #[test]
@@ -437,12 +558,57 @@ mod tests {
     }
 
     #[test]
-    fn serde_roundtrip() {
+    fn restore_forces_locked_and_keeps_audit_log() {
         let mut g = gate();
-        g.update(0.99, 0.0);
+        for i in 0..3 {
+            g.update(0.99, 3.0 + i as f64 * 0.1);
+        }
+        assert!(g.is_armed());
         let json = serde_json::to_string(&g).unwrap();
         let back: DecodeGate = serde_json::from_str(&json).unwrap();
-        assert_eq!(back.state(), g.state());
-        assert_eq!(back.transitions(), g.transitions());
+        // Arming is opt-in per use: an armed state never survives restore,
+        // and release() is suppressed immediately (no update() required).
+        assert_eq!(back.state(), GateState::Locked);
+        assert_eq!(back.release("secret"), None);
+        let restored = back.transitions().last().unwrap();
+        assert_eq!(restored.reason, GateTransitionReason::Restored);
+        assert!(matches!(restored.from, GateState::Armed { .. }));
+        // The prior audit history is preserved ahead of the restore entry.
+        assert_eq!(back.transitions().len(), g.transitions().len() + 1);
+        // A restarted (earlier) clock works: the gate adopted a fresh
+        // timeline, so re-arming near t=0 is possible.
+        let mut back = back;
+        for i in 0..3 {
+            back.update(0.99, 0.1 + i as f64 * 0.1);
+        }
+        assert!(back.is_armed());
+    }
+
+    #[test]
+    fn restore_validates_config_and_roundtrips_fresh_gate() {
+        // Deserialize must not bypass config validation.
+        let bad = r#"{"config":{"arm_threshold":2.0,"arm_frames":0,"armed_timeout_s":-5.0},"state":{"state":"armed","armedAtS":0.0},"last_now_s":0.0,"transitions":[]}"#;
+        assert!(serde_json::from_str::<DecodeGate>(bad).is_err());
+        // A fresh gate (last_now_s = -inf, serialized as null) roundtrips.
+        let fresh = gate();
+        let json = serde_json::to_string(&fresh).unwrap();
+        let back: DecodeGate = serde_json::from_str(&json).unwrap();
+        assert_eq!(back.state(), GateState::Locked);
+        assert!(back.transitions().is_empty());
+    }
+
+    #[test]
+    fn transition_log_uses_camel_case_wire_shape() {
+        let mut g = gate();
+        for i in 0..3 {
+            g.update(0.99, i as f64 * 0.1);
+        }
+        let json = serde_json::to_string(g.transitions()).unwrap();
+        // Matches the TypeScript mirror's shape: atS / armedAtS, snake_case
+        // state and reason tags.
+        assert!(json.contains("\"atS\""), "json: {json}");
+        assert!(json.contains("\"armedAtS\""), "json: {json}");
+        assert!(json.contains("\"password_detected\""), "json: {json}");
+        assert!(!json.contains("at_s"), "json: {json}");
     }
 }

@@ -86,26 +86,37 @@ pub struct WasmDecodeGate {
 
 #[wasm_bindgen]
 impl WasmDecodeGate {
-    /// Create a gate. Pass `0` (or a negative timeout) for any parameter to
+    /// Create a gate. Pass `0` (or a negative value) for any parameter to
     /// use its default (threshold 0.98, 3 frames, 300 s timeout).
+    /// Non-integer or out-of-range `arm_frames` values are an error rather
+    /// than being silently coerced.
     #[wasm_bindgen(constructor)]
     pub fn new(
         arm_threshold: f64,
-        arm_frames: u32,
+        arm_frames: f64,
         armed_timeout_s: f64,
     ) -> Result<WasmDecodeGate, JsError> {
         let defaults = DecodeGateConfig::default();
+        let arm_frames = if arm_frames <= 0.0 {
+            defaults.arm_frames
+        } else if !arm_frames.is_finite()
+            || arm_frames.fract() != 0.0
+            || arm_frames > u32::MAX as f64
+        {
+            return Err(JsError::new(&format!(
+                "arm_frames must be a non-negative integer <= {}, got {arm_frames}",
+                u32::MAX
+            )));
+        } else {
+            arm_frames as u32
+        };
         let config = DecodeGateConfig {
             arm_threshold: if arm_threshold == 0.0 {
                 defaults.arm_threshold
             } else {
                 arm_threshold
             },
-            arm_frames: if arm_frames == 0 {
-                defaults.arm_frames
-            } else {
-                arm_frames
-            },
+            arm_frames,
             armed_timeout_s: if armed_timeout_s <= 0.0 {
                 defaults.armed_timeout_s
             } else {

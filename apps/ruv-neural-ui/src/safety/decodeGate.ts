@@ -10,6 +10,10 @@
  * user produces a chosen unlock signal (e.g. an imagined password phrase)
  * detected with high confidence, and re-locks automatically after a bounded
  * armed window. Decoding is opt-in per use, never ambient (ADR-0007/0022).
+ *
+ * Fail-locked policy (mirrors Rust): out-of-domain confidence reads as 0;
+ * a non-finite or regressing clock locks any in-progress arming or armed
+ * window (audited as "clock_anomaly") and the anomalous frame is dropped.
  */
 
 export const MAX_AUDIT_TRANSITIONS = 1024;
@@ -30,21 +34,28 @@ export const DEFAULT_GATE_CONFIG: DecodeGateConfig = {
 };
 
 export type GateState =
-  | { state: "locked" }
-  | { state: "arming"; consecutive: number }
-  | { state: "armed"; armedAtS: number };
+  | { readonly state: "locked" }
+  | { readonly state: "arming"; readonly consecutive: number }
+  | { readonly state: "armed"; readonly armedAtS: number };
 
+/**
+ * "restored" is emitted only by the Rust implementation (relock on
+ * deserialization); it is part of the union so consumers can handle
+ * transition logs from either implementation uniformly.
+ */
 export type GateTransitionReason =
   | "password_detected"
   | "arming_aborted"
   | "timeout"
-  | "explicit_lock";
+  | "explicit_lock"
+  | "clock_anomaly"
+  | "restored";
 
 export interface GateTransition {
-  atS: number;
-  from: GateState;
-  to: GateState;
-  reason: GateTransitionReason;
+  readonly atS: number;
+  readonly from: GateState;
+  readonly to: GateState;
+  readonly reason: GateTransitionReason;
 }
 
 export class DecodeGate {
@@ -66,50 +77,70 @@ export class DecodeGate {
     this.config = { ...config };
   }
 
+  /** Current state, returned as a defensive copy. */
   get state(): GateState {
-    return this.currentState;
+    return { ...this.currentState };
   }
 
   get isArmed(): boolean {
     return this.currentState.state === "armed";
   }
 
-  /** Bounded audit log of state transitions, oldest first. */
+  /**
+   * Bounded audit log of state transitions, oldest first. Entries are
+   * defensive copies — mutating them cannot affect the gate.
+   */
   get transitions(): readonly GateTransition[] {
-    return this.log;
+    return this.log.map((t) => ({ ...t, from: { ...t.from }, to: { ...t.to } }));
   }
 
   /**
-   * Advance the gate by one decode frame. Non-finite confidence is treated
-   * as 0 (fail-locked); a regressing clock is clamped, never trusted.
+   * Advance the gate by one decode frame. Confidence outside the finite
+   * [0, 1] domain reads as 0; a non-finite or regressing clock locks any
+   * non-locked state ("clock_anomaly") and drops the frame. After a
+   * regression the gate adopts the new (earlier) timeline so a stepped-back
+   * clock can never freeze an armed countdown at zero elapsed time.
    */
   update(passwordConfidence: number, nowS: number): GateState {
-    const confidence = Number.isFinite(passwordConfidence)
-      ? Math.min(Math.max(passwordConfidence, 0), 1)
-      : 0;
-    const now = Number.isFinite(nowS) ? Math.max(nowS, this.lastNowS) : this.lastNowS;
-    this.lastNowS = now;
+    const confidence =
+      Number.isFinite(passwordConfidence) && passwordConfidence >= 0 && passwordConfidence <= 1
+        ? passwordConfidence
+        : 0;
+    if (!Number.isFinite(nowS)) {
+      if (this.currentState.state !== "locked") {
+        this.transition({ state: "locked" }, "clock_anomaly", this.lastNowS);
+      }
+      return this.state;
+    }
+    if (nowS < this.lastNowS) {
+      if (this.currentState.state !== "locked") {
+        this.transition({ state: "locked" }, "clock_anomaly", this.lastNowS);
+      }
+      this.lastNowS = nowS;
+      return this.state;
+    }
+    this.lastNowS = nowS;
 
     const above = confidence >= this.config.armThreshold;
     const s = this.currentState;
     if (s.state === "locked") {
       if (above) {
-        this.advanceArming(1, now);
+        this.advanceArming(1, nowS);
       }
     } else if (s.state === "arming") {
       if (above) {
-        this.advanceArming(s.consecutive + 1, now);
+        this.advanceArming(s.consecutive + 1, nowS);
       } else {
-        this.transition({ state: "locked" }, "arming_aborted", now);
+        this.transition({ state: "locked" }, "arming_aborted", nowS);
       }
     } else {
       // Armed: the password only arms; only the bounded timeout (or an
       // explicit lock) disarms.
-      if (now - s.armedAtS >= this.config.armedTimeoutS) {
-        this.transition({ state: "locked" }, "timeout", now);
+      if (nowS - s.armedAtS >= this.config.armedTimeoutS) {
+        this.transition({ state: "locked" }, "timeout", nowS);
       }
     }
-    return this.currentState;
+    return this.state;
   }
 
   /** Explicitly re-lock the gate (user action or safety-envelope trip). */
@@ -119,7 +150,7 @@ export class DecodeGate {
     if (this.currentState.state !== "locked") {
       this.transition({ state: "locked" }, "explicit_lock", now);
     }
-    return this.currentState;
+    return this.state;
   }
 
   /** Pass decoded output through the gate: the value while armed, else null. */
@@ -141,6 +172,7 @@ export class DecodeGate {
     if (this.log.length >= MAX_AUDIT_TRANSITIONS) {
       this.log.shift();
     }
-    this.log.push({ atS, from, to, reason });
+    // Log copies, never the live state objects.
+    this.log.push({ atS, from: { ...from }, to: { ...to }, reason });
   }
 }

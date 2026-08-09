@@ -142,6 +142,15 @@ export function dfa(
   config: DfaConfig = DEFAULT_DFA_CONFIG,
 ): DfaResult | null {
   const n = signal.length;
+  // Mirror the Rust usize domain: non-integer scales are unrepresentable
+  // there and would silently produce a different alpha here.
+  if (
+    !Number.isInteger(config.minScale) ||
+    !Number.isInteger(config.numScales) ||
+    (config.maxScale !== null && !Number.isInteger(config.maxScale))
+  ) {
+    return null;
+  }
   if (config.minScale < 4 || config.numScales < 2 || n < 4 * config.minScale) {
     return null;
   }

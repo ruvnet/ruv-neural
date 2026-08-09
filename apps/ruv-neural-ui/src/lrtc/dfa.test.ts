@@ -76,6 +76,11 @@ describe("dfa", () => {
     expect(dfa(withNan)).toBeNull();
     expect(dfa(whiteNoise(4096, 1), { ...DEFAULT_DFA_CONFIG, numScales: 1 })).toBeNull();
     expect(dfa(whiteNoise(4096, 1), { ...DEFAULT_DFA_CONFIG, minScale: 2 })).toBeNull();
+    // Non-integer config is unrepresentable on the Rust/WASM side and is
+    // rejected here too rather than silently diverging.
+    expect(dfa(whiteNoise(4096, 1), { ...DEFAULT_DFA_CONFIG, minScale: 4.5 })).toBeNull();
+    expect(dfa(whiteNoise(4096, 1), { ...DEFAULT_DFA_CONFIG, numScales: 16.2 })).toBeNull();
+    expect(dfa(whiteNoise(4096, 1), { ...DEFAULT_DFA_CONFIG, maxScale: 100.7 })).toBeNull();
   });
 
   it("matches the Rust implementation on the shared parity fixture", () => {

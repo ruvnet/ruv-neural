@@ -360,6 +360,21 @@ the right substrate for group evolution.
 >   `harness/.metaharness/{archive,lineage}.json` as audit-trail evidence.
 >   A real (non-mock) evolve run against cargo-test fitness is the next step.
 
+> **Review round (2026-08-09):** a harness-style swarm (3 reviewers →
+> adversarial verifiers → architect; 12 agents) audited the DFA/gate
+> implementation. **8/8 findings survived adversarial verification** — all in
+> the gate and bindings, none in the DFA math — including a critical one (a
+> non-finite clock could arm the gate permanently). All 8 are fixed: the gate
+> now fails locked on non-finite/regressing clocks (`clock_anomaly` audit
+> reason), rejects out-of-domain confidence, relocks on deserialization with
+> config revalidation (`restored` audit reason), uses one camelCase wire
+> shape across Rust/WASM/TS, and the TS mirror returns defensive copies.
+> The architect's next increment (in dependency order): streaming 80-ms
+> frame-hop decoder scaffold in `brain2text` gated by `DecodeGate` (§9 row
+> 5), FM negative-control promotion gates in `ruv-neural-embed` +
+> `validation/` (§9 row 1), and a CoW-branched embedding store in
+> `ruv-neural-memory` (§9 row 17).
+
 How to run this research-and-optimization loop continuously, on a
 monthly-or-faster cadence:
 
