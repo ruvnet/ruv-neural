@@ -472,8 +472,8 @@ fn decode_epoch(
             annotations.extend(parsed);
         } else {
             let mut samples = Vec::with_capacity(decoder.metadata.samples_per_record);
-            for (sample, pair) in signal_bytes.chunks_exact(2).enumerate() {
-                let digital = f64::from(i16::from_le_bytes([pair[0], pair[1]]));
+            for (sample, pair) in signal_bytes.as_chunks::<2>().0.iter().enumerate() {
+                let digital = f64::from(i16::from_le_bytes(*pair));
                 let value = digital * decoder.scale + decoder.offset;
                 if !value.is_finite() {
                     return Err(IoError::NonFiniteSample {
