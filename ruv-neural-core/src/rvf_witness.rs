@@ -187,8 +187,10 @@ impl WitnessChain {
             )));
         }
         let entries = payload
-            .chunks_exact(WITNESS_ENTRY_LEN)
-            .map(WitnessEntry::from_bytes)
+            .as_chunks::<WITNESS_ENTRY_LEN>()
+            .0
+            .iter()
+            .map(|c| WitnessEntry::from_bytes(c))
             .collect::<Result<Vec<_>>>()?;
         Ok(Self { entries })
     }

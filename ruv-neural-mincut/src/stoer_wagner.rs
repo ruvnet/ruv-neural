@@ -186,7 +186,7 @@ fn merge_vertices(
     w[u][u] = 0.0;
 
     // Move v's original nodes into u's group.
-    let v_nodes: Vec<usize> = merged[v].drain(..).collect();
+    let v_nodes: Vec<usize> = std::mem::take(&mut merged[v]);
     merged[u].extend(v_nodes);
 
     // Deactivate v.

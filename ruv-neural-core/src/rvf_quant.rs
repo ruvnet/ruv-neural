@@ -289,16 +289,22 @@ pub fn decode_vector(bytes: &[u8], dim: usize, dtype: VecDType) -> Result<Vec<f6
     }
     Ok(match dtype {
         VecDType::F64 => bytes[..dim * 8]
-            .chunks_exact(8)
-            .map(|c| f64::from_le_bytes(c.try_into().unwrap()))
+            .as_chunks::<8>()
+            .0
+            .iter()
+            .map(|c| f64::from_le_bytes(*c))
             .collect(),
         VecDType::F32 => bytes[..dim * 4]
-            .chunks_exact(4)
-            .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]]) as f64)
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .map(|c| f32::from_le_bytes(*c) as f64)
             .collect(),
         VecDType::F16 => bytes[..dim * 2]
-            .chunks_exact(2)
-            .map(|c| f16_to_f32(u16::from_le_bytes([c[0], c[1]])) as f64)
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .map(|c| f16_to_f32(u16::from_le_bytes(*c)) as f64)
             .collect(),
         VecDType::I8 => {
             let scale = f32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
